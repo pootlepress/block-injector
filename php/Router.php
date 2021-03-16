@@ -189,7 +189,7 @@ class Router {
 			'some_meta_box_name',
 			__( 'Some Meta Box Headline', 'pmab' ),
 			array( $this, 'render_meta_box_content' ),
-			$post_type,
+			$this->post_type,
 			'side',
 			'high'
 		);
