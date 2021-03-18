@@ -5,8 +5,6 @@
  * @package PutMeAnywhereBlock
  */
 
-namespace pootlepress\PutMeAnywhereBlock;
-
 /**
  * WordPress plugin interface.
  */

@@ -10,11 +10,13 @@
  * @package PutMeAnywhereBlock
  */
 
-namespace pootlepress\PutMeAnywhereBlock;
 
-// Support for site-level autoloading.
-if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
-	require_once __DIR__ . '/vendor/autoload.php';
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+foreach ( glob( plugin_dir_path( __FILE__ ) . 'php/*.php', GLOB_BRACE ) as $file ) {
+	require_once $file;
 }
 
 $router = new Router( new Plugin( __FILE__ ) );
