@@ -19,7 +19,7 @@ foreach ( glob( plugin_dir_path( __FILE__ ) . 'php/*.php', GLOB_BRACE ) as $file
 	require_once $file;
 }
 
-$router = new Router( new Plugin( __FILE__ ) );
+$router = new PMAB_Router( new PMAB_Plugin( __FILE__ ) );
 
 add_action( 'plugins_loaded', array( $router, 'init' ) );
 
