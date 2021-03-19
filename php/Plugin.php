@@ -167,7 +167,7 @@ if ( ! class_exists( 'PMAB_Plugin' ) ) {
 			static $meta;
 
 			if ( ! isset( $meta ) ) {
-				$meta = get_file_data( $this->file );
+				$meta = get_file_data( $this->file, array() );
 			}
 
 			if ( isset( $field ) ) {
