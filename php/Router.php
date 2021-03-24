@@ -61,7 +61,10 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 				$num_of_blocks       = get_post_meta( $id, '_pmab_meta_number_of_blocks', true );
 				$tag_type            = get_post_meta( $id, '_pmab_meta_tag_n_fix', true );
 				$inject_content_type = get_post_meta( $id, '_pmab_meta_type', true );
-
+				$stdate              = get_post_meta( $id, '_pmab_meta_stdate', true );
+				$exdate              = get_post_meta( $id, '_pmab_meta_exdate', true );
+				// echo $exdate;
+				// exit();
 				$tag_type = explode( '_', $tag_type );
 				if ( ! empty( $tag_type ) && isset( $tag_type[0] ) && isset( $tag_type[1] ) ) {
 
@@ -70,13 +73,21 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 
 					add_filter(
 						'the_content',
-						function ( $content ) use ( $inject_content_type, $p, $tag, $num_of_blocks, $after_before ) {
+						function ( $content ) use ( $inject_content_type, $p, $tag, $num_of_blocks, $after_before, $exdate, $stdate ) {
+
+							if ( $tag == 'top' || $num_of_blocks == '' ) {
+								$num_of_blocks = 0;
+							} elseif ( $tag == 'bottom' ) {
+								$num_of_blocks = PHP_INT_MAX;
+							}
 
 							// Check if we're inside the main loop in a single Post.
-							if ( $inject_content_type == 'post' && is_single() ) {
+							$edate = date( 'd/m/Y', strtotime( $exdate ) );
+							$sdate = date( 'd/m/Y', strtotime( $stdate ) );
+							if ( ( $inject_content_type == 'post' && $edate >= date( 'd/m/Y' ) && $sdate <= date( 'd/m/Y' ) ) && is_single() ) {
 								return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
 							}
-							if ( $inject_content_type == 'page' && is_page() ) {
+							if ( ( $inject_content_type == 'page' && $edate >= date( 'd/m/Y' ) && $sdate <= date( 'd/m/Y' ) ) && is_page() ) {
 								return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
 							}
 
@@ -173,14 +184,12 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 				update_post_meta( $post_id, '_pmab_meta_number_of_blocks', sanitize_text_field( $_POST['_pmab_meta_number_of_blocks'] ) );
 				update_post_meta( $post_id, '_pmab_meta_type', sanitize_text_field( $_POST['_pmab_meta_type'] ) );
 				update_post_meta( $post_id, '_pmab_meta_tag_n_fix', sanitize_text_field( isset( $_POST['_pmab_meta_tag_n_fix'] ) ? $_POST['_pmab_meta_tag_n_fix'] : 'p_after' ) );
-
+				update_post_meta( $post_id, '_pmab_meta_exdate', $_POST['_pmab_meta_exdate'] );
+				update_post_meta( $post_id, '_pmab_meta_stdate', $_POST['_pmab_meta_stdate'] );
 			}
 		}
 
-		function test( $content ) {
-			remove_filter( current_filter(), array( $this, __FUNCTION__ ) );
-			return $content . ' ESSA';
-		}
+
 		/**
 		 * Render Meta Box content.
 		 *
@@ -195,31 +204,45 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 			$_pmab_meta_number_of_blocks = get_post_meta( $post->ID, '_pmab_meta_number_of_blocks', true );
 			$_pmab_meta_type             = get_post_meta( $post->ID, '_pmab_meta_type', true );
 			$_pmab_meta_tag_n_fix        = get_post_meta( $post->ID, '_pmab_meta_tag_n_fix', true );
+			$_pmab_meta_exdate           = get_post_meta( $post->ID, '_pmab_meta_exdate', true );
+			$_pmab_meta_stdate           = get_post_meta( $post->ID, '_pmab_meta_stdate', true );
 
 			// Display the form, using the current value.
 			?>
+			<div>
 			<p><label for="_pmab_meta_number_of_blocks">
-				<?php _e( 'certain number', 'pmab' ); ?>
+				<?php _e( 'After Certain Number', 'pmab' ); ?>
 			</label>
 			<input type="number" id="_pmab_meta_number_of_blocks" name="_pmab_meta_number_of_blocks" value="<?php echo esc_attr( $_pmab_meta_number_of_blocks ); ?>" size="25" class="postbox" /></p>
 			<p>
 			<label for="_pmab_meta_tag_n_fix"><?php _e( 'Select post type', 'pmab' ); ?></label>
-			<select name="_pmab_meta_tag_n_fix" id="_pmab_meta_tag_n_fix" class="postbox">
+			<select name="_pmab_meta_tag_n_fix" id="_pmab_meta_tag_n_fix" class="postbox col-12">
 				<option value="">Blocks and Prefix/Suffix</option>
-				<option value="h2_before" <?php echo $this->selected( $_pmab_meta_tag_n_fix, 'h2_before' ); ?>>Before Heading</option>
+				<option value="top" <?php echo $this->selected( $_pmab_meta_tag_n_fix, 'top_before' ); ?>>Top</option>
+				<option value="bottom" <?php echo $this->selected( $_pmab_meta_tag_n_fix, 'bottom_after' ); ?>>Bottom</option>
 				<option value="h2_after" <?php echo $this->selected( $_pmab_meta_tag_n_fix, 'h2_after' ); ?>>After Heading</option>
-				<option value="p_before" <?php echo $this->selected( $_pmab_meta_tag_n_fix, 'p_before' ); ?>>Before Blocks</option>
 				<option value="p_after" <?php echo $this->selected( $_pmab_meta_tag_n_fix, 'p_after' ); ?>>After Blocks</option>
 			</select>
 			</p>
 			<p>
 			<label for="_pmab_meta_type"><?php _e( 'Select post type', 'pmab' ); ?></label>
 			<select name="_pmab_meta_type" id="_pmab_meta_type" class="postbox">
-				<option value="">Select Type</option>
+				<option value="post_page">Entire Website</option>
 				<option value="post" <?php echo $this->selected( $_pmab_meta_type, 'post' ); ?>>Post</option>
 				<option value="page" <?php echo $this->selected( $_pmab_meta_type, 'page' ); ?>>Page</option>
 			</select>
 			</p>
+			<p>
+			<label for="_pmab_meta_stdate"><?php _e( 'Select Start Date', 'pmab' ); ?></label>
+			<input type="datetime" id="_pmab_meta_stdate" name="_pmab_meta_stdate" value="<?php echo esc_attr( $_pmab_meta_stdate ); ?>" size="25" class="postbox" /></p>
+
+
+			<p>
+			<label for="_pmab_meta_exdate"><?php _e( 'Select Expiry Date', 'pmab' ); ?></label>
+			<input type="datetime" id="_pmab_meta_exdate" name="_pmab_meta_exdate" value="<?php echo esc_attr( $_pmab_meta_exdate ); ?>" size="25" class="postbox" /></p>
+
+
+			</div>
 		
 			<?php
 		}
@@ -234,35 +257,18 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 			// Limit meta box to certain post types.
 			add_meta_box(
 				'some_meta_box_name',
-				__( 'Some Meta Box Headline', 'pmab' ),
+				__( 'Location & Priority', 'pmab' ),
 				array( $this, 'render_meta_box_content' ),
 				$this->post_type,
 				'side',
 				'high'
 			);
 		}
-		public function get_all_hooks() {
-			return array(
-				array(
-					'type'  => 'dynamic',
-					'hook'  => 'blocksy:single:content:paragraphs-number',
-					'title' => __( 'After certain number of blocks', 'blc' ),
-					'group' => __( 'Single Post', 'blc' ),
-				),
 
-				array(
-					'type'  => 'dynamic',
-					'hook'  => 'blocksy:single:content:headings-number',
-					'title' => __( 'Before certain number of headings', 'blc' ),
-					'group' => __( 'Single Post', 'blc' ),
-				),
-			);
-		}
 		public function update_content( $content, $tag, $num_of_blocks, $p, $after_before ) {
 			// global $content, $tag, $num_of_blocks, $p,$after_before;
 			$content_array = explode( "</$tag>", $content );
-			$offset        = $after_before === 'before' ? ( $num_of_blocks > 0 ) ? count( $content_array ) - 1 - $num_of_blocks : 0 : $num_of_blocks;
-			array_splice( $content_array, $offset, 0, array( $p->post_content ) );
+			array_splice( $content_array, $num_of_blocks, 0, array( $p->post_content ) );
 			$update_content = implode( "</$tag>", $content_array );
 			return $update_content;
 		}
