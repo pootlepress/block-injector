@@ -92,18 +92,24 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 							$edate = $exdate;
 							$sdate = $stdate;
 							if ( $inject_content_type == 'post' ) {
-								$mypost = get_page_by_title( $specific_post, '', 'post' );
-								if ( $mypost ) {
-									if ( ( $inject_content_type == 'post' && ( $edate >= $dt || $edate == '' ) && $sdate <= $dt ) && is_single( $mypost->ID ) ) {
-										return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+								foreach ( explode( ',', $specific_post ) as $specific_post_id ) {
+									// $mypost = get_page_by_title( $specific_post, '', 'post' );
+									$mypost = get_post( $specific_post_id );
+									if ( $mypost ) {
+										if ( ( $inject_content_type == 'post' && ( $edate >= $dt || $edate == '' ) && $sdate <= $dt ) && is_single( $mypost->ID ) ) {
+											return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+										}
 									}
 								}
 							}
 							if ( $inject_content_type == 'page' ) {
-								$mypage = get_page_by_title( $specific_post, '', 'page' );
-								if ( $mypage ) {
-									if ( ( $inject_content_type == 'page' && $edate >= $dt && $sdate <= $dt ) && is_page( $mypage->ID ) ) {
-										return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+								foreach ( explode( ',', $specific_post ) as $specific_post_id ) {
+									// $mypage = get_page_by_title( $specific_post, '', 'page' );
+									$mypage = get_post( $specific_post_id );
+									if ( $mypage ) {
+										if ( ( $inject_content_type == 'page' && $edate >= $dt && $sdate <= $dt ) && is_page( $mypage->ID ) ) {
+											return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+										}
 									}
 								}
 							}
@@ -114,6 +120,9 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 							// return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
 							// }
 							if ( ( $inject_content_type == 'all_page' && $edate >= $dt && $sdate <= $dt ) && is_page() ) {
+								return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+							}
+							if ( ( $inject_content_type == 'all_page' && $edate >= $dt && $sdate <= $dt ) && ( is_page() || is_single() ) ) {
 								return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
 							}
 
@@ -266,6 +275,7 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 			</select> -->
 			<label for="_pmab_meta_type"><?php _e( 'Posts', 'pmab' ); ?></label>
 			<select name="_pmab_meta_type" id="_pmab_meta_type" class="postbox">
+			<option value="post_page" selected>Entire Website</option>
 			<option  disabled style="font-weight: bolder;">Post</option>
 				<option value="all_post" <?php echo $this->selected( $_pmab_meta_type, 'all_post' ); ?>>All Posts</option>
 				<option value="post" <?php echo $this->selected( $_pmab_meta_type, 'post' ); ?>>Specific Posts</option>
@@ -276,7 +286,7 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 		
 			</p>
 			<p class="specificpost" style="<?php echo $_pmab_meta_specific_post == '' ? 'display: none;' : ''; ?>">
-			<label for="_pmab_meta_specific_post"><?php _e( 'Name', 'pmab' ); ?></label>
+			<label for="_pmab_meta_specific_post"><?php _e( 'IDs', 'pmab' ); ?><span>Comma Seperated</span></label>
 			<input type="text" id="_pmab_meta_specific_post" name="_pmab_meta_specific_post" value="<?php echo esc_attr( $_pmab_meta_specific_post ); ?>" size="25" class="postbox" /></p>
 
 			</p>
