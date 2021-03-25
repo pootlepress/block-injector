@@ -2,7 +2,7 @@
 /**
  * Plugin class.
  *
- * @package PutMeAnywhereBlock
+ * @package PutBlocksAnywhere
  */
 if ( ! class_exists( 'PMAB_Plugin' ) ) {
 	/**
