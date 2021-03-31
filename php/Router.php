@@ -60,10 +60,14 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 				// get the meta you need form each post_pmab_meta_specific_post
 				$num_of_blocks       = get_post_meta( $id, '_pmab_meta_number_of_blocks', true );
 				$specific_post       = get_post_meta( $id, '_pmab_meta_specific_post', true );
+				$specific_post2       = get_post_meta( $id, '_pmab_meta_specific_post2', true );
+				$tags       		 = get_post_meta( $id, '_pmab_meta_tags', true );
 				$tag_type            = get_post_meta( $id, '_pmab_meta_tag_n_fix', true );
 				$inject_content_type = get_post_meta( $id, '_pmab_meta_type', true );
+				$inject_content_type2 = get_post_meta( $id, '_pmab_meta_type2', true );
 				$stdate              = get_post_meta( $id, '_pmab_meta_stdate', true );
 				$exdate              = get_post_meta( $id, '_pmab_meta_exdate', true );
+				$category            = get_post_meta( $id, '_pmab_meta_category', true );
 
 				// exit();
 				$tag_type = explode( '_', $tag_type );
@@ -74,7 +78,7 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 
 					add_filter(
 						'the_content',
-						function ( $content ) use ( $inject_content_type, $p, $tag, $num_of_blocks, $after_before, $exdate, $stdate, $specific_post ) {
+						function ( $content ) use ( $inject_content_type ,$inject_content_type2, $p, $tag, $num_of_blocks, $after_before, $exdate, $stdate, $specific_post , $specific_post2 ,$category,$id,$tags ) {
 
 							if ( $tag == 'top' || $num_of_blocks == '' ) {
 								$num_of_blocks = 0;
@@ -91,12 +95,96 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 
 							$edate = $exdate;
 							$sdate = $stdate;
+							
+							if ( ($inject_content_type == 'tags' && ( ( ($sdate == '' && $edate == '') || $sdate <= $dt ) || ( $edate >= $dt && $sdate <= $dt ) ) ) && is_single() ) {
+								$all_tags = get_tags();
+								$tag_id = array();
+								foreach ( explode( ',', $tags ) as $tags ) {
+									$tag_id[] = $tags;
+									
+								}
+								
+								foreach ( explode( ',', $tags ) as $tags ) {
+									
+										$args = array(
+											'tag__in' => $tag_id
+										);
+										
+										$mypost = get_posts( $args );
+										if($mypost){
+											foreach( $mypost as $myposts ) {
+												if ( ($inject_content_type == 'tags' && ( ( $sdate == '' || $edate == '' ) || ( $edate >= $dt && $sdate <= $dt ) ) ) && is_single( $myposts->ID ) ) {
+													if ( $inject_content_type2 == 'post2' ) {
+														$thisposts = array();
+														foreach ( explode( ',', $specific_post2 ) as $specific_post_id ) {
+															$thisposts[] = $specific_post_id;
+															
+														}
+														
+															
+															$mypost = get_post();
+															
+															if ( !in_array($myposts->ID, $thisposts) ) {
+																
+																return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+															}
+														
+													}
+													else{
+														return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+													}
+												}
+											}
+										}
+										
+								}
+								
+								
+								
+							}
+							if ( ($inject_content_type == 'category' && ( ( ($sdate == '' && $edate == '') || $sdate <= $dt ) || ( $edate >= $dt && $sdate <= $dt ) ) ) && is_single() ) {
+								// echo $category;
+								// $category_id = get_the_category( $id );
+								// print_r($category_id);
+								$mypost = get_post();
+								// print_r($mypost);
+								$categories = wp_get_post_categories($mypost->ID);
+								// print_r($categories);
+								// $category_id = $categories[0]->cat_ID;
+								
+								for($i=0; $i<count($categories);$i++){
+									if($categories[$i] == $category){
+										
+										if ( $inject_content_type2 == 'post2' ) {
+											$thisposts = array();
+											foreach ( explode( ',', $specific_post2 ) as $specific_post_id ) {
+												$thisposts[] = $specific_post_id;
+												
+											}
+											
+												
+												$mypost = get_post();
+												
+												if ( !in_array($mypost->ID, $thisposts) ) {
+													
+													return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+												}
+											
+										} else{
+										if(is_single($mypost->ID)){
+											return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+										}
+										}
+									}
+								}
+								
+							}
 							if ( $inject_content_type == 'post' ) {
 								foreach ( explode( ',', $specific_post ) as $specific_post_id ) {
 									// $mypost = get_page_by_title( $specific_post, '', 'post' );
 									$mypost = get_post( $specific_post_id );
 									if ( $mypost ) {
-										if ( ( $inject_content_type == 'post' && ( $edate >= $dt || $edate == '' ) && $sdate <= $dt ) && is_single( $mypost->ID ) ) {
+										if ( ( $inject_content_type == 'post' && ( ( ($sdate == '' && $edate == '') || $sdate <= $dt ) || ( $edate >= $dt && $sdate <= $dt ) ) ) && is_single( $mypost->ID ) ) {
 											return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
 										}
 									}
@@ -107,24 +195,104 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 									// $mypage = get_page_by_title( $specific_post, '', 'page' );
 									$mypage = get_post( $specific_post_id );
 									if ( $mypage ) {
-										if ( ( $inject_content_type == 'page' && $edate >= $dt && $sdate <= $dt ) && is_page( $mypage->ID ) ) {
+										if ( ( $inject_content_type == 'page' && ( ( $sdate == '' || $edate == '' ) || ( $edate >= $dt && $sdate <= $dt ) ) ) && is_page( $mypage->ID ) ) {
 											return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
 										}
 									}
 								}
 							}
-							if ( ( $inject_content_type == 'all_post' && $edate >= $dt && $sdate <= $dt ) && is_single() ) {
-								return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+							
+							if ( $inject_content_type == 'all_post' && ( ( ($sdate == '' && $edate == '') || $sdate <= $dt ) || ( $edate >= $dt && $sdate <= $dt ) ) && is_single() ) {
+								
+								
+								if ( $inject_content_type2 == 'post2' ) {
+									$thisposts = array();
+									foreach ( explode( ',', $specific_post2 ) as $specific_post_id ) {
+										$thisposts[] = $specific_post_id;
+										
+									}
+									
+										
+										$mypost = get_post();
+										
+										if ( !in_array($mypost->ID, $thisposts) ) {
+											
+											return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+										}
+									
+								}
+								else{
+									return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+								}
 							}
-							// if ( ( $inject_content_type == 'post' && $edate >= $dt && $sdate <= $dt ) && is_single(@$mypost->ID) ) {
+							// if ( ( $inject_content_type == 'post' && (($sdate == "" || $edate == "" ) ||  ($edate >= $dt && $sdate <= $dt)) && is_single(@$mypost->ID) ) {
 							// return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
 							// }
-							if ( ( $inject_content_type == 'all_page' && $edate >= $dt && $sdate <= $dt ) && is_page() ) {
+							if ( $inject_content_type == 'all_page' && ( ( ($sdate == '' && $edate == '') || $sdate <= $dt ) || ( $edate >= $dt && $sdate <= $dt ) ) && is_page() ) {
+								if ( $inject_content_type2 == 'page2' ) {
+									$thisposts = array();
+									foreach ( explode( ',', $specific_post2 ) as $specific_post_id ) {
+										$thisposts[] = $specific_post_id;
+										
+									}
+									
+										
+										$mypost = get_post();
+										
+										if ( !in_array($mypost->ID, $thisposts) ) {
+											
+											return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+										}
+									
+								} else{
+								// if(is_page($mypost->ID)){
+								// 	return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+								// }
 								return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+									
+								}
 							}
-							if ( ( $inject_content_type == 'all_page' && $edate >= $dt && $sdate <= $dt ) && ( is_page() || is_single() ) ) {
-								return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+							
+							if ( $inject_content_type == 'post_page' && ( ( ($sdate == '' && $edate == '') || $sdate <= $dt  ) || ( $edate >= $dt && $sdate <= $dt ) ) && ( is_page() || is_single() ) ) {
+								if ( $inject_content_type2 == 'page2' ) {
+									$thisposts = array();
+									foreach ( explode( ',', $specific_post2 ) as $specific_post_id ) {
+										$thisposts[] = $specific_post_id;
+										
+									}
+									
+										
+										$mypost = get_post();
+										
+										if ( !in_array($mypost->ID, $thisposts) ) {
+											
+											return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+										}
+									
+								} else if ( $inject_content_type2 == 'post2' ) {
+									$thisposts = array();
+									foreach ( explode( ',', $specific_post2 ) as $specific_post_id ) {
+										$thisposts[] = $specific_post_id;
+										
+									}
+									
+										
+										$mypost = get_post();
+										
+										if ( !in_array($mypost->ID, $thisposts) ) {
+											
+											return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+										}
+									
+								}
+								else {
+									return $this->update_content( $content, $tag, $num_of_blocks, $p, $after_before );
+
+								}
+
+								
 							}
+							
 
 							return $content;
 						},
@@ -220,9 +388,12 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 		public function save_post( $post_id ) {
 			if ( isset( $_POST['_pmab_meta_number_of_blocks'], $_POST['_pmab_meta_type'], $_POST['pmab_plugin_field'] ) && wp_verify_nonce( $_POST['pmab_plugin_field'], 'pmab_plugin_nonce' ) ) {
 				update_post_meta( $post_id, '_pmab_meta_number_of_blocks', sanitize_text_field( $_POST['_pmab_meta_number_of_blocks'] ) );
-				update_post_meta( $post_id, '_pmab_meta_specific_post', sanitize_text_field( $_POST['_pmab_meta_specific_post'] ) );
-
+				update_post_meta( $post_id, '_pmab_meta_specific_post', sanitize_text_field( $_POST['_pmab_meta_specific_post'] ) );		
+				update_post_meta( $post_id, '_pmab_meta_specific_post2', sanitize_text_field( $_POST['_pmab_meta_specific_post2'] ) );		
+				update_post_meta( $post_id, '_pmab_meta_tags', sanitize_text_field( $_POST['_pmab_meta_tags'] ) );		
+				update_post_meta( $post_id, '_pmab_meta_category', $_POST['_pmab_meta_category'] );
 				update_post_meta( $post_id, '_pmab_meta_type', sanitize_text_field( $_POST['_pmab_meta_type'] ) );
+				update_post_meta( $post_id, '_pmab_meta_type2', sanitize_text_field( $_POST['_pmab_meta_type2'] ) );
 				update_post_meta( $post_id, '_pmab_meta_tag_n_fix', sanitize_text_field( isset( $_POST['_pmab_meta_tag_n_fix'] ) ? $_POST['_pmab_meta_tag_n_fix'] : 'p_after' ) );
 				update_post_meta( $post_id, '_pmab_meta_exdate', $_POST['_pmab_meta_exdate'] );
 				update_post_meta( $post_id, '_pmab_meta_stdate', $_POST['_pmab_meta_stdate'] );
@@ -243,15 +414,25 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 			// Use get_post_meta to retrieve an existing value from the database.
 			$_pmab_meta_number_of_blocks = get_post_meta( $post->ID, '_pmab_meta_number_of_blocks', true );
 			$_pmab_meta_specific_post    = get_post_meta( $post->ID, '_pmab_meta_specific_post', true );
+			$_pmab_meta_specific_post2    = get_post_meta( $post->ID, '_pmab_meta_specific_post2', true );
+			$_pmab_meta_tags    		 = get_post_meta( $post->ID, '_pmab_meta_tags', true );
 			$_pmab_meta_type             = get_post_meta( $post->ID, '_pmab_meta_type', true );
+			$_pmab_meta_type2             = get_post_meta( $post->ID, '_pmab_meta_type2', true );
 			$_pmab_meta_tag_n_fix        = get_post_meta( $post->ID, '_pmab_meta_tag_n_fix', true );
 			$_pmab_meta_exdate           = get_post_meta( $post->ID, '_pmab_meta_exdate', true );
 			$_pmab_meta_stdate           = get_post_meta( $post->ID, '_pmab_meta_stdate', true );
+			$_pmab_meta_category         = get_post_meta( $post->ID, '_pmab_meta_category', true );
+			
 
 			// Display the form, using the current value.
 			?>
 			<div>
-			<p><label for="_pmab_meta_number_of_blocks">
+			<p>
+				<select name="" id="" class="postbox ">
+					<option value="" selected>Include</option>
+				</select>
+			</p>
+			<p class="certain_num"  style="<?php echo $_pmab_meta_number_of_blocks == '' ? 'display: none;' : ''; ?>"><label for="_pmab_meta_number_of_blocks">
 				<?php _e( 'After Certain Number', 'pmab' ); ?>
 			</label>
 			<input type="number" id="_pmab_meta_number_of_blocks" name="_pmab_meta_number_of_blocks" value="<?php echo esc_attr( $_pmab_meta_number_of_blocks ); ?>" size="25" class="postbox" /></p>
@@ -279,15 +460,43 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 			<option  disabled style="font-weight: bolder;">Post</option>
 				<option value="all_post" <?php echo $this->selected( $_pmab_meta_type, 'all_post' ); ?>>All Posts</option>
 				<option value="post" <?php echo $this->selected( $_pmab_meta_type, 'post' ); ?>>Specific Posts</option>
+				<option value="category" <?php echo $this->selected( $_pmab_meta_type, 'category' ); ?>>Posts By Category</option>
+				<option value="tags" <?php echo $this->selected( $_pmab_meta_type, 'tags' ); ?>>Posts By Tag</option>
 				<option  disabled style="font-weight: bolder;"> Pages</option>
 				<option value="all_page" <?php echo $this->selected( $_pmab_meta_type, 'all_page' ); ?>>All Pages</option>
 				<option value="page" <?php echo $this->selected( $_pmab_meta_type, 'page' ); ?>>Specific Page</option>
 			</select>
-		
+			
+			
+
+			</p>
+			<p class="category-box" style="<?php echo $_pmab_meta_category == '' ? 'display: none;' : ''; ?>" >
+			<label for="_pmab_meta_category"><?php _e( 'Categories', 'pmab' ); ?></label>
+			<select name="_pmab_meta_category" id="_pmab_meta_category" class="postbox">
+				<option disabled style="font-weight: bolder;">Select Category</option>
+				<?php 
+					$args = array(
+						"hide_empty" => 0,
+						'orderby' => 'name',
+						'exclude' => '',
+						'include' => '',
+						'parent' => 0
+						);
+					$categories = get_categories($args);
+					foreach($categories as $category) {					
+				?>
+					<option value="<?php echo $category->cat_ID ?>" <?php echo $this->selected( $_pmab_meta_category, $category->cat_ID ); ?>><?php echo $category->name ?></option>
+				<?php } ?>
+			</select>
 			</p>
 			<p class="specificpost" style="<?php echo $_pmab_meta_specific_post == '' ? 'display: none;' : ''; ?>">
-			<label for="_pmab_meta_specific_post"><?php _e( 'IDs', 'pmab' ); ?><span>Comma Seperated</span></label>
+			<label for="_pmab_meta_specific_post"><?php _e( 'IDs', 'pmab' ); ?> <span style="font-size:8px;">Comma Seperated</span></label>
 			<input type="text" id="_pmab_meta_specific_post" name="_pmab_meta_specific_post" value="<?php echo esc_attr( $_pmab_meta_specific_post ); ?>" size="25" class="postbox" /></p>
+
+			</p>
+			<p class="tags" style="<?php echo $_pmab_meta_tags == '' ? 'display: none;' : ''; ?>">
+			<label for="_pmab_meta_tags"><?php _e( 'Tag IDs', 'pmab' ); ?> <span style="font-size:8px;">Comma Seperated</span></label>
+			<input type="text" id="_pmab_meta_tags" name="_pmab_meta_tags" value="<?php echo esc_attr( $_pmab_meta_tags ); ?>" size="25" class="postbox" /></p>
 
 			</p>
 			<p>
@@ -298,13 +507,31 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 			<p>
 			<label for="_pmab_meta_exdate"><?php _e( 'Select Expiry Date', 'pmab' ); ?></label>
 			<input type="datetime-local" id="_pmab_meta_exdate" name="_pmab_meta_exdate" value="<?php echo esc_attr( $_pmab_meta_exdate ); ?>" size="25" class="postbox" /></p>
+			<p>
+				<select name="" id="" class="postbox ">
+					<option value="" selected>Exclude</option>
+				</select>
+			</p>
 			
+			<label for="_pmab_meta_type2"><?php _e( 'Posts', 'pmab' ); ?></label>
+			<select name="_pmab_meta_type2" id="_pmab_meta_type2" class="postbox">
+			<!-- <option value="post_page" selected>Entire Website</option> -->
+				<option value="" disabled style="font-weight: bolder;"> Posts</option>
+				<option value="post2" <?php echo $this->selected( $_pmab_meta_type2, 'post2' ); ?>>Specific Posts</option>
+				<option value="page2" <?php echo $this->selected( $_pmab_meta_type2, 'page2' ); ?>>Specific Pages</option>
+			</select>
+			<p class="specificpost2">
+			<label for="_pmab_meta_specific_post2"><?php _e( 'IDs', 'pmab' ); ?> <span style="font-size:8px;">Comma Seperated</span></label>
+			<input type="text" id="_pmab_meta_specific_post2" name="_pmab_meta_specific_post2" value="<?php echo esc_attr( $_pmab_meta_specific_post2 ); ?>" size="25" class="postbox" /></p>
+
+			</p>
 			<div  style="justify-content: space-evenly; display: flex;">
 			<button id="pmabDesktopsize"><span class="dashicons dashicons-desktop"></span></button>
 			<button id="pmabTabletsize"><span class="dashicons dashicons-tablet"></span></button>
-			<button id="pmabMobilesize"><span class="dashicons dashicons-smartphone"></span></button></div>
+			<!-- <button id="pmabMobilesize"><span class="dashicons dashicons-smartphone"></span></button></div> -->
 			
 			</div>
+			
 			
 			<?php
 		}
