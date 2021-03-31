@@ -56,4 +56,15 @@ jQuery(document).ready(function($){
             $('#_pmab_meta_number_of_blocks').val('');
         }
     });
+    $('#_pmab_meta_type2').on('change', function() {
+       
+        if(this.value == 'post2' || this.value == 'page2' ){
+            $('.specificpost2').show();
+        } 
+        else{
+            $('.specificpost2').hide();
+            $('#_pmab_meta_specific_post2').val('');
+        }
+        
+    });
 });

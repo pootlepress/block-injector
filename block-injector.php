@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: Put Blocks Anywhere
+ * Plugin Name: Block Injector
  * Description: A WordPress plugin that lets you inject content into Post and Page content.
  * Version: 1.0.0
  * Author: PootlePress
  * Author URI: https://github.com/pootlepress/put-blocks-anywhere
- * Text Domain: put-blocks-anywhere
+ * Text Domain: block-injector
  *
  * @package PutBlocksAnywhere
  */
