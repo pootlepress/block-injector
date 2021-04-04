@@ -79,11 +79,14 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 					add_filter(
 						'the_content',
 						function ( $content ) use ( $inject_content_type ,$inject_content_type2, $p, $tag, $num_of_blocks, $after_before, $exdate, $stdate, $specific_post , $specific_post2 ,$category,$id,$tags ) {
-
-							if ( $tag == 'top' || $num_of_blocks == '' ) {
+							// echo $tag;
+							if ( $tag == 'top') {
 								$num_of_blocks = 0;
-							} elseif ( $tag == 'bottom' ) {
+								// echo $num_of_blocks;
+							} else if ( $tag == 'bottom' ) {
 								$num_of_blocks = PHP_INT_MAX;
+							// echo $num_of_blocks;
+
 							}
 
 							// Check if we're inside the main loop in a single Post.
@@ -426,16 +429,16 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 
 			// Display the form, using the current value.
 			?>
-			<div>
-			<div>
+			<div> 
+			 <!-- <div style="padding-bottom:1rem 0rem;">
 				<select name="" id="" class="postbox" style="display:none">
 					<option value="" selected>Include</option>
 				</select>
-			</div>
+			</div>  -->
 			
 			
 			
-			<div>
+			<div class="" style="padding-bottom:1rem;">
 			<!-- <label for="_pmab_meta_type"><php _e( 'Select post type', 'pmab' ); ?></label> -->
 			<!-- <select name="_pmab_meta_type" id="_pmab_meta_type" class="postbox">
 				<option value="post_page">Entire Website</option>
@@ -458,79 +461,84 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 			
 
 			</div>
-			<div class="category-box" style="<?php echo $_pmab_meta_category == '' ? 'display: none;' : ''; ?>" >
-			<label for="_pmab_meta_category"><?php _e( 'Categories', 'pmab' ); ?></label>
-			<select name="_pmab_meta_category" id="_pmab_meta_category" class="postbox">
-				<option disabled style="font-weight: bolder;">Select Category</option>
-				<?php 
-					$args = array(
-						"hide_empty" => 0,
-						'orderby' => 'name',
-						'exclude' => '',
-						'include' => '',
-						'parent' => 0
-						);
-					$categories = get_categories($args);
-					foreach($categories as $category) {					
-				?>
-					<option value="<?php echo $category->cat_ID ?>" <?php echo $this->selected( $_pmab_meta_category, $category->cat_ID ); ?>><?php echo $category->name ?></option>
-				<?php } ?>
-			</select>
-			</div>
-			<div class="specificpost" style="<?php echo $_pmab_meta_specific_post == '' ? 'display: none;' : ''; ?>">
-			<label for="_pmab_meta_specific_post"><?php _e( 'IDs', 'pmab' ); ?> <span style="font-size:8px;">Comma Seperated</span></label>
-			<input type="text" id="_pmab_meta_specific_post" name="_pmab_meta_specific_post" value="<?php echo esc_attr( $_pmab_meta_specific_post ); ?>" size="25" class="postbox" /></p>
-
-			</div>
-			<div class="tags" style="<?php echo $_pmab_meta_tags == '' ? 'display: none;' : ''; ?>">
-			<label for="_pmab_meta_tags"><?php _e( 'Tag IDs', 'pmab' ); ?> <span style="font-size:8px;">Comma Seperated</span></label>
-			<input type="text" id="_pmab_meta_tags" name="_pmab_meta_tags" value="<?php echo esc_attr( $_pmab_meta_tags ); ?>" size="25" class="postbox" /></p>
-
-			</div>
-			<div>
-			<label for="_pmab_meta_tag_n_fix"><b style="font-size:16px"><?php _e( 'Position', 'pmab' ); ?></b></label>
-			<select name="_pmab_meta_tag_n_fix" id="_pmab_meta_tag_n_fix" class="postbox col-12">
-				<option value="" disabled style="font-weight: bolder;">Position</option>
-				<option value="top_before" <?php echo $this->selected( $_pmab_meta_tag_n_fix, 'top_before' ); ?>>Top</option>
-				<option value="bottom_after" <?php echo $this->selected( $_pmab_meta_tag_n_fix, 'bottom_after' ); ?>>Bottom</option>
-				<option value="h2_after" <?php echo $this->selected( $_pmab_meta_tag_n_fix, 'h2_after' ); ?>>After Heading</option>
-				<option value="p_after" <?php echo $this->selected( $_pmab_meta_tag_n_fix, 'p_after' ); ?>>After Blocks</option>
-			</select>
-			</div>
-			<div class="certain_num"  style="<?php echo $_pmab_meta_number_of_blocks == '' ? 'display: none;' : ''; ?>"><label for="_pmab_meta_number_of_blocks">
-				<?php _e( 'After Certain Number', 'pmab' ); ?>
-			</label>
-			<input type="number" id="_pmab_meta_number_of_blocks" name="_pmab_meta_number_of_blocks" value="<?php echo esc_attr( $_pmab_meta_number_of_blocks ); ?>" size="25" class="postbox" />
-			</div>
-			<div>
-				<select name="" id="" class="postbox " style="display:none">
-					<option value="" selected>Exclude</option>
+			<div class="category-box" style="<?php echo $_pmab_meta_category == '' ? 'display: none;' : ''; ?> padding-bottom:1rem" >
+				<label for="_pmab_meta_category"><?php _e( 'Categories', 'pmab' ); ?></label>
+				<select name="_pmab_meta_category" id="_pmab_meta_category" class="postbox">
+					<option disabled style="font-weight: bolder;">Select Category</option>
+					<?php 
+						$args = array(
+							"hide_empty" => 0,
+							'orderby' => 'name',
+							'exclude' => '',
+							'include' => '',
+							'parent' => 0
+							);
+						$categories = get_categories($args);
+						foreach($categories as $category) {					
+					?>
+						<option value="<?php echo $category->cat_ID ?>" <?php echo $this->selected( $_pmab_meta_category, $category->cat_ID ); ?>><?php echo $category->name ?></option>
+					<?php } ?>
 				</select>
 			</div>
-			<div>
-			<label for="_pmab_meta_type2"><b style="font-size:16px"><?php _e( 'Exclude Post & Pages', 'pmab' ); ?></b></label>
-			<select name="_pmab_meta_type2" id="_pmab_meta_type2" class="postbox">
-			<!-- <option value="post_page" selected>Entire Website</option> -->
-				<option value=""  style="font-weight: bolder;">Exclude Option</option>
-				<option value="post2" <?php echo $this->selected( $_pmab_meta_type2, 'post2' ); ?>>Specific Posts</option>
-				<option value="page2" <?php echo $this->selected( $_pmab_meta_type2, 'page2' ); ?>>Specific Pages</option>
-			</select>
+
+			<div class="specificpost" style="<?php echo $_pmab_meta_specific_post == '' ? 'display: none;' : ''; ?> padding-bottom:1rem ">
+				<label for="_pmab_meta_specific_post"><?php _e( 'IDs', 'pmab' ); ?> <span style="font-size:8px;">Comma Seperated</span></label>
+				<input type="text" id="_pmab_meta_specific_post" name="_pmab_meta_specific_post" value="<?php echo esc_attr( $_pmab_meta_specific_post ); ?>" size="25" class="postbox" />
+
+				</div>
+				<div class="tags" style="<?php echo $_pmab_meta_tags == '' ? 'display: none;' : ''; ?> padding-bottom:1rem">
+				<label for="_pmab_meta_tags"><?php _e( 'Tag IDs', 'pmab' ); ?> <span style="font-size:8px;">Comma Seperated</span></label>
+				<input type="text" id="_pmab_meta_tags" name="_pmab_meta_tags" value="<?php echo esc_attr( $_pmab_meta_tags ); ?>" size="25" class="postbox" /></p>
+
 			</div>
-			<div class="specificpost2" style="<?php echo $_pmab_meta_specific_post2 == '' ? 'display: none;' : ''; ?>">
-			<label for="_pmab_meta_specific_post2"><?php _e( 'IDs', 'pmab' ); ?> <span style="font-size:8px;">Comma Seperated</span></label>
-			<input type="text" id="_pmab_meta_specific_post2" name="_pmab_meta_specific_post2" value="<?php echo esc_attr( $_pmab_meta_specific_post2 ); ?>" size="25" class="postbox" />
+
+			<div style="padding-bottom:1rem;">
+				<label for="_pmab_meta_tag_n_fix"><b style="font-size:16px"><?php _e( 'Position', 'pmab' ); ?></b></label>
+				<select name="_pmab_meta_tag_n_fix" id="_pmab_meta_tag_n_fix" class="postbox col-12">
+					<option value="" disabled style="font-weight: bolder;">Position</option>
+					<option value="top_before" <?php echo $this->selected( $_pmab_meta_tag_n_fix, 'top_before' ); ?>>Top</option>
+					<option value="bottom_after" <?php echo $this->selected( $_pmab_meta_tag_n_fix, 'bottom_after' ); ?>>Bottom</option>
+					<option value="h2_after" <?php echo $this->selected( $_pmab_meta_tag_n_fix, 'h2_after' ); ?>>After Heading</option>
+					<option value="p_after" <?php echo $this->selected( $_pmab_meta_tag_n_fix, 'p_after' ); ?>>After Blocks</option>
+				</select>
+			</div>
+
+			<div class="certain_num"  style=" <?php echo $_pmab_meta_number_of_blocks == '' ? 'display: none;' : ''; ?> padding-bottom:1rem"><label for="_pmab_meta_number_of_blocks">
+					<?php _e( 'After Certain Number', 'pmab' ); ?>
+				</label>
+				<input type="number" id="_pmab_meta_number_of_blocks" name="_pmab_meta_number_of_blocks" value="<?php echo esc_attr( $_pmab_meta_number_of_blocks ); ?>" size="25" class="postbox" />
+			</div>
+			<div style="padding-bottom:1rem;">
+					<select name="" id="" class="postbox " style="display:none">
+						<option value="" selected>Exclude</option>
+					</select>
+			</div>
+
+			<div style="padding-bottom:1rem;">
+				<label for="_pmab_meta_type2"><b style="font-size:16px"><?php _e( 'Exclude Post & Pages', 'pmab' ); ?></b></label>
+				<select name="_pmab_meta_type2" id="_pmab_meta_type2" class="postbox">
+				<!-- <option value="post_page" selected>Entire Website</option> -->
+					<option value=""  style="font-weight: bolder;">Exclude Option</option>
+					<option value="post2" <?php echo $this->selected( $_pmab_meta_type2, 'post2' ); ?>>Specific Posts</option>
+					<option value="page2" <?php echo $this->selected( $_pmab_meta_type2, 'page2' ); ?>>Specific Pages</option>
+				</select>
+			</div>
+			
+			<div class="specificpost2" style="<?php echo $_pmab_meta_specific_post2 == '' ? 'display: none;' : ''; ?> padding-bottom:1rem">
+				<label for="_pmab_meta_specific_post2"><?php _e( 'IDs', 'pmab' ); ?> <span style="font-size:8px;">Comma Seperated</span></label>
+				<input type="text" id="_pmab_meta_specific_post2" name="_pmab_meta_specific_post2" value="<?php echo esc_attr( $_pmab_meta_specific_post2 ); ?>" size="25" class="postbox" />
 			</div>
 
 			</div>
-			<div>
-			<label for="_pmab_meta_stdate"><?php _e( 'Select Start Date', 'pmab' ); ?></label>
-			<input type="datetime-local" id="_pmab_meta_stdate" name="_pmab_meta_stdate" value="<?php echo esc_attr( $_pmab_meta_stdate ); ?>" size="25" class="postbox" />
+			<div style="padding-bottom:1rem;">
+				<label for="_pmab_meta_stdate"><?php _e( 'Select Start Date', 'pmab' ); ?></label>
+				<input type="datetime-local" id="_pmab_meta_stdate" name="_pmab_meta_stdate" value="<?php echo esc_attr( $_pmab_meta_stdate ); ?>" size="25" class="postbox" />
 			</div>
 
 
-			<div>
-			<label for="_pmab_meta_exdate"><?php _e( 'Select Expiry Date', 'pmab' ); ?></label>
-			<input type="datetime-local" id="_pmab_meta_exdate" name="_pmab_meta_exdate" value="<?php echo esc_attr( $_pmab_meta_exdate ); ?>" size="25" class="postbox" />
+			<div style="padding-bottom:1rem;">
+				<label for="_pmab_meta_exdate"><?php _e( 'Select Expiry Date', 'pmab' ); ?></label>
+				<input type="datetime-local" id="_pmab_meta_exdate" name="_pmab_meta_exdate" value="<?php echo esc_attr( $_pmab_meta_exdate ); ?>" size="25" class="postbox" />
 			</div>
 			
 			
@@ -549,13 +557,15 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 			// Limit meta box to certain post types.
 			add_meta_box(
 				'some_meta_box_name',
-				__( 'Location & Priority', 'pmab' ),
+				__( 'Location and Position', 'pmab' ),
 				array( $this, 'render_meta_box_content' ),
 				$this->post_type,
 				'side',
 				'high'
 			);
+			
 		}
+		
 
 		public function update_content( $content, $tag, $num_of_blocks, $p, $after_before ) {
 			// global $content, $tag, $num_of_blocks, $p,$after_before;
