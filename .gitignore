@@ -7,3 +7,9 @@ node_modules/
 phpcs.xml
 phpunit.xml
 vendor/
+.devcontainer/
+Vagrantfile
+docker-compose.yml
+webpack.config.js
+test/
+block-injector.zip
