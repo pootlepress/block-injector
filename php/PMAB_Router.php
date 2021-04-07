@@ -43,7 +43,6 @@ if (!class_exists('PMAB_Router')) {
 			add_action('enqueue_block_editor_assets', array($this, 'enqueue_editor_assets'));
 			add_action('add_meta_boxes', array($this, 'add_meta_box'));
 			add_action('save_post', array($this, 'save_post'));
-			// add_filter( 'the_content', array( $this, 'test' ), 1 );
 		}
 
 		public function manual_hook()
@@ -64,7 +63,7 @@ if (!class_exists('PMAB_Router')) {
 				// get the meta you need form each post_pmab_meta_specific_post
 				$num_of_blocks        = get_post_meta($id, '_pmab_meta_number_of_blocks', true);
 				$specific_post        = get_post_meta($id, '_pmab_meta_specific_post', true);
-				$specific_post2       = get_post_meta($id, '_pmab_meta_specific_post2', true);
+				$specific_post_exclude= get_post_meta($id, '_pmab_meta_specific_post_exclude', true);
 				$tags       		  = get_post_meta($id, '_pmab_meta_tags', true);
 				$tag_type             = get_post_meta($id, '_pmab_meta_tag_n_fix', true);
 				$inject_content_type  = get_post_meta($id, '_pmab_meta_type', true);
@@ -73,7 +72,14 @@ if (!class_exists('PMAB_Router')) {
 				$expiredate           = get_post_meta($id, '_pmab_meta_expiredate', true);
 				$category             = get_post_meta($id, '_pmab_meta_category', true);
 
-
+				$tag_ids = explode(',', $tags);
+				$args = array(
+					'tag__in' => $tag_ids
+				);
+				$dateandtime =$this->PMAB_DateAndTime($startdate , $expiredate);
+				$thisposts_exclude = explode(',', $specific_post_exclude);
+				$thisposts = explode(',', $specific_post);
+				$is_post = get_posts($args);
 				$tag_type = explode('_', $tag_type);
 				if (!empty($tag_type) && isset($tag_type[0]) && isset($tag_type[1])) {
 
@@ -82,7 +88,7 @@ if (!class_exists('PMAB_Router')) {
 
 					add_filter(
 						'the_content',
-						function ($content) use ($inject_content_type, $inject_content_type2, $p, $tag, $num_of_blocks, $after_before, $expiredate, $startdate, $specific_post, $specific_post2, $category, $id, $tags) {
+						function ($content) use ($inject_content_type, $inject_content_type2, $p, $tag, $num_of_blocks, $after_before, $expiredate, $startdate, $specific_post, $specific_post_exclude, $category, $thisposts_exclude , $thisposts , $is_post ,$id, $tags ,$args,$dateandtime) {
 							if ($tag == 'top') {
 								$num_of_blocks = 0;
 							} else if ($tag == 'bottom') {
@@ -91,74 +97,33 @@ if (!class_exists('PMAB_Router')) {
 
 							// Check if we're inside the main loop in a single Post.
 
-							$date = date('Y-m-d\TH:i', time()); // Date object using current date and time
-							$currentdate   = $date;
+							if ($inject_content_type == 'tags') {
+								if ($is_post) {
+									foreach ($is_post as $is_posts) {
+										if ($inject_content_type == 'tags' && $dateandtime && is_single($is_posts->ID)) {
+											if ($inject_content_type2 == 'post_exclude') {
+												if (!in_array($is_posts->ID, $thisposts_exclude)) {
 
-
-							$expirydate = $expiredate;
-							$startingdate = $startdate;
-
-							if (($inject_content_type == 'tags' && ((($startingdate == '' && $expirydate == '') || $startingdate <= $currentdate) || ($expirydate >= $currentdate && $startingdate <= $currentdate))) && is_single()) {
-								$all_tags = get_tags();
-								$tag_id = array();
-								foreach (explode(',', $tags) as $tags) {
-									$tag_id[] = $tags;
-								}
-
-								foreach (explode(',', $tags) as $tags) {
-
-									$args = array(
-										'tag__in' => $tag_id
-									);
-
-									$is_post = get_posts($args);
-									if ($is_post) {
-										foreach ($is_post as $is_posts) {
-											if (($inject_content_type == 'tags' && (($startingdate == '' || $expirydate == '') || ($expirydate >= $currentdate && $startingdate <= $currentdate))) && is_single($is_posts->ID)) {
-												if ($inject_content_type2 == 'post2') {
-													$thisposts = array();
-													foreach (explode(',', $specific_post2) as $specific_post_id) {
-														$thisposts[] = $specific_post_id;
-													}
-
-
-													$is_post = get_post();
-
-													if (!in_array($is_posts->ID, $thisposts)) {
-
-														return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
-													}
-												} else {
 													return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
 												}
+											} else {
+												return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
 											}
 										}
 									}
 								}
+								
 							}
-							if (($inject_content_type == 'category' && ((($startingdate == '' && $expirydate == '') || $startingdate <= $currentdate) || ($expirydate >= $currentdate && $startingdate <= $currentdate))) && is_single()) {
-
-								$is_post = get_post();
-								$categories = wp_get_post_categories($is_post->ID);
-
+							if ($inject_content_type == 'category' && $dateandtime && is_single()) {								
+								$categories = wp_get_post_categories(get_post()->ID);
 								for ($i = 0; $i < count($categories); $i++) {
 									if ($categories[$i] == $category) {
-
-										if ($inject_content_type2 == 'post2') {
-											$thisposts = array();
-											foreach (explode(',', $specific_post2) as $specific_post_id) {
-												$thisposts[] = $specific_post_id;
-											}
-
-
-											$is_post = get_post();
-
-											if (!in_array($is_post->ID, $thisposts)) {
-
+										if ($inject_content_type2 == 'post_exclude') {
+											if (!in_array(get_post()->ID, $thisposts)) {
 												return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
 											}
 										} else {
-											if (is_single($is_post->ID)) {
+											if (is_single(get_post()->ID)) {
 												return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
 											}
 										}
@@ -166,93 +131,52 @@ if (!class_exists('PMAB_Router')) {
 								}
 							}
 							if ($inject_content_type == 'post') {
-								foreach (explode(',', $specific_post) as $specific_post_id) {
-									$is_post = get_post($specific_post_id);
-									if ($is_post) {
-										if (($inject_content_type == 'post' && ((($startingdate == '' && $expirydate == '') || $startingdate <= $currentdate) || ($expirydate >= $currentdate && $startingdate <= $currentdate))) && is_single($is_post->ID)) {
+								foreach ($thisposts as $thispost) {
+									$currentpost = get_post($thispost);
+									if ($currentpost) {
+										if ($inject_content_type == 'post' && $dateandtime && is_single($currentpost->ID)) {
 											return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
 										}
 									}
 								}
 							}
 							if ($inject_content_type == 'page') {
-								foreach (explode(',', $specific_post) as $specific_post_id) {
-
-									$is_page = get_post($specific_post_id);
-									if ($is_page) {
-										if (($inject_content_type == 'page' && (($startingdate == '' || $expirydate == '') || ($expirydate >= $currentdate && $startingdate <= $currentdate))) && is_page($is_page->ID)) {
+								foreach ($thisposts as $thispage) {									 
+									$currentpage = get_post($thispage);
+									if ($currentpage) {
+										if ($inject_content_type == 'page' &&  $dateandtime  && is_page($currentpage->ID)) {
 											return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
 										}
 									}
 								}
 							}
 
-							if ($inject_content_type == 'all_post' && ((($startingdate == '' && $expirydate == '') || $startingdate <= $currentdate) || ($expirydate >= $currentdate && $startingdate <= $currentdate)) && is_single()) {
-
-
-								if ($inject_content_type2 == 'post2') {
-									$thisposts = array();
-									foreach (explode(',', $specific_post2) as $specific_post_id) {
-										$thisposts[] = $specific_post_id;
+							if ($inject_content_type == 'all_post' && $dateandtime && is_single()) {
+								if ($inject_content_type2 == 'post_exclude') {
+									if (!in_array(get_post()->ID, $thisposts_exclude)) {
+										return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
 									}
+								} else {
+										return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
+								}
+							}
 
-
-									$is_post = get_post();
-
-									if (!in_array($is_post->ID, $thisposts)) {
-
+							if ($inject_content_type == 'all_page' && $dateandtime && is_page()) {
+								if ($inject_content_type2 == 'page_exclude') {
+									if (!in_array(get_post()->ID, $thisposts_exclude)) {
 										return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
 									}
 								} else {
 									return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
 								}
 							}
-
-							if ($inject_content_type == 'all_page' && ((($startingdate == '' && $expirydate == '') || $startingdate <= $currentdate) || ($expirydate >= $currentdate && $startingdate <= $currentdate)) && is_page()) {
-								if ($inject_content_type2 == 'page2') {
-									$thisposts = array();
-									foreach (explode(',', $specific_post2) as $specific_post_id) {
-										$thisposts[] = $specific_post_id;
-									}
-
-
-									$is_post = get_post();
-
-									if (!in_array($is_post->ID, $thisposts)) {
-
+							if ($inject_content_type == 'post_page' && $dateandtime && (is_page() || is_single())) {
+								if ($inject_content_type2 == 'page_exclude') {
+									if (!in_array(get_post()->ID, $thisposts_exclude)) {
 										return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
 									}
-								} else {
-
-									return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
-								}
-							}
-
-							if ($inject_content_type == 'post_page' && ((($startingdate == '' && $expirydate == '') || $startingdate <= $currentdate) || ($expirydate >= $currentdate && $startingdate <= $currentdate)) && (is_page() || is_single())) {
-								if ($inject_content_type2 == 'page2') {
-									$thisposts = array();
-									foreach (explode(',', $specific_post2) as $specific_post_id) {
-										$thisposts[] = $specific_post_id;
-									}
-
-
-									$is_post = get_post();
-
-									if (!in_array($is_post->ID, $thisposts)) {
-
-										return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
-									}
-								} else if ($inject_content_type2 == 'post2') {
-									$thisposts = array();
-									foreach (explode(',', $specific_post2) as $specific_post_id) {
-										$thisposts[] = $specific_post_id;
-									}
-
-
-									$is_post = get_post();
-
-									if (!in_array($is_post->ID, $thisposts)) {
-
+								} else if ($inject_content_type2 == 'post_exclude') {
+									if (!in_array(get_post()->ID, $thisposts_exclude)) {
 										return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
 									}
 								} else {
@@ -269,6 +193,18 @@ if (!class_exists('PMAB_Router')) {
 					// do whatever you want with it
 				}
 			}
+		}
+
+		public function PMAB_DateAndTime($startingdate , $expirydate  )
+		{
+			$currentdate  = date('Y-m-d\TH:i', time()); // Date object using current date and time
+			if((($startingdate == '' && $expirydate == '') || $startingdate <= $currentdate) || ($expirydate >= $currentdate && $startingdate <= $currentdate)){
+				return true;
+			}
+			else{
+				false;
+			}
+
 		}
 
 		/**
@@ -359,7 +295,7 @@ if (!class_exists('PMAB_Router')) {
 			if (isset($_POST['_pmab_meta_number_of_blocks'], $_POST['_pmab_meta_type'], $_POST['pmab_plugin_field']) && wp_verify_nonce($_POST['pmab_plugin_field'], 'pmab_plugin_nonce')) {
 				update_post_meta($post_id, '_pmab_meta_number_of_blocks', sanitize_text_field($_POST['_pmab_meta_number_of_blocks']));
 				update_post_meta($post_id, '_pmab_meta_specific_post', sanitize_text_field($_POST['_pmab_meta_specific_post']));
-				update_post_meta($post_id, '_pmab_meta_specific_post2', sanitize_text_field($_POST['_pmab_meta_specific_post2']));
+				update_post_meta($post_id, '_pmab_meta_specific_post_exclude', sanitize_text_field($_POST['_pmab_meta_specific_post_exclude']));
 				update_post_meta($post_id, '_pmab_meta_tags', sanitize_text_field($_POST['_pmab_meta_tags']));
 				update_post_meta($post_id, '_pmab_meta_category', $_POST['_pmab_meta_category']);
 				update_post_meta($post_id, '_pmab_meta_type', sanitize_text_field($_POST['_pmab_meta_type']));
@@ -385,7 +321,7 @@ if (!class_exists('PMAB_Router')) {
 			// Use get_post_meta to retrieve an existing value from the database.
 			$_pmab_meta_number_of_blocks = get_post_meta($post->ID, '_pmab_meta_number_of_blocks', true);
 			$_pmab_meta_specific_post    = get_post_meta($post->ID, '_pmab_meta_specific_post', true);
-			$_pmab_meta_specific_post2   = get_post_meta($post->ID, '_pmab_meta_specific_post2', true);
+			$_pmab_meta_specific_post_exclude   = get_post_meta($post->ID, '_pmab_meta_specific_post_exclude', true);
 			$_pmab_meta_tags    		 = get_post_meta($post->ID, '_pmab_meta_tags', true);
 			$_pmab_meta_type             = get_post_meta($post->ID, '_pmab_meta_type', true);
 			$_pmab_meta_type2            = get_post_meta($post->ID, '_pmab_meta_type2', true);
@@ -403,7 +339,7 @@ if (!class_exists('PMAB_Router')) {
 				'_pmab_meta_type2'=>$_pmab_meta_type2,
 				'_pmab_meta_number_of_blocks'=>$_pmab_meta_number_of_blocks,
 				'_pmab_meta_specific_post'=>$_pmab_meta_specific_post,
-				'_pmab_meta_specific_post2'=>$_pmab_meta_specific_post2,
+				'_pmab_meta_specific_post_exclude'=>$_pmab_meta_specific_post_exclude,
 				'_pmab_meta_tags' => $_pmab_meta_tags,
 				'_pmab_meta_tag_n_fix' => $_pmab_meta_tag_n_fix,
 				'_pmab_meta_expiredate' => $_pmab_meta_expiredate,

@@ -28,11 +28,11 @@ jQuery(document).ready(function($){
         }
     });
     $('#_pmab_meta_type2').on('change', function() {       
-        if(this.value == 'post2' || this.value == 'page2' ){
-            $('.specificpost2').show();
+        if(this.value == 'post_exclude' || this.value == 'page_exclude' ){
+            $('.specificpost_exclude').show();
         } else{
-            $('.specificpost2').hide();
-            $('#_pmab_meta_specific_post2').val('');
+            $('.specificpost_exclude').hide();
+            $('#_pmab_meta_specific_post_exclude').val('');
         }        
     });
 });

@@ -78,14 +78,14 @@
             <label for="_pmab_meta_type2"><b style="font-size:16px"><?php _e( 'Exclude Post & Pages', 'pmab' ); ?></b></label>
             <select name="_pmab_meta_type2" id="_pmab_meta_type2" class="postbox">
                 <option value=""  style="font-weight: bolder;">Exclude Option</option>
-                <option value="post2" <?php echo selected( $_pmab_meta_type2, 'post2' ); ?>>Specific Posts</option>
-                <option value="page2" <?php echo selected( $_pmab_meta_type2, 'page2' ); ?>>Specific Pages</option>
+                <option value="post_exclude" <?php echo selected( $_pmab_meta_type2, 'post_exclude' ); ?>>Specific Posts</option>
+                <option value="page_exclude" <?php echo selected( $_pmab_meta_type2, 'page_exclude' ); ?>>Specific Pages</option>
             </select>
         </div>
         
-        <div class="specificpost2" style="<?php echo $_pmab_meta_specific_post2 == '' ? 'display: none;' : ''; ?> padding-bottom:1rem">
-            <label for="_pmab_meta_specific_post2"><?php _e( 'IDs', 'pmab' ); ?> <span style="font-size:8px;">Comma Seperated</span></label>
-            <input type="text" id="_pmab_meta_specific_post2" name="_pmab_meta_specific_post2" value="<?php echo esc_attr( $_pmab_meta_specific_post2 ); ?>" size="25" class="postbox" />
+        <div class="specificpost_exclude" style="<?php echo $_pmab_meta_specific_post_exclude == '' ? 'display: none;' : ''; ?> padding-bottom:1rem">
+            <label for="_pmab_meta_specific_post_exclude"><?php _e( 'IDs', 'pmab' ); ?> <span style="font-size:8px;">Comma Seperated</span></label>
+            <input type="text" id="_pmab_meta_specific_post_exclude" name="_pmab_meta_specific_post_exclude" value="<?php echo esc_attr( $_pmab_meta_specific_post_exclude ); ?>" size="25" class="postbox" />
         </div>
 
         </div>
