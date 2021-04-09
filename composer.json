@@ -21,6 +21,7 @@
     "wpsh/local": "0.2.3"
   },
   "autoload": {
+    "files": [ "block-injector.php" ],
     "psr-4": {
       "pootlepress\\PutMeAnywhereBlock\\": "php/"
     }
