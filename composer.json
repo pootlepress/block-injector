@@ -1,0 +1,51 @@
+{
+  "name": "pootlepress/put-me-anywhere-block",
+  "description": "Put Me Anywhere Block for WordPress.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {
+    "php": ">=7.2",
+    "composer/installers": "*",
+    "squizlabs/php_codesniffer": "*"
+  },
+  "require-dev": {
+    "10up/wp_mock": "*",
+    "dealerdirect/phpcodesniffer-composer-installer": "*",
+    "mockery/mockery": "*",
+    "php-coveralls/php-coveralls": "*",
+    "phpcompatibility/phpcompatibility-wp": "*",
+    "phpunit/phpunit": "*",
+    "wp-coding-standards/wpcs": "*",
+    "wpsh/local": "0.2.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "pootlepress\\PutMeAnywhereBlock\\": "php/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "pootlepress\\PutMeAnywhereBlock\\": "tests/php/"
+    }
+  },
+  "scripts": {
+    "lint": [
+      "@composer validate --strict",
+      "phpcs ."
+    ],
+    "test": [
+      "phpunit"
+    ],
+    "coverage": [
+      "php-coveralls --verbose"
+    ],
+    "build": [
+      "composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts"
+    ]
+  },
+  "config": {
+    "sort-packages": true
+  }
+}
