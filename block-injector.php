@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Block Injector
  * Description: A WordPress plugin that lets you inject content into Post and Page content.
@@ -11,30 +12,13 @@
  */
 
 
-if ( ! defined( 'ABSPATH' ) ) {
+if (!defined('ABSPATH')) {
 	exit;
 }
 
-// foreach ( glob( plugin_dir_path( __FILE__ ) . 'php/*.php', GLOB_BRACE ) as $file ) {
-// 	require_once $file;
-// }
-require_once plugin_dir_path( __FILE__ ).'php/PMAB_Plugin.php';
-require_once plugin_dir_path( __FILE__ ).'php/PMAB_Router.php';
-require_once plugin_dir_path( __FILE__ ).'php/helper.php';
-$router = new PMAB_Router( new PMAB_Plugin( __FILE__ ) );
+require_once plugin_dir_path(__FILE__) . 'php/PMAB_Plugin.php';
+require_once plugin_dir_path(__FILE__) . 'php/PMAB_Router.php';
+require_once plugin_dir_path(__FILE__) . 'php/helper.php';
+$router = new PMAB_Router(new PMAB_Plugin(__FILE__));
 
-add_action( 'plugins_loaded', array( $router, 'init' ) );
-
-
-// function myguten_register_post_meta() {
-// register_post_meta( 'post', '_myguten_protected_key', array(
-// 'show_in_rest' => true,
-// 'single' => true,
-// 'type' => 'string',
-// 'auth_callback' => function() {
-// return current_user_can( 'edit_posts' );
-// }
-// ) );
-// }
-
-
+add_action('plugins_loaded', array($router, 'init'));

@@ -63,7 +63,7 @@ if (!class_exists('PMAB_Router')) {
 				// get the meta you need form each post_pmab_meta_specific_post
 				$num_of_blocks        = get_post_meta($id, '_pmab_meta_number_of_blocks', true);
 				$specific_post        = get_post_meta($id, '_pmab_meta_specific_post', true);
-				$specific_post_exclude= get_post_meta($id, '_pmab_meta_specific_post_exclude', true);
+				$specific_post_exclude = get_post_meta($id, '_pmab_meta_specific_post_exclude', true);
 				$tags       		  = get_post_meta($id, '_pmab_meta_tags', true);
 				$tag_type             = get_post_meta($id, '_pmab_meta_tag_n_fix', true);
 				$inject_content_type  = get_post_meta($id, '_pmab_meta_type', true);
@@ -71,15 +71,19 @@ if (!class_exists('PMAB_Router')) {
 				$startdate            = get_post_meta($id, '_pmab_meta_startdate', true);
 				$expiredate           = get_post_meta($id, '_pmab_meta_expiredate', true);
 				$category             = get_post_meta($id, '_pmab_meta_category', true);
+				if ($tags) {
 
-				$tag_ids = explode(',', $tags);
-				$args = array(
-					'tag__in' => $tag_ids
-				);
-				$dateandtime =$this->PMAB_DateAndTime($startdate , $expiredate);
+					$tag_ids = explode(',', $tags);
+					$args = array(
+						'tag__in' => $tag_ids
+					);
+					$is_post = get_posts($args);
+				} else {
+					$is_post = false;
+				}
+				$dateandtime = $this->PMAB_DateAndTime($startdate, $expiredate);
 				$thisposts_exclude = explode(',', $specific_post_exclude);
 				$thisposts = explode(',', $specific_post);
-				$is_post = get_posts($args);
 				$tag_type = explode('_', $tag_type);
 				if (!empty($tag_type) && isset($tag_type[0]) && isset($tag_type[1])) {
 
@@ -88,7 +92,7 @@ if (!class_exists('PMAB_Router')) {
 
 					add_filter(
 						'the_content',
-						function ($content) use ($inject_content_type, $inject_content_type2, $p, $tag, $num_of_blocks, $after_before, $expiredate, $startdate, $specific_post, $specific_post_exclude, $category, $thisposts_exclude , $thisposts , $is_post ,$id, $tags ,$args,$dateandtime) {
+						function ($content) use ($inject_content_type, $inject_content_type2, $p, $tag, $num_of_blocks, $after_before, $category, $thisposts_exclude, $thisposts, $is_post, $dateandtime) {
 							if ($tag == 'top') {
 								$num_of_blocks = 0;
 							} else if ($tag == 'bottom') {
@@ -112,19 +116,20 @@ if (!class_exists('PMAB_Router')) {
 										}
 									}
 								}
-								
 							}
-							if ($inject_content_type == 'category' && $dateandtime && is_single()) {								
+							if ($inject_content_type == 'category' && $dateandtime && is_single()) {
 								$categories = wp_get_post_categories(get_post()->ID);
-								for ($i = 0; $i < count($categories); $i++) {
-									if ($categories[$i] == $category) {
-										if ($inject_content_type2 == 'post_exclude') {
-											if (!in_array(get_post()->ID, $thisposts)) {
-												return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
-											}
-										} else {
-											if (is_single(get_post()->ID)) {
-												return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
+								if ($categories) {
+									for ($i = 0; $i < count($categories); $i++) {
+										if ($categories[$i] == $category) {
+											if ($inject_content_type2 == 'post_exclude') {
+												if (!in_array(get_post()->ID, $thisposts)) {
+													return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
+												}
+											} else {
+												if (is_single(get_post()->ID)) {
+													return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
+												}
 											}
 										}
 									}
@@ -132,7 +137,7 @@ if (!class_exists('PMAB_Router')) {
 							}
 							if ($inject_content_type == 'post') {
 								foreach ($thisposts as $thispost) {
-									$currentpost = get_post($thispost);
+									$currentpost = get_post(intval($thispost));
 									if ($currentpost) {
 										if ($inject_content_type == 'post' && $dateandtime && is_single($currentpost->ID)) {
 											return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
@@ -141,7 +146,7 @@ if (!class_exists('PMAB_Router')) {
 								}
 							}
 							if ($inject_content_type == 'page') {
-								foreach ($thisposts as $thispage) {									 
+								foreach ($thisposts as $thispage) {
 									$currentpage = get_post($thispage);
 									if ($currentpage) {
 										if ($inject_content_type == 'page' &&  $dateandtime  && is_page($currentpage->ID)) {
@@ -157,7 +162,7 @@ if (!class_exists('PMAB_Router')) {
 										return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
 									}
 								} else {
-										return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
+									return $this->update_content($content, $tag, $num_of_blocks, $p, $after_before);
 								}
 							}
 
@@ -195,16 +200,14 @@ if (!class_exists('PMAB_Router')) {
 			}
 		}
 
-		public function PMAB_DateAndTime($startingdate , $expirydate  )
+		public function PMAB_DateAndTime($startingdate, $expirydate)
 		{
 			$currentdate  = date('Y-m-d\TH:i', time()); // Date object using current date and time
-			if((($startingdate == '' && $expirydate == '') || $startingdate <= $currentdate) || ($expirydate >= $currentdate && $startingdate <= $currentdate)){
+			if ((($startingdate == '' && $expirydate == '') || $startingdate <= $currentdate) || ($expirydate >= $currentdate && $startingdate <= $currentdate)) {
 				return true;
-			}
-			else{
+			} else {
 				false;
 			}
-
 		}
 
 		/**
@@ -251,7 +254,6 @@ if (!class_exists('PMAB_Router')) {
 
 					'public'              => true,
 					'show_ui'             => true,
-					// 'show_in_menu'        => 'ct-dashboard',
 					'show_in_menu'        => true,
 					'publicly_queryable'  => false,
 					'can_export'          => true,
@@ -264,9 +266,6 @@ if (!class_exists('PMAB_Router')) {
 					'supports'            => array(
 						'title',
 						'editor',
-						// 'fw-page-builder'
-						// 'thumbnail',
-						// 'revisions'
 					),
 
 					'capabilities'        => array(
@@ -332,19 +331,21 @@ if (!class_exists('PMAB_Router')) {
 
 
 			// Display the form, using the current value & Template .
- 
-			
-			$this->viewTemplate(plugin_dir_path(__FILE__) . 'View.php',[
-				'_pmab_meta_type'=>$_pmab_meta_type,
-				'_pmab_meta_type2'=>$_pmab_meta_type2,
-				'_pmab_meta_number_of_blocks'=>$_pmab_meta_number_of_blocks,
-				'_pmab_meta_specific_post'=>$_pmab_meta_specific_post,
-				'_pmab_meta_specific_post_exclude'=>$_pmab_meta_specific_post_exclude,
-				'_pmab_meta_tags' => $_pmab_meta_tags,
-				'_pmab_meta_tag_n_fix' => $_pmab_meta_tag_n_fix,
-				'_pmab_meta_expiredate' => $_pmab_meta_expiredate,
-				'_pmab_meta_startdate'  => $_pmab_meta_startdate,
-				'_pmab_meta_category'  => $_pmab_meta_category				
+
+
+			$this->viewTemplate(
+				plugin_dir_path(__FILE__) . 'View.php',
+				[
+					'_pmab_meta_type' => $_pmab_meta_type,
+					'_pmab_meta_type2' => $_pmab_meta_type2,
+					'_pmab_meta_number_of_blocks' => $_pmab_meta_number_of_blocks,
+					'_pmab_meta_specific_post' => $_pmab_meta_specific_post,
+					'_pmab_meta_specific_post_exclude' => $_pmab_meta_specific_post_exclude,
+					'_pmab_meta_tags' => $_pmab_meta_tags,
+					'_pmab_meta_tag_n_fix' => $_pmab_meta_tag_n_fix,
+					'_pmab_meta_expiredate' => $_pmab_meta_expiredate,
+					'_pmab_meta_startdate'  => $_pmab_meta_startdate,
+					'_pmab_meta_category'  => $_pmab_meta_category
 				]
 			);
 		}
@@ -352,7 +353,7 @@ if (!class_exists('PMAB_Router')) {
 
 		public function viewTemplate($filePath, $variables = array(), $print = true)
 		{
-			
+
 			// die(var_dump($variables));
 			$output = NULL;
 			if (file_exists($filePath)) {
@@ -381,7 +382,7 @@ if (!class_exists('PMAB_Router')) {
 		/**
 		 * Adds the meta box container.
 		 */
-		public function add_meta_box($post_type)
+		public function add_meta_box()
 		{
 			// Limit meta box to certain post types.
 			add_meta_box(
@@ -395,7 +396,7 @@ if (!class_exists('PMAB_Router')) {
 		}
 
 
-		public function update_content($content, $tag, $num_of_blocks, $p, $after_before)
+		public function update_content($content, $tag, $num_of_blocks, $p)
 		{
 			// global $content, $tag, $num_of_blocks, $p,$after_before;
 			$content_array = explode("</$tag>", $content);
