@@ -66,69 +66,72 @@ if (!function_exists('pmab_push_to_specific_content')) {
             $thisposts_exclude = is_string($specific_post_exclude) ? explode(',', $specific_post_exclude) : [];
             $thisposts = is_string($specific_post) ?  explode(',', $specific_post) : [];
             $tag_type = is_string($tag_type) ?  explode('_', $tag_type) : [];
-            if (!empty($tag_type) && isset($tag_type[0])) {
+            if (!empty($tag_type) && isset($tag_type[0]) && $dateandtime) {
                 $tag          = $tag_type[0];
-
                 add_filter(
                     'the_content',
                     function ($content) use ($inject_content_type, $inject_content_type2, $p, $tag, $num_of_blocks, $category, $thisposts_exclude, $thisposts, $tag_posts, $dateandtime) {
-                        if ($tag == 'top') {
-                            $num_of_blocks = 0;
-                        } else if ($tag == 'bottom') {
-                            $num_of_blocks = PHP_INT_MAX;
+                        switch ($tag) {
+                            case 'top':
+                                $num_of_blocks = 0;
+                                break;
+                            case "bottom":
+                                $num_of_blocks = PHP_INT_MAX;
+                                break;
                         }
-                        if ($dateandtime) {
-                            // Check if we're inside the main loop in a single Post.
-                            switch ($inject_content_type) {
-                                case "tags":
-                                    if ($tag_posts) {
-                                        foreach ($tag_posts as $tag_post) {
-                                            if (is_single($tag_post->ID)) {
-                                                if ($inject_content_type2 == 'post_exclude' && !in_array($tag_post->ID, $thisposts_exclude)) {
-                                                    return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                                }
+
+
+                        // Check if we're inside the main loop in a single Post.
+                        switch ($inject_content_type) {
+                            case "tags":
+
+                                foreach ($tag_posts as $tag_post) {
+                                    if (is_single($tag_post->ID)) {
+                                        if ($inject_content_type2 == 'post_exclude' && !in_array($tag_post->ID, $thisposts_exclude)) {
+                                            return pmab_update_content($content, $tag, $num_of_blocks, $p);
+                                        }
+                                        return pmab_update_content($content, $tag, $num_of_blocks, $p);
+                                    }
+                                }
+
+                                break;
+                            case "category":
+                                if (is_single()) {
+                                    $categories = wp_get_post_categories(get_post()->ID);
+                                    foreach ($categories as $cat) {
+                                        if ($cat == $category) {
+                                            if ($inject_content_type2 == 'post_exclude' && !in_array(get_post()->ID, $thisposts)) {
+                                                return pmab_update_content($content, $tag, $num_of_blocks, $p);
+                                            } else if (is_single(get_post()->ID)) {
                                                 return pmab_update_content($content, $tag, $num_of_blocks, $p);
                                             }
                                         }
                                     }
-                                    break;
-                                case "category":
-                                    if (is_single()) {
-                                        $categories = wp_get_post_categories(get_post()->ID);
-                                        foreach ($categories as $cat) {
-                                            if ($cat == $category) {
-                                                if ($inject_content_type2 == 'post_exclude' && !in_array(get_post()->ID, $thisposts)) {
-                                                    return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                                } else if (is_single(get_post()->ID)) {
-                                                    return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                                }
-                                            }
-                                        }
-                                    }
-                                    break;
-                                case "post":
-                                    pmab_filter_content($thisposts, $content, $tag, $num_of_blocks, $p, "is_single");
-                                    break;
-                                case "page":
-                                    pmab_filter_content($thisposts, $content, $tag, $num_of_blocks, $p, "is_page");
-                                    break;
-                                case "all_post":
-                                    if (is_single()) {
-                                        pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, 'post_exclude', $content, $tag, $num_of_blocks, $p);
-                                    }
-                                    break;
-                                case "all_page":
-                                    if (is_page()) {
-                                        pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, 'page_exclude', $content, $tag, $num_of_blocks, $p);
-                                    }
-                                    break;
-                                case "post_page":
-                                    if ((is_page() || is_single())) {
-                                        pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, 'both', $content, $tag, $num_of_blocks, $p);
-                                    }
-                                    break;
-                            }
+                                }
+                                break;
+                            case "post":
+                                pmab_filter_content($thisposts, $content, $tag, $num_of_blocks, $p, "is_single");
+                                break;
+                            case "page":
+                                pmab_filter_content($thisposts, $content, $tag, $num_of_blocks, $p, "is_page");
+                                break;
+                            case "all_post":
+                                if (is_single()) {
+                                    pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, 'post_exclude', $content, $tag, $num_of_blocks, $p);
+                                }
+                                break;
+                            case "all_page":
+                                if (is_page()) {
+                                    pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, 'page_exclude', $content, $tag, $num_of_blocks, $p);
+                                }
+                                break;
+                            case "post_page":
+                                if ((is_page() || is_single())) {
+                                    pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, 'both', $content, $tag, $num_of_blocks, $p);
+                                }
+                                break;
                         }
+
 
 
                         return $content;
