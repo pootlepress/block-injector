@@ -161,8 +161,8 @@ if (!function_exists('pmab_filter_exclude_content')) {
     function pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, $exclude_type, $content, $tag, $num_of_blocks, $p)
     {
         if ($exclude_type == "both") {
-            foreach (array('post_exclude', 'page_exclude') as $exclude_type) {
-                if ($inject_content_type2 == $exclude_type && !in_array(get_post()->ID, $thisposts_exclude)) {
+            foreach (array('post_exclude', 'page_exclude') as $exclude) {
+                if ($inject_content_type2 == $exclude && !in_array(get_post()->ID, $thisposts_exclude)) {
                     return pmab_update_content($content, $tag, $num_of_blocks, $p);
                 }
                 return pmab_update_content($content, $tag, $num_of_blocks, $p);
