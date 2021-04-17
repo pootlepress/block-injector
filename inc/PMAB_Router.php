@@ -82,7 +82,7 @@ if (!class_exists('PMAB_Router')) {
 					$is_post = false;
 				}
 				$dateandtime = $this->PMAB_DateAndTime($startdate, $expiredate);
-				$thisposts_exclude = $specific_post_exclude ? explode(',', $specific_post_exclude) : [];
+				$thisposts_exclude = is_string($specific_post_exclude) ? explode(',', $specific_post_exclude) : [];
 				$thisposts = explode(',', $specific_post);
 				$tag_type = explode('_', $tag_type);
 				if (!empty($tag_type) && isset($tag_type[0]) && isset($tag_type[1])) {
