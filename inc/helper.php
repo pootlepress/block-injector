@@ -131,8 +131,6 @@ if (!function_exists('pmab_filter_hook')) {
     }
 }
 
-
-
 if (!function_exists('pmab_posts_filter_content')) {
     function pmab_posts_filter_content($posts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, $function_name)
     {
