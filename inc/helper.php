@@ -100,18 +100,15 @@ if (!function_exists('pmab_push_to_specific_content')) {
                         }
                         if ($inject_content_type == 'category' && $dateandtime && is_single()) {
                             $categories = wp_get_post_categories(get_post()->ID);
-                            $categories_itration = count($categories);
-                            if ($categories_itration > 0) {
-                                for ($i = 0; $i < $categories_itration; $i++) {
-                                    if ($categories[$i] == $category) {
-                                        if ($inject_content_type2 == 'post_exclude') {
-                                            if (!in_array(get_post()->ID, $thisposts)) {
-                                                return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                            }
-                                        } else {
-                                            if (is_single(get_post()->ID)) {
-                                                return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                            }
+                            foreach ($categories as $cat) {
+                                if ($cat == $category) {
+                                    if ($inject_content_type2 == 'post_exclude') {
+                                        if (!in_array(get_post()->ID, $thisposts)) {
+                                            return pmab_update_content($content, $tag, $num_of_blocks, $p);
+                                        }
+                                    } else {
+                                        if (is_single(get_post()->ID)) {
+                                            return pmab_update_content($content, $tag, $num_of_blocks, $p);
                                         }
                                     }
                                 }
