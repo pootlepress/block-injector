@@ -124,7 +124,6 @@ if (!function_exists('pmab_push_to_specific_content')) {
                                 }
                                 return pmab_update_content($content, $tag, $num_of_blocks, $p);
                             }
-
                             if ($inject_content_type == 'all_page' && is_page()) {
                                 if ($inject_content_type2 == 'page_exclude' && !in_array(get_post()->ID, $thisposts_exclude)) {
                                     return pmab_update_content($content, $tag, $num_of_blocks, $p);
