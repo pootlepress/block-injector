@@ -38,8 +38,8 @@ if (!class_exists('PMAB_Router')) {
 		 */
 		public function init()
 		{
-			add_action('init', array($this, 'register_post_type'));
 			add_action('enqueue_block_editor_assets', array($this, 'enqueue_editor_assets'));
+			add_action('init', array($this, 'register_post_type'));
 			add_action('add_meta_boxes', array($this, 'add_meta_box'));
 			add_action('save_post', array($this, 'save_post'));
 
@@ -47,14 +47,12 @@ if (!class_exists('PMAB_Router')) {
 		}
 
 		/**
-		 * Load our block assets.
+		 * Load js assets on editor.
 		 *
 		 * @return void
 		 */
 		public function enqueue_editor_assets()
 		{
-			global $post_type;
-			// if($this->post_type == $post_type){
 			wp_enqueue_script(
 				'put-me-anywhere-block-js',
 				$this->plugin->asset_url('js/dist/editor.js'),
@@ -65,7 +63,6 @@ if (!class_exists('PMAB_Router')) {
 				),
 				$this->plugin->asset_version()
 			);
-			// }
 		}
 		/**
 		 * Register meta box container.
