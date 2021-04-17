@@ -68,10 +68,9 @@ if (!function_exists('pmab_push_to_specific_content')) {
             }
             $dateandtime = pmab_expire_checker($startdate, $expiredate);
             $thisposts_exclude = is_string($specific_post_exclude) ? explode(',', $specific_post_exclude) : [];
-            $thisposts = explode(',', $specific_post);
-            $tag_type = explode('_', $tag_type);
+            $thisposts = is_string($specific_post) ?  explode(',', $specific_post) : [];
+            $tag_type = is_string($tag_type) ?  explode('_', $tag_type) : [];
             if (!empty($tag_type) && isset($tag_type[0]) && isset($tag_type[1])) {
-
                 $tag          = $tag_type[0];
 
                 add_filter(
