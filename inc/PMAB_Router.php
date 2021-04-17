@@ -5,6 +5,9 @@
  *
  * @package BlockInjector
  */
+
+use phpDocumentor\Reflection\Types\Integer;
+
 if (!class_exists('PMAB_Router')) {
 	/**
 	 * Plugin Router.
@@ -144,7 +147,7 @@ if (!class_exists('PMAB_Router')) {
 
 		/**
 		 * Save the meta box container.
-		 * @param WP_Post $post_id The post object.
+		 * @param Integer $post_id The post object.
 		 * 
 		 * @return void
 		 */
@@ -212,9 +215,9 @@ if (!class_exists('PMAB_Router')) {
 		/**
 		 * Meta Preview TEmplate.
 		 *
-		 * @param $file_path real file path.
-		 * @param $variables pass data into variable.
-		 * @param $print boolean
+		 * @param string $file_path Real file path.
+		 * @param array $variables Pass data into variable.
+		 * @param boolean $print 
 		 * 
 		 * @return mixed
 		 */
