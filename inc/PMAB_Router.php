@@ -29,7 +29,6 @@ if (!class_exists('PMAB_Router')) {
 		public function __construct($plugin)
 		{
 			$this->plugin = $plugin;
-			$this->manual_hook();
 		}
 
 		/**
@@ -43,9 +42,17 @@ if (!class_exists('PMAB_Router')) {
 			add_action('enqueue_block_editor_assets', array($this, 'enqueue_editor_assets'));
 			add_action('add_meta_boxes', array($this, 'add_meta_box'));
 			add_action('save_post', array($this, 'save_post'));
+
+			$this->pushContentToWP();
 		}
 
-		public function manual_hook()
+		/**
+		 * Push Block Injector Post into Post,Page and CPT.
+		 *
+		 * @return void
+		 */
+
+		public function pushContentToWP()
 		{
 			// code...
 			$posts = get_posts(
@@ -59,29 +66,27 @@ if (!class_exists('PMAB_Router')) {
 			// loop over each post
 			foreach ($posts as $p) {
 
-				$id = $p->ID;
+				$post_id = $p->ID;
 				// get the meta you need form each post_pmab_meta_specific_post
-				$num_of_blocks        = get_post_meta($id, '_pmab_meta_number_of_blocks', true);
-				$specific_post        = get_post_meta($id, '_pmab_meta_specific_post', true);
-				$specific_post_exclude = get_post_meta($id, '_pmab_meta_specific_post_exclude', true);
-				$tags       		  = get_post_meta($id, '_pmab_meta_tags', true);
-				$tag_type             = get_post_meta($id, '_pmab_meta_tag_n_fix', true);
-				$inject_content_type  = get_post_meta($id, '_pmab_meta_type', true);
-				$inject_content_type2 = get_post_meta($id, '_pmab_meta_type2', true);
-				$startdate            = get_post_meta($id, '_pmab_meta_startdate', true);
-				$expiredate           = get_post_meta($id, '_pmab_meta_expiredate', true);
-				$category             = get_post_meta($id, '_pmab_meta_category', true);
+				$num_of_blocks        = get_post_meta($post_id, '_pmab_meta_number_of_blocks', true);
+				$specific_post        = get_post_meta($post_id, '_pmab_meta_specific_post', true);
+				$specific_post_exclude = get_post_meta($post_id, '_pmab_meta_specific_post_exclude', true);
+				$tags       		  = get_post_meta($post_id, '_pmab_meta_tags', true);
+				$tag_type             = get_post_meta($post_id, '_pmab_meta_tag_n_fix', true);
+				$inject_content_type  = get_post_meta($post_id, '_pmab_meta_type', true);
+				$inject_content_type2 = get_post_meta($post_id, '_pmab_meta_type2', true);
+				$startdate            = get_post_meta($post_id, '_pmab_meta_startdate', true);
+				$expiredate           = get_post_meta($post_id, '_pmab_meta_expiredate', true);
+				$category             = get_post_meta($post_id, '_pmab_meta_category', true);
+				$is_post = false;
 				if ($tags) {
-
 					$tag_ids = explode(',', $tags);
 					$args = array(
 						'tag__in' => $tag_ids
 					);
 					$is_post = get_posts($args);
-				} else {
-					$is_post = false;
 				}
-				$dateandtime = $this->PMAB_DateAndTime($startdate, $expiredate);
+				$dateandtime = pmab_expire_checker($startdate, $expiredate);
 				$thisposts_exclude = is_string($specific_post_exclude) ? explode(',', $specific_post_exclude) : [];
 				$thisposts = explode(',', $specific_post);
 				$tag_type = explode('_', $tag_type);
@@ -100,18 +105,16 @@ if (!class_exists('PMAB_Router')) {
 
 							// Check if we're inside the main loop in a single Post.
 
-							if ($inject_content_type == 'tags') {
-								if ($is_post) {
-									foreach ($is_post as $is_posts) {
-										if ($inject_content_type == 'tags' && $dateandtime && is_single($is_posts->ID)) {
-											if ($inject_content_type2 == 'post_exclude') {
-												if (!in_array($is_posts->ID, $thisposts_exclude)) {
+							if ($inject_content_type == 'tags' && $is_post) {
+								foreach ($is_post as $is_posts) {
+									if ($inject_content_type == 'tags' && $dateandtime && is_single($is_posts->ID)) {
+										if ($inject_content_type2 == 'post_exclude') {
+											if (!in_array($is_posts->ID, $thisposts_exclude)) {
 
-													return $this->update_content($content, $tag, $num_of_blocks, $p);
-												}
-											} else {
-												return $this->update_content($content, $tag, $num_of_blocks, $p);
+												return pmab_update_content($content, $tag, $num_of_blocks, $p);
 											}
+										} else {
+											return pmab_update_content($content, $tag, $num_of_blocks, $p);
 										}
 									}
 								}
@@ -124,11 +127,11 @@ if (!class_exists('PMAB_Router')) {
 										if ($categories[$i] == $category) {
 											if ($inject_content_type2 == 'post_exclude') {
 												if (!in_array(get_post()->ID, $thisposts)) {
-													return $this->update_content($content, $tag, $num_of_blocks, $p);
+													return pmab_update_content($content, $tag, $num_of_blocks, $p);
 												}
 											} else {
 												if (is_single(get_post()->ID)) {
-													return $this->update_content($content, $tag, $num_of_blocks, $p);
+													return pmab_update_content($content, $tag, $num_of_blocks, $p);
 												}
 											}
 										}
@@ -140,7 +143,7 @@ if (!class_exists('PMAB_Router')) {
 									$currentpost = get_post(intval($thispost));
 									if ($currentpost) {
 										if ($inject_content_type == 'post' && $dateandtime && is_single($currentpost->ID)) {
-											return $this->update_content($content, $tag, $num_of_blocks, $p);
+											return pmab_update_content($content, $tag, $num_of_blocks, $p);
 										}
 									}
 								}
@@ -151,7 +154,7 @@ if (!class_exists('PMAB_Router')) {
 										$currentpage = get_post($thispage);
 										if ($currentpage) {
 											if ($inject_content_type == 'page' &&  $dateandtime  && is_page($currentpage->ID)) {
-												return $this->update_content($content, $tag, $num_of_blocks, $p);
+												return pmab_update_content($content, $tag, $num_of_blocks, $p);
 											}
 										}
 									}
@@ -161,33 +164,33 @@ if (!class_exists('PMAB_Router')) {
 							if ($inject_content_type == 'all_post' && $dateandtime && is_single()) {
 								if ($inject_content_type2 == 'post_exclude') {
 									if (!in_array(get_post()->ID, $thisposts_exclude)) {
-										return $this->update_content($content, $tag, $num_of_blocks, $p);
+										return pmab_update_content($content, $tag, $num_of_blocks, $p);
 									}
 								} else {
-									return $this->update_content($content, $tag, $num_of_blocks, $p);
+									return pmab_update_content($content, $tag, $num_of_blocks, $p);
 								}
 							}
 
 							if ($inject_content_type == 'all_page' && $dateandtime && is_page()) {
 								if ($inject_content_type2 == 'page_exclude') {
 									if (!in_array(get_post()->ID, $thisposts_exclude)) {
-										return $this->update_content($content, $tag, $num_of_blocks, $p);
+										return pmab_update_content($content, $tag, $num_of_blocks, $p);
 									}
 								} else {
-									return $this->update_content($content, $tag, $num_of_blocks, $p);
+									return pmab_update_content($content, $tag, $num_of_blocks, $p);
 								}
 							}
 							if ($inject_content_type == 'post_page' && $dateandtime && (is_page() || is_single())) {
 								if ($inject_content_type2 == 'page_exclude') {
 									if (!in_array(get_post()->ID, $thisposts_exclude)) {
-										return $this->update_content($content, $tag, $num_of_blocks, $p);
+										return pmab_update_content($content, $tag, $num_of_blocks, $p);
 									}
 								} else if ($inject_content_type2 == 'post_exclude') {
 									if (!in_array(get_post()->ID, $thisposts_exclude)) {
-										return $this->update_content($content, $tag, $num_of_blocks, $p);
+										return pmab_update_content($content, $tag, $num_of_blocks, $p);
 									}
 								} else {
-									return $this->update_content($content, $tag, $num_of_blocks, $p);
+									return pmab_update_content($content, $tag, $num_of_blocks, $p);
 								}
 							}
 
@@ -201,15 +204,7 @@ if (!class_exists('PMAB_Router')) {
 			}
 		}
 
-		public function PMAB_DateAndTime($startingdate, $expirydate)
-		{
-			$currentdate  = date('Y-m-d\TH:i', time()); // Date object using current date and time
-			if ((($startingdate == '' && $expirydate == '') || $startingdate <= $currentdate) || ($expirydate >= $currentdate && $startingdate <= $currentdate)) {
-				return true;
-			} else {
-				false;
-			}
-		}
+
 
 		/**
 		 * Load our block assets.
@@ -376,10 +371,7 @@ if (!class_exists('PMAB_Router')) {
 			return $output;
 		}
 
-		public function selected($val, $val2)
-		{
-			return $val === $val2 ? 'selected=selected' : '';
-		}
+
 		/**
 		 * Adds the meta box container.
 		 */
@@ -394,15 +386,6 @@ if (!class_exists('PMAB_Router')) {
 				'side',
 				'high'
 			);
-		}
-
-
-		public function update_content($content, $tag, $num_of_blocks, $p)
-		{
-			$content_array = explode("</$tag>", $content);
-			array_splice($content_array, $num_of_blocks, 0, array($p->post_content));
-			$update_content = implode("</$tag>", $content_array);
-			return $update_content;
 		}
 	}
 }
