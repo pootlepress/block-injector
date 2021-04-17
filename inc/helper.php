@@ -76,25 +76,16 @@ if (!function_exists('pmab_push_to_specific_content')) {
                 add_filter(
                     'the_content',
                     function ($content) use ($inject_content_type, $inject_content_type2, $p, $tag, $num_of_blocks, $category, $thisposts_exclude, $thisposts, $is_post, $dateandtime) {
-                        if ($tag == 'top') {
-                            $num_of_blocks = 0;
-                        } else if ($tag == 'bottom') {
-                            $num_of_blocks = PHP_INT_MAX;
-                        }
+                        $num_of_blocks = $tag == 'top' ? 0 : PHP_INT_MAX;
 
                         // Check if we're inside the main loop in a single Post.
-
                         if ($inject_content_type == 'tags' && $is_post) {
                             foreach ($is_post as $is_posts) {
-                                if ($inject_content_type == 'tags' && $dateandtime && is_single($is_posts->ID)) {
-                                    if ($inject_content_type2 == 'post_exclude') {
-                                        if (!in_array($is_posts->ID, $thisposts_exclude)) {
-
-                                            return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                        }
-                                    } else {
+                                if ($dateandtime && is_single($is_posts->ID)) {
+                                    if ($inject_content_type2 == 'post_exclude' && !in_array($is_posts->ID, $thisposts_exclude)) {
                                         return pmab_update_content($content, $tag, $num_of_blocks, $p);
                                     }
+                                    return pmab_update_content($content, $tag, $num_of_blocks, $p);
                                 }
                             }
                         }
@@ -102,14 +93,10 @@ if (!function_exists('pmab_push_to_specific_content')) {
                             $categories = wp_get_post_categories(get_post()->ID);
                             foreach ($categories as $cat) {
                                 if ($cat == $category) {
-                                    if ($inject_content_type2 == 'post_exclude') {
-                                        if (!in_array(get_post()->ID, $thisposts)) {
-                                            return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                        }
-                                    } else {
-                                        if (is_single(get_post()->ID)) {
-                                            return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                        }
+                                    if ($inject_content_type2 == 'post_exclude' && !in_array(get_post()->ID, $thisposts)) {
+                                        return pmab_update_content($content, $tag, $num_of_blocks, $p);
+                                    } else if (is_single(get_post()->ID)) {
+                                        return pmab_update_content($content, $tag, $num_of_blocks, $p);
                                     }
                                 }
                             }
@@ -117,57 +104,40 @@ if (!function_exists('pmab_push_to_specific_content')) {
                         if ($inject_content_type == 'post') {
                             foreach ($thisposts as $thispost) {
                                 $currentpost = get_post(intval($thispost));
-                                if ($currentpost) {
-                                    if ($inject_content_type == 'post' && $dateandtime && is_single($currentpost->ID)) {
-                                        return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                    }
+                                if ($currentpost  && $dateandtime && is_single($currentpost->ID)) {
+                                    return pmab_update_content($content, $tag, $num_of_blocks, $p);
                                 }
                             }
                         }
                         if ($inject_content_type == 'page') {
                             foreach ($thisposts as $thispage) {
-                                if ($thispage) {
-                                    $currentpage = get_post($thispage);
-                                    if ($currentpage) {
-                                        if ($inject_content_type == 'page' &&  $dateandtime  && is_page($currentpage->ID)) {
-                                            return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                        }
-                                    }
+                                $currentpage = get_post($thispage);
+                                if ($currentpage && $dateandtime && is_page($currentpage->ID)) {
+                                    return pmab_update_content($content, $tag, $num_of_blocks, $p);
                                 }
                             }
                         }
 
                         if ($inject_content_type == 'all_post' && $dateandtime && is_single()) {
-                            if ($inject_content_type2 == 'post_exclude') {
-                                if (!in_array(get_post()->ID, $thisposts_exclude)) {
-                                    return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                }
-                            } else {
+                            if ($inject_content_type2 == 'post_exclude' && !in_array(get_post()->ID, $thisposts_exclude)) {
                                 return pmab_update_content($content, $tag, $num_of_blocks, $p);
                             }
+                            return pmab_update_content($content, $tag, $num_of_blocks, $p);
                         }
 
                         if ($inject_content_type == 'all_page' && $dateandtime && is_page()) {
-                            if ($inject_content_type2 == 'page_exclude') {
-                                if (!in_array(get_post()->ID, $thisposts_exclude)) {
-                                    return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                }
-                            } else {
+                            if ($inject_content_type2 == 'page_exclude' && !in_array(get_post()->ID, $thisposts_exclude)) {
                                 return pmab_update_content($content, $tag, $num_of_blocks, $p);
                             }
+                            return pmab_update_content($content, $tag, $num_of_blocks, $p);
                         }
                         if ($inject_content_type == 'post_page' && $dateandtime && (is_page() || is_single())) {
-                            if ($inject_content_type2 == 'page_exclude') {
-                                if (!in_array(get_post()->ID, $thisposts_exclude)) {
-                                    return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                }
-                            } else if ($inject_content_type2 == 'post_exclude') {
-                                if (!in_array(get_post()->ID, $thisposts_exclude)) {
-                                    return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                }
-                            } else {
+                            if ($inject_content_type2 == 'page_exclude' && !in_array(get_post()->ID, $thisposts_exclude)) {
+                                return pmab_update_content($content, $tag, $num_of_blocks, $p);
+                            } else if ($inject_content_type2 == 'post_exclude' && !in_array(get_post()->ID, $thisposts_exclude)) {
                                 return pmab_update_content($content, $tag, $num_of_blocks, $p);
                             }
+                            return pmab_update_content($content, $tag, $num_of_blocks, $p);
                         }
 
 
