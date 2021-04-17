@@ -43,13 +43,9 @@ if (!function_exists('pmab_push_to_specific_content')) {
 
             // get the meta you need form each post_pmab_meta_specific_post
             $num_of_blocks        = get_post_meta($p->ID, '_pmab_meta_number_of_blocks', true);
-
             $tag_type             = get_post_meta($p->ID, '_pmab_meta_tag_n_fix', true);
-
             $startdate            = get_post_meta($p->ID, '_pmab_meta_startdate', true);
             $expiredate           = get_post_meta($p->ID, '_pmab_meta_expiredate', true);
-
-
             $dateandtime = pmab_expire_checker($startdate, $expiredate);
 
             $tag_type = is_string($tag_type) ? explode('_', $tag_type) : array();
@@ -83,20 +79,13 @@ if (!function_exists('pmab_filter_hook')) {
         $tags                 = get_post_meta($p->ID, '_pmab_meta_tags', true);
         $category             = get_post_meta($p->ID, '_pmab_meta_category', true);
 
-        $tag_posts = $tags ? get_posts(array('tag__in' => explode(',', $tags))) : array();
+        $tag_posts = $tags ? get_posts(array('posts_per_page' => -1, 'tag__in' => explode(',', $tags))) : array();
         $thisposts_exclude = is_string($specific_post_exclude) ? explode(',', $specific_post_exclude) : array();
-        $thisposts = is_string($specific_post) ? explode(',', $specific_post) : array();
+        $thisposts = get_posts(array('posts_per_page' => -1, 'post__in' => $specific_post));
         // Check if we're inside the main loop in a single Post.
         switch ($inject_content_type) {
             case "tags":
-                foreach ($tag_posts as $tag_post) {
-                    if (is_single($tag_post->ID)) {
-                        if ($inject_content_type2 == 'post_exclude' && !in_array($tag_post->ID, $thisposts_exclude)) {
-                            return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                        }
-                        return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                    }
-                }
+                pmab_posts_filter_content($tag_posts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, "is_single");
 
                 break;
             case "category":
@@ -114,10 +103,10 @@ if (!function_exists('pmab_filter_hook')) {
                 }
                 break;
             case "post":
-                pmab_filter_content($thisposts, $content, $tag, $num_of_blocks, $p, "is_single");
+                pmab_posts_filter_content($thisposts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, "is_single");
                 break;
             case "page":
-                pmab_filter_content($thisposts, $content, $tag, $num_of_blocks, $p, "is_page");
+                pmab_posts_filter_content($thisposts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, "is_page");
                 break;
             case "all_post":
                 if (is_single()) {
@@ -142,12 +131,17 @@ if (!function_exists('pmab_filter_hook')) {
     }
 }
 
-if (!function_exists('pmab_filter_content')) {
-    function pmab_filter_content($posts, $content, $tag, $num_of_blocks, $p, $function_name)
+
+
+if (!function_exists('pmab_posts_filter_content')) {
+    function pmab_posts_filter_content($posts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, $function_name)
     {
-        foreach ($posts as $thispage) {
-            $currentpage = get_post($thispage);
-            if ($currentpage && $function_name($currentpage->ID)) {
+        foreach ($posts as $post) {
+
+            if ($function_name($post->ID)) {
+                if ($inject_content_type2 == 'post_exclude' && !in_array($post->ID, $thisposts_exclude)) {
+                    return pmab_update_content($content, $tag, $num_of_blocks, $p);
+                }
                 return pmab_update_content($content, $tag, $num_of_blocks, $p);
             }
         }
