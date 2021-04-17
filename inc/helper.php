@@ -76,7 +76,11 @@ if (!function_exists('pmab_push_to_specific_content')) {
                 add_filter(
                     'the_content',
                     function ($content) use ($inject_content_type, $inject_content_type2, $p, $tag, $num_of_blocks, $category, $thisposts_exclude, $thisposts, $is_post, $dateandtime) {
-                        $num_of_blocks = $tag == 'top' ? 0 : PHP_INT_MAX;
+                        if ($tag == 'top') {
+                            $num_of_blocks = 0;
+                        } else if ($tag == 'bottom') {
+                            $num_of_blocks = PHP_INT_MAX;
+                        }
 
                         // Check if we're inside the main loop in a single Post.
                         if ($inject_content_type == 'tags' && $is_post) {
