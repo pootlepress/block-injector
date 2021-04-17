@@ -93,7 +93,7 @@ if (!function_exists('pmab_filter_hook')) {
                     $categories = wp_get_post_categories(get_post()->ID);
                     foreach ($categories as $cat) {
                         if ($cat == $category) {
-                            if ($inject_content_type2 == 'post_exclude' && !in_array(get_post()->ID, $thisposts)) {
+                            if ($inject_content_type2 == 'post_exclude' && !in_array(get_post()->ID, $thisposts_exclude)) {
                                 return pmab_update_content($content, $tag, $num_of_blocks, $p);
                             } else if (is_single(get_post()->ID)) {
                                 return pmab_update_content($content, $tag, $num_of_blocks, $p);
