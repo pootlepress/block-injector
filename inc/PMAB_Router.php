@@ -82,7 +82,7 @@ if (!class_exists('PMAB_Router')) {
 					$is_post = false;
 				}
 				$dateandtime = $this->PMAB_DateAndTime($startdate, $expiredate);
-				$thisposts_exclude = explode(',', $specific_post_exclude);
+				$thisposts_exclude = $specific_post_exclude ? explode(',', $specific_post_exclude) : [];
 				$thisposts = explode(',', $specific_post);
 				$tag_type = explode('_', $tag_type);
 				if (!empty($tag_type) && isset($tag_type[0]) && isset($tag_type[1])) {
@@ -118,8 +118,9 @@ if (!class_exists('PMAB_Router')) {
 							}
 							if ($inject_content_type == 'category' && $dateandtime && is_single()) {
 								$categories = wp_get_post_categories(get_post()->ID);
-								if (count($categories) > 0) {
-									for ($i = 0; $i < count($categories); $i++) {
+								$categories_itration = count($categories);
+								if ($categories_itration > 0) {
+									for ($i = 0; $i < $categories_itration; $i++) {
 										if ($categories[$i] == $category) {
 											if ($inject_content_type2 == 'post_exclude') {
 												if (!in_array(get_post()->ID, $thisposts)) {
@@ -146,10 +147,12 @@ if (!class_exists('PMAB_Router')) {
 							}
 							if ($inject_content_type == 'page') {
 								foreach ($thisposts as $thispage) {
-									$currentpage = get_post($thispage);
-									if ($currentpage) {
-										if ($inject_content_type == 'page' &&  $dateandtime  && is_page($currentpage->ID)) {
-											return $this->update_content($content, $tag, $num_of_blocks, $p);
+									if ($thispage) {
+										$currentpage = get_post($thispage);
+										if ($currentpage) {
+											if ($inject_content_type == 'page' &&  $dateandtime  && is_page($currentpage->ID)) {
+												return $this->update_content($content, $tag, $num_of_blocks, $p);
+											}
 										}
 									}
 								}
