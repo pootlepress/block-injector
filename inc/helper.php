@@ -34,7 +34,6 @@ if (!function_exists('pmab_push_to_specific_content')) {
 
     function pmab_push_to_specific_content()
     {
-
         // loop over each post
         foreach (get_posts(
             array('post_type'      => 'block_injector', 'post_status'    => 'publish', 'posts_per_page' => -1)
@@ -82,11 +81,11 @@ if (!function_exists('pmab_filter_hook')) {
         $tag_posts = $tags ? get_posts(array('posts_per_page' => -1, 'tag__in' => explode(',', $tags))) : array();
         $thisposts_exclude = is_string($specific_post_exclude) ? explode(',', $specific_post_exclude) : array();
         $thisposts = get_posts(array('posts_per_page' => -1, 'post__in' => $specific_post));
+
         // Check if we're inside the main loop in a single Post.
         switch ($inject_content_type) {
             case "tags":
                 pmab_posts_filter_content($tag_posts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, "is_single");
-
                 break;
             case "category":
                 if (is_single()) {
