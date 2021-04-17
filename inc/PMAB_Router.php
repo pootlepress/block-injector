@@ -193,7 +193,7 @@ if (!class_exists('PMAB_Router')) {
 			// Display the form, using the current value & Template .
 
 
-			$this->viewTemplate(
+			$this->view_template(
 				plugin_dir_path(__FILE__) . 'View.php',
 				[
 					'_pmab_meta_type' => $_pmab_meta_type,
@@ -210,29 +210,27 @@ if (!class_exists('PMAB_Router')) {
 			);
 		}
 
-		/**
-		 * Meta Preview TEmplate.
+		/*
+		 * Meta Preview Template.
 		 *
-		 * @param string $file_path Real file path.
-		 * @param array $variables Pass data into variable.
-		 * @param boolean $print 
-		 * 
+		 * @param:string $file_path Real file path.
+		 * @param:array $variables Pass data into variable.
+		 * @param:boolean $print.
 		 * @return mixed
 		 */
-		public function viewTemplate($filePath, $variables = array(), $print = true)
+		public function view_template($file_path, $variables = array(), $print = true)
 		{
 
-			// die(var_dump($variables));
-			$output = NULL;
-			if (file_exists($filePath)) {
-				// Extract the variables to a local namespace
+			$output = null;
+			if (file_exists($file_path)) {
+				// Extract the variables to a local namespace.
 				extract($variables);
 
-				// Start output buffering
+				// Start output buffering.
 				ob_start();
 
-				// Include the template file
-				include $filePath;
+				// Include the template file.
+				include $file_path;
 
 				// End buffering and return its contents
 				$output = ob_get_clean();
