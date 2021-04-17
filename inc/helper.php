@@ -34,14 +34,6 @@ if (!function_exists('pmab_push_to_specific_content')) {
 
     function pmab_push_to_specific_content()
     {
-        // code...
-        $posts = get_posts(
-            array(
-                'post_type'      => 'block_injector',
-                'post_status'    => 'publish',
-                'posts_per_page' => -1,
-            )
-        );
 
         // loop over each post
         foreach (get_posts(
