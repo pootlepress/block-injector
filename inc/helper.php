@@ -67,8 +67,17 @@ if (!function_exists('pmab_push_to_specific_content')) {
             $thisposts_exclude = is_string($specific_post_exclude) ? explode(',', $specific_post_exclude) : array();
             $thisposts = is_string($specific_post) ? explode(',', $specific_post) : array();
             $tag_type = is_string($tag_type) ? explode('_', $tag_type) : array();
+
             if (!empty($tag_type) && isset($tag_type[0]) && $dateandtime) {
                 $tag          = $tag_type[0];
+                switch ($tag) {
+                    case 'top':
+                        $num_of_blocks = 0;
+                        break;
+                    case "bottom":
+                        $num_of_blocks = PHP_INT_MAX;
+                        break;
+                }
                 add_filter('the_content', function ($content) use ($inject_content_type, $inject_content_type2, $p, $tag, $num_of_blocks, $category, $thisposts_exclude, $thisposts, $tag_posts) {
                     return pmab_filter_hook($content, $inject_content_type, $inject_content_type2, $p, $tag, $num_of_blocks, $category, $thisposts_exclude, $thisposts, $tag_posts);
                 }, 0);
@@ -80,14 +89,7 @@ if (!function_exists('pmab_push_to_specific_content')) {
 if (!function_exists('pmab_filter_hook')) {
     function pmab_filter_hook($content, $inject_content_type, $inject_content_type2, $p, $tag, $num_of_blocks, $category, $thisposts_exclude, $thisposts, $tag_posts)
     {
-        switch ($tag) {
-            case 'top':
-                $num_of_blocks = 0;
-                break;
-            case "bottom":
-                $num_of_blocks = PHP_INT_MAX;
-                break;
-        }
+
 
 
         // Check if we're inside the main loop in a single Post.
