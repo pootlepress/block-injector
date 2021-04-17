@@ -43,21 +43,15 @@ if (!function_exists('pmab_push_to_specific_content')) {
 
             // get the meta you need form each post_pmab_meta_specific_post
             $num_of_blocks        = get_post_meta($p->ID, '_pmab_meta_number_of_blocks', true);
-            $specific_post        = get_post_meta($p->ID, '_pmab_meta_specific_post', true);
-            $specific_post_exclude = get_post_meta($p->ID, '_pmab_meta_specific_post_exclude', true);
-            $tags                 = get_post_meta($p->ID, '_pmab_meta_tags', true);
+
             $tag_type             = get_post_meta($p->ID, '_pmab_meta_tag_n_fix', true);
-            $inject_content_type  = get_post_meta($p->ID, '_pmab_meta_type', true);
-            $inject_content_type2 = get_post_meta($p->ID, '_pmab_meta_type2', true);
+
             $startdate            = get_post_meta($p->ID, '_pmab_meta_startdate', true);
             $expiredate           = get_post_meta($p->ID, '_pmab_meta_expiredate', true);
-            $category             = get_post_meta($p->ID, '_pmab_meta_category', true);
 
-            $tag_posts = $tags ? get_posts(array('tag__in' => explode(',', $tags))) : array();
 
             $dateandtime = pmab_expire_checker($startdate, $expiredate);
-            $thisposts_exclude = is_string($specific_post_exclude) ? explode(',', $specific_post_exclude) : array();
-            $thisposts = is_string($specific_post) ? explode(',', $specific_post) : array();
+
             $tag_type = is_string($tag_type) ? explode('_', $tag_type) : array();
 
             if (!empty($tag_type) && isset($tag_type[0]) && $dateandtime) {
@@ -70,8 +64,8 @@ if (!function_exists('pmab_push_to_specific_content')) {
                         $num_of_blocks = PHP_INT_MAX;
                         break;
                 }
-                add_filter('the_content', function ($content) use ($inject_content_type, $inject_content_type2, $p, $tag, $num_of_blocks, $category, $thisposts_exclude, $thisposts, $tag_posts) {
-                    return pmab_filter_hook($content, $inject_content_type, $inject_content_type2, $p, $tag, $num_of_blocks, $category, $thisposts_exclude, $thisposts, $tag_posts);
+                add_filter('the_content', function ($content) use ($p, $tag, $num_of_blocks) {
+                    return pmab_filter_hook($content, $p, $tag, $num_of_blocks);
                 }, 0);
             }
         }
@@ -79,11 +73,19 @@ if (!function_exists('pmab_push_to_specific_content')) {
 }
 
 if (!function_exists('pmab_filter_hook')) {
-    function pmab_filter_hook($content, $inject_content_type, $inject_content_type2, $p, $tag, $num_of_blocks, $category, $thisposts_exclude, $thisposts, $tag_posts)
+    function pmab_filter_hook($content, $p, $tag, $num_of_blocks)
     {
 
+        $inject_content_type  = get_post_meta($p->ID, '_pmab_meta_type', true); //
+        $inject_content_type2 = get_post_meta($p->ID, '_pmab_meta_type2', true); //
+        $specific_post        = get_post_meta($p->ID, '_pmab_meta_specific_post', true);
+        $specific_post_exclude = get_post_meta($p->ID, '_pmab_meta_specific_post_exclude', true);
+        $tags                 = get_post_meta($p->ID, '_pmab_meta_tags', true);
+        $category             = get_post_meta($p->ID, '_pmab_meta_category', true);
 
-
+        $tag_posts = $tags ? get_posts(array('tag__in' => explode(',', $tags))) : array();
+        $thisposts_exclude = is_string($specific_post_exclude) ? explode(',', $specific_post_exclude) : array();
+        $thisposts = is_string($specific_post) ? explode(',', $specific_post) : array();
         // Check if we're inside the main loop in a single Post.
         switch ($inject_content_type) {
             case "tags":
