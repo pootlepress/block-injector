@@ -6,8 +6,6 @@
  * @package BlockInjector
  */
 
-use phpDocumentor\Reflection\Types\Integer;
-
 if (!class_exists('PMAB_Router')) {
 	/**
 	 * Plugin Router.
