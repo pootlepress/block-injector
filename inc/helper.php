@@ -70,7 +70,7 @@ if (!function_exists('pmab_push_to_specific_content')) {
                 $tag          = $tag_type[0];
                 add_filter(
                     'the_content',
-                    function ($content) use ($inject_content_type, $inject_content_type2, $p, $tag, $num_of_blocks, $category, $thisposts_exclude, $thisposts, $tag_posts, $dateandtime) {
+                    function ($content) use ($inject_content_type, $inject_content_type2, $p, $tag, $num_of_blocks, $category, $thisposts_exclude, $thisposts, $tag_posts) {
                         switch ($tag) {
                             case 'top':
                                 $num_of_blocks = 0;
