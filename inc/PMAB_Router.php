@@ -147,7 +147,7 @@ if (!class_exists('PMAB_Router')) {
 
 		/**
 		 * Save the meta box container.
-		 * @param Integer $post_id The post object.
+		 * @param mixed $post_id The post object.
 		 * 
 		 * @return void
 		 */
