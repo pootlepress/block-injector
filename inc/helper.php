@@ -107,45 +107,24 @@ if (!function_exists('pmab_push_to_specific_content')) {
                                     }
                                     break;
                                 case "post":
-                                    foreach ($thisposts as $thispost) {
-                                        $currentpost = get_post(intval($thispost));
-                                        if ($currentpost  && is_single($currentpost->ID)) {
-                                            return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                        }
-                                    }
+                                    pmab_filter_content($thisposts, $content, $tag, $num_of_blocks, $p, "is_single");
                                     break;
                                 case "page":
-                                    foreach ($thisposts as $thispage) {
-                                        $currentpage = get_post($thispage);
-                                        if ($currentpage && is_page($currentpage->ID)) {
-                                            return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                        }
-                                    }
+                                    pmab_filter_content($thisposts, $content, $tag, $num_of_blocks, $p, "is_page");
                                     break;
                                 case "all_post":
                                     if (is_single()) {
-                                        if ($inject_content_type2 == 'post_exclude' && !in_array(get_post()->ID, $thisposts_exclude)) {
-                                            return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                        }
-                                        return pmab_update_content($content, $tag, $num_of_blocks, $p);
+                                        pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, 'post_exclude', $content, $tag, $num_of_blocks, $p);
                                     }
                                     break;
                                 case "all_page":
                                     if (is_page()) {
-                                        if ($inject_content_type2 == 'page_exclude' && !in_array(get_post()->ID, $thisposts_exclude)) {
-                                            return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                        }
-                                        return pmab_update_content($content, $tag, $num_of_blocks, $p);
+                                        pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, 'page_exclude', $content, $tag, $num_of_blocks, $p);
                                     }
                                     break;
                                 case "post_page":
                                     if ((is_page() || is_single())) {
-                                        if ($inject_content_type2 == 'page_exclude' && !in_array(get_post()->ID, $thisposts_exclude)) {
-                                            return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                        } else if ($inject_content_type2 == 'post_exclude' && !in_array(get_post()->ID, $thisposts_exclude)) {
-                                            return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                                        }
-                                        return pmab_update_content($content, $tag, $num_of_blocks, $p);
+                                        pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, 'both', $content, $tag, $num_of_blocks, $p);
                                     }
                                     break;
                             }
@@ -159,5 +138,25 @@ if (!function_exists('pmab_push_to_specific_content')) {
                 // do whatever you want with it
             }
         }
+    }
+}
+if (!function_exists('pmab_filter_content')) {
+    function pmab_filter_content($posts, $content, $tag, $num_of_blocks, $p, $function_name)
+    {
+        foreach ($posts as $thispage) {
+            $currentpage = get_post($thispage);
+            if ($currentpage && $function_name($currentpage->ID)) {
+                return pmab_update_content($content, $tag, $num_of_blocks, $p);
+            }
+        }
+    }
+}
+if (!function_exists('pmab_filter_exclude_content')) {
+    function pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, $exclude_type, $content, $tag, $num_of_blocks, $p)
+    {
+        if (($exclude_type == "both" || $inject_content_type2 == $exclude_type) && !in_array(get_post()->ID, $thisposts_exclude)) {
+            return pmab_update_content($content, $tag, $num_of_blocks, $p);
+        }
+        return pmab_update_content($content, $tag, $num_of_blocks, $p);
     }
 }
