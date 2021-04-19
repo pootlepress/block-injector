@@ -56,7 +56,7 @@ if (!class_exists('PMAB_Router')) {
 		{
 			wp_enqueue_script(
 				'put-me-anywhere-block-js',
-				$this->plugin->asset_url('js/dist/editor.js'),
+				$this->plugin->asset_url('js/src/editor.js'),
 				array(
 					'lodash',
 					'react',
