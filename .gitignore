@@ -13,3 +13,4 @@ docker-compose.yml
 webpack.config.js
 test/
 block-injector.zip
+!js/dist/
