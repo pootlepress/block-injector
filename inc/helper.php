@@ -86,7 +86,7 @@ if (!function_exists('pmab_filter_hook')) {
         switch ($inject_content_type) {
             case "tags":
                 return pmab_posts_filter_content($tag_posts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, "is_single");
-                break;
+
             case "category":
                 if (is_single()) {
                     $categories = wp_get_post_categories(get_post()->ID);
@@ -103,10 +103,10 @@ if (!function_exists('pmab_filter_hook')) {
                 break;
             case "post":
                 return pmab_posts_filter_content($thisposts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, "is_single");
-                break;
+
             case "page":
                 return pmab_posts_filter_content($thisposts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, "is_page");
-                break;
+
             case "all_post":
                 if (is_single()) {
                     return  pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, 'post_exclude', $content, $tag, $num_of_blocks, $p);
