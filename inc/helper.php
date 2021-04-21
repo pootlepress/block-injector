@@ -1,31 +1,29 @@
 <?php
-if (!function_exists('pmab_select_checker')) {
+if (! function_exists('pmab_select_checker')) {
     function pmab_select_checker($val, $val2)
     {
         return $val === $val2 ? 'selected=selected' : '';
     }
 }
-if (!function_exists('pmab_update_content')) {
+if (! function_exists('pmab_update_content')) {
     function pmab_update_content($content, $tag, $num_of_blocks, $p)
     {
         $content_array = explode("</$tag>", $content);
-        array_splice($content_array, $num_of_blocks, 0, array($p->post_content));
-        $update_content = implode("</$tag>", $content_array);
-        return $update_content;
+        array_splice($content_array, $num_of_blocks, 0, array( $p->post_content ));
+
+        return implode("</$tag>", $content_array);
     }
 }
 
-if (!function_exists('pmab_expire_checker')) {
+if (! function_exists('pmab_expire_checker')) {
     function pmab_expire_checker($startingdate, $expirydate)
     {
-        $currentdate  = date('Y-m-d\TH:i', time()); // Date object using current date and time
-        if ((($startingdate == '' && $expirydate == '') || $startingdate <= $currentdate) || ($expirydate >= $currentdate && $startingdate <= $currentdate)) {
-            return true;
-        }
-        return false;
+        $currentdate = date('Y-m-d\TH:i'); // Date object using current date and time
+
+        return (($startingdate === '' && $expirydate === '') || $startingdate <= $currentdate) || ($expirydate >= $currentdate && $startingdate <= $currentdate);
     }
 }
-if (!function_exists('pmab_push_to_specific_content')) {
+if (! function_exists('pmab_push_to_specific_content')) {
     /**
      * Push Block Injector Post into Post,Page and CPT.
      *
@@ -35,22 +33,24 @@ if (!function_exists('pmab_push_to_specific_content')) {
     function pmab_push_to_specific_content()
     {
         // loop over each post
-        foreach (get_posts(
-            array('post_type'      => 'block_injector', 'post_status'    => 'publish', 'posts_per_page' => -1)
-        ) as $p) {
+        foreach (
+            get_posts(
+                array( 'post_type' => 'block_injector', 'post_status' => 'publish', 'posts_per_page' => - 1 )
+            ) as $p
+        ) {
 
 
             // get the meta you need form each post_pmab_meta_specific_post
-            $num_of_blocks        = get_post_meta($p->ID, '_pmab_meta_number_of_blocks', true);
-            $tag_type             = get_post_meta($p->ID, '_pmab_meta_tag_n_fix', true);
-            $startdate            = get_post_meta($p->ID, '_pmab_meta_startdate', true);
-            $expiredate           = get_post_meta($p->ID, '_pmab_meta_expiredate', true);
-            $dateandtime = pmab_expire_checker($startdate, $expiredate);
+            $num_of_blocks = get_post_meta($p->ID, '_pmab_meta_number_of_blocks', true);
+            $tag_type      = get_post_meta($p->ID, '_pmab_meta_tag_n_fix', true);
+            $startdate     = get_post_meta($p->ID, '_pmab_meta_startdate', true);
+            $expiredate    = get_post_meta($p->ID, '_pmab_meta_expiredate', true);
+            $dateandtime   = pmab_expire_checker($startdate, $expiredate);
 
             $tag_type = is_string($tag_type) ? explode('_', $tag_type) : array();
 
-            if (!empty($tag_type) && isset($tag_type[0]) && $dateandtime) {
-                $tag          = $tag_type[0];
+            if (! empty($tag_type) && isset($tag_type[0]) && $dateandtime) {
+                $tag = $tag_type[0];
                 switch ($tag) {
                     case 'top':
                         $num_of_blocks = 0;
@@ -67,20 +67,22 @@ if (!function_exists('pmab_push_to_specific_content')) {
     }
 }
 
-if (!function_exists('pmab_filter_hook')) {
+if (! function_exists('pmab_filter_hook')) {
     function pmab_filter_hook($content, $p, $tag, $num_of_blocks)
     {
-
-        $inject_content_type  = get_post_meta($p->ID, '_pmab_meta_type', true); //
-        $inject_content_type2 = get_post_meta($p->ID, '_pmab_meta_type2', true); //
-        $specific_post        = get_post_meta($p->ID, '_pmab_meta_specific_post', true);
+        $inject_content_type   = get_post_meta($p->ID, '_pmab_meta_type', true); //
+        $inject_content_type2  = get_post_meta($p->ID, '_pmab_meta_type2', true); //
+        $specific_post         = get_post_meta($p->ID, '_pmab_meta_specific_post', true);
         $specific_post_exclude = get_post_meta($p->ID, '_pmab_meta_specific_post_exclude', true);
-        $tags                 = get_post_meta($p->ID, '_pmab_meta_tags', true);
-        $category             = get_post_meta($p->ID, '_pmab_meta_category', true);
-        $tag_posts = $tags ? get_posts(array('posts_per_page' => -1, 'tag__in' => explode(',', $tags))) : array();
-        $thisposts_exclude = is_string($specific_post_exclude) ? explode(',', $specific_post_exclude) : array();
-        $specific_post = is_string($specific_post) ? explode(',', $specific_post) : array();
-        $thisposts = get_posts(array('posts_per_page' => -1, 'post__in' => $specific_post));
+        $tags                  = get_post_meta($p->ID, '_pmab_meta_tags', true);
+        $category              = get_post_meta($p->ID, '_pmab_meta_category', true);
+        $tag_posts             = $tags ? get_posts(array(
+            'posts_per_page' => - 1,
+            'tag__in'        => explode(',', $tags)
+        )) : array();
+        $thisposts_exclude     = is_string($specific_post_exclude) ? explode(',', $specific_post_exclude) : array();
+        $specific_post         = is_string($specific_post) ? explode(',', $specific_post) : array();
+        $thisposts             = get_posts(array( 'posts_per_page' => - 1, 'post__in' => $specific_post ));
 
         // Check if we're inside the main loop in a single Post.
         switch ($inject_content_type) {
@@ -91,10 +93,12 @@ if (!function_exists('pmab_filter_hook')) {
                 if (is_single()) {
                     $categories = wp_get_post_categories(get_post()->ID);
                     foreach ($categories as $cat) {
-                        if ($cat == $category) {
-                            if ($inject_content_type2 == 'post_exclude' && !in_array(get_post()->ID, $thisposts_exclude)) {
+                        if ($cat === $category) {
+                            if ($inject_content_type2 === 'post_exclude' && ! in_array(get_post()->ID, $thisposts_exclude, true)) {
                                 return pmab_update_content($content, $tag, $num_of_blocks, $p);
-                            } else if (is_single(get_post()->ID)) {
+                            }
+
+                            if (is_single(get_post()->ID)) {
                                 return pmab_update_content($content, $tag, $num_of_blocks, $p);
                             }
                         }
@@ -109,12 +113,12 @@ if (!function_exists('pmab_filter_hook')) {
 
             case "all_post":
                 if (is_single()) {
-                    return  pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, 'post_exclude', $content, $tag, $num_of_blocks, $p);
+                    return pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, 'post_exclude', $content, $tag, $num_of_blocks, $p);
                 }
                 break;
             case "all_page":
                 if (is_page()) {
-                    return  pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, 'page_exclude', $content, $tag, $num_of_blocks, $p);
+                    return pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, 'page_exclude', $content, $tag, $num_of_blocks, $p);
                 }
                 break;
             case "post_page":
@@ -125,40 +129,39 @@ if (!function_exists('pmab_filter_hook')) {
         }
 
 
-
         return $content;
     }
 }
 
-if (!function_exists('pmab_posts_filter_content')) {
+if (! function_exists('pmab_posts_filter_content')) {
     function pmab_posts_filter_content($posts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, $function_name)
     {
         foreach ($posts as $post) {
             if ($function_name($post->ID)) {
-                if ($inject_content_type2 == 'post_exclude' && !in_array($post->ID, $thisposts_exclude)) {
-
+                if ($inject_content_type2 === 'post_exclude' && ! in_array($post->ID, $thisposts_exclude, true)) {
                     return pmab_update_content($content, $tag, $num_of_blocks, $p);
                 }
+
                 return pmab_update_content($content, $tag, $num_of_blocks, $p);
             }
         }
+
         return $content;
     }
 }
-if (!function_exists('pmab_filter_exclude_content')) {
+if (! function_exists('pmab_filter_exclude_content')) {
     function pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, $exclude_type, $content, $tag, $num_of_blocks, $p)
     {
-
-        if ($exclude_type == "both") {
-            foreach (array('post_exclude', 'page_exclude') as $exclude) {
-                if ($inject_content_type2 == $exclude && !in_array(get_post()->ID, $thisposts_exclude)) {
+        if ($exclude_type === "both") {
+            foreach (array( 'post_exclude', 'page_exclude' ) as $exclude) {
+                if ($inject_content_type2 === $exclude && ! in_array(get_post()->ID, $thisposts_exclude, true)) {
                     return pmab_update_content($content, $tag, $num_of_blocks, $p);
                 }
-                return pmab_update_content($content, $tag, $num_of_blocks, $p);
             }
-            return;
+
+            return pmab_update_content($content, $tag, $num_of_blocks, $p);
         }
-        if ($inject_content_type2 == $exclude_type && in_array(get_post()->ID, $thisposts_exclude)) {
+        if ($inject_content_type2 === $exclude_type && in_array(get_post()->ID, $thisposts_exclude, true)) {
             return $content;
         }
 
