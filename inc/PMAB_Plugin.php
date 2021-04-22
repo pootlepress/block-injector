@@ -5,191 +5,179 @@
  *
  * @package PutBlocksAnywhere
  */
-if (!class_exists('PMAB_Plugin')) {
-    /**
-     * WordPress plugin interface.
-     */
-    class PMAB_Plugin
-    {
+if ( ! class_exists( 'PMAB_Plugin' ) ) {
+	/**
+	 * WordPress plugin interface.
+	 */
+	class PMAB_Plugin {
 
-        /**
-         * Absolute path to the main plugin file.
-         *
-         * @var string
-         */
-        protected $file;
 
-        /**
-         * Absolute path to the root directory of this plugin.
-         *
-         * @var string
-         */
-        protected $dir;
+		/**
+		 * Absolute path to the main plugin file.
+		 *
+		 * @var string
+		 */
+		protected $file;
 
-        /**
-         * Store the WP uploads dir object.
-         *
-         * @see https://developer.wordpress.org/reference/functions/wp_upload_dir/
-         * @var array
-         */
-        protected $uploads_dir;
+		/**
+		 * Absolute path to the root directory of this plugin.
+		 *
+		 * @var string
+		 */
+		protected $dir;
 
-        /**
-         * Setup the plugin.
-         *
-         * @param string $plugin_file_path Absolute path to the main plugin file.
-         */
-        public function __construct(string $plugin_file_path)
-        {
-            $this->file        = $plugin_file_path;
-            $this->dir         = dirname($plugin_file_path);
-            $this->uploads_dir = wp_upload_dir(null, false);
-        }
+		/**
+		 * Store the WP uploads dir object.
+		 *
+		 * @see https://developer.wordpress.org/reference/functions/wp_upload_dir/
+		 * @var array
+		 */
+		protected $uploads_dir;
 
-        /**
-         * Return the absolute path to the plugin directory.
-         *
-         * @return string
-         */
-        public function dir(): string
-        {
-            return $this->dir;
-        }
+		/**
+		 * Setup the plugin.
+		 *
+		 * @param string $plugin_file_path Absolute path to the main plugin file.
+		 */
+		public function __construct( string $plugin_file_path ) {
+			$this->file        = $plugin_file_path;
+			$this->dir         = dirname( $plugin_file_path );
+			$this->uploads_dir = wp_upload_dir( null, false );
+		}
 
-        /**
-         * Return the absolute path to the plugin file.
-         *
-         * @return string
-         */
-        public function file(): string
-        {
-            return $this->file;
-        }
+		/**
+		 * Return the absolute path to the plugin directory.
+		 *
+		 * @return string
+		 */
+		public function dir(): string {
+			return $this->dir;
+		}
 
-        /**
-         * Get the file path relative to the WordPress plugin directory.
-         *
-         * @param null $file_path Absolute path to any plugin file.
-         *
-         * @return string
-         */
-        public function basename($file_path = null): string
-        {
-            if (!isset($file_path)) {
-                $file_path = $this->file();
-            }
+		/**
+		 * Return the absolute path to the plugin file.
+		 *
+		 * @return string
+		 */
+		public function file(): string {
+			return $this->file;
+		}
 
-            return plugin_basename($file_path);
-        }
+		/**
+		 * Get the file path relative to the WordPress plugin directory.
+		 *
+		 * @param null|string $file_path Absolute path to any plugin file.
+		 *
+		 * @return string
+		 */
+		public function basename( $file_path = null ): string {
+			if ( ! isset( $file_path ) ) {
+				$file_path = $this->file();
+			}
 
-        /**
-         * Get the public URL to the asset file.
-         *
-         * @param string $path_relative Path relative to this plugin directory root.
-         *
-         * @return string The URL to the asset.
-         */
-        public function asset_url(string $path_relative): string
-        {
-            return plugins_url($path_relative, $this->file());
-        }
+			return plugin_basename( $file_path );
+		}
 
-        /**
-         * Get absolute path to a file in the uploads directory.
-         *
-         * @param null $path_relative File path relative to the root of the WordPress uploads directory.
-         *
-         * @return string
-         */
-        public function uploads_dir($path_relative = null): string
-        {
-            if (isset($path_relative)) {
-                return sprintf('%s/%s', $this->uploads_dir['basedir'], $path_relative);
-            }
+		/**
+		 * Get the public URL to the asset file.
+		 *
+		 * @param string $path_relative Path relative to this plugin directory root.
+		 *
+		 * @return string The URL to the asset.
+		 */
+		public function asset_url( string $path_relative ): string {
+			return plugins_url( $path_relative, $this->file() );
+		}
 
-            return $this->uploads_dir['basedir'];
-        }
+		/**
+		 * Get absolute path to a file in the uploads directory.
+		 *
+		 * @param null|string $path_relative File path relative to the root of the WordPress uploads directory.
+		 *
+		 * @return string
+		 */
+		public function uploads_dir( $path_relative = null ): string {
+			if ( isset( $path_relative ) ) {
+				return sprintf( '%s/%s', $this->uploads_dir['basedir'], $path_relative );
+			}
 
-        /**
-         * Get URL to a file in the uploads directory.
-         *
-         * @param null $path_relative Path to the file relative to the root of the WordPress uploads directory.
-         *
-         * @return string
-         */
-        public function uploads_dir_url($path_relative = null): string
-        {
-            if (isset($path_relative)) {
-                return sprintf('%s/%s', $this->uploads_dir['baseurl'], $path_relative);
-            }
+			return $this->uploads_dir['basedir'];
+		}
 
-            return $this->uploads_dir['baseurl'];
-        }
+		/**
+		 * Get URL to a file in the uploads directory.
+		 *
+		 * @param null|string $path_relative Path to the file relative to the root of the WordPress uploads directory.
+		 *
+		 * @return string
+		 */
+		public function uploads_dir_url( $path_relative = null ): string {
+			if ( isset( $path_relative ) ) {
+				return sprintf( '%s/%s', $this->uploads_dir['baseurl'], $path_relative );
+			}
 
-        /**
-         * Is WP debug mode enabled.
-         *
-         * @return boolean
-         */
-        public function is_debug(): bool
-        {
-            return (defined('WP_DEBUG') && WP_DEBUG);
-        }
+			return $this->uploads_dir['baseurl'];
+		}
 
-        /**
-         * Is WP script debug mode enabled.
-         *
-         * @return boolean
-         */
-        public function is_script_debug(): bool
-        {
-            return (defined('SCRIPT_DEBUG') && SCRIPT_DEBUG);
-        }
+		/**
+		 * Is WP debug mode enabled.
+		 *
+		 * @return boolean
+		 */
+		public function is_debug(): bool {
+			return ( defined( 'WP_DEBUG' ) && WP_DEBUG );
+		}
 
-        /**
-         * Return the current version of the plugin.
-         *
-         * @return mixed
-         */
-        public function version()
-        {
-            return $this->meta('Version');
-        }
+		/**
+		 * Is WP script debug mode enabled.
+		 *
+		 * @return boolean
+		 */
+		public function is_script_debug(): bool {
+			return ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG );
+		}
 
-        /**
-         * Sync the plugin version with the asset version.
-         *
-         * @return mixed
-         */
-        public function asset_version()
-        {
-            if ($this->is_debug() || $this->is_script_debug()) {
-                return time();
-            }
+		/**
+		 * Return the current version of the plugin.
+		 *
+		 * @return string
+		 */
+		public function version() {
+			return $this->meta( 'Version' );
+		}
 
-            return $this->version();
-        }
+		/**
+		 * Sync the plugin version with the asset version.
+		 *
+		 * @return string
+		 */
+		public function asset_version() {
+			if ( $this->is_debug() || $this->is_script_debug() ) {
+				return time();
+			}
 
-        /**
-         * Get plugin meta data.
-         *
-         * @param null $field Optional field key.
-         *
-         * @return string|array|null
-         */
-        public function meta($field = null)
-        {
-            static $meta;
+			return $this->version();
+		}
 
-            if (!isset($meta)) {
-                $meta = get_file_data($this->file, array());
-            }
+		/**
+		 * Get plugin meta data.
+		 *
+		 * @param null $field Optional field key.
+		 *
+		 * @return string|array
+		 */
+		public function meta( $field = null ) {
+			static $meta;
 
-            if (isset($field)) {
-                return $meta[ $field ] ?? null;
-            }
+			if ( ! isset( $meta ) ) {
+				$meta = get_file_data( $this->file, array() );
+			}
 
-            return $meta;
-        }
-    }
+			if ( isset( $field ) ) {
+				return $meta[ $field ] ?? null;
+			}
+
+			return $meta;
+		}
+	}
 }
