@@ -224,14 +224,15 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 		public function view_template( $file_path, $variables = array(), $print = true ) {
 			$output = null;
 			if ( file_exists( $file_path ) ) {
-				// Extract the variables to a local namespace.
-				$data = $variables;
 
 				// Start output buffering.
 				ob_start();
 
+				// Extract the variables to a local namespace.
+				$data = $variables;
+				// die( $file_path );
 				// Include the template file.
-				include $file_path;
+				@include $file_path;
 
 				// End buffering and return its contents
 				$output = ob_get_clean();

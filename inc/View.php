@@ -49,7 +49,7 @@
 			   value="<?php echo esc_attr( $data['_pmab_meta_specific_post'] ); ?>" size="25" class="postbox"/>
 
 	</div>
-	<div class="tags" style="<?php echo $_pmab_meta_tags === '' ? 'display: none;' : ''; ?> padding-bottom:1rem">
+	<div class="tags" style="<?php echo $data['_pmab_meta_tags'] === '' ? 'display: none;' : ''; ?> padding-bottom:1rem">
 		<label for="_pmab_meta_tags"><?php _e( 'Tag IDs', 'pmab' ); ?> <span
 					style="font-size:8px;"><?php _e( 'Comma Separated', 'pmab' ); ?></span></label>
 		<input type="text" id="_pmab_meta_tags" name="_pmab_meta_tags"
