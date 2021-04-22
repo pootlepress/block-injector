@@ -185,7 +185,7 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 
 			// Display the form, using the current value & Template .
 
-			$_pmab_meta_category = get_categories(
+			$_pmab_category = get_categories(
 				array(
 					'hide_empty' => 0,
 					'orderby'    => 'name',
@@ -208,6 +208,7 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 					'_pmab_meta_expiredate'            => $_pmab_meta_expiredate,
 					'_pmab_meta_startdate'             => $_pmab_meta_startdate,
 					'_pmab_meta_category'              => $_pmab_meta_category,
+					'_pmab_categories'                 => $_pmab_category,
 				)
 			);
 		}
