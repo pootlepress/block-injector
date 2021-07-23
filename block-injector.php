@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Plugin Name: Block Injector
  * Description: A WordPress plugin that lets you inject content into Post and Page content.
@@ -8,17 +7,17 @@
  * Author URI: https://github.com/pootlepress/put-blocks-anywhere
  * Text Domain: block-injector
  *
- * @package PutBlocksAnywhere
+ * @package Block Injector
  */
 
-
-if (! defined('ABSPATH')) {
-    exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 require_once 'inc/helper.php';
 require_once 'inc/PMAB_Plugin.php';
 require_once 'inc/PMAB_Router.php';
+require_once 'show-hooks/show-hooks.php';
 
-$router = new PMAB_Router(new PMAB_Plugin(__FILE__));
+$router = new PMAB_Router( new PMAB_Plugin( __FILE__ ) );
 
-add_action('plugins_loaded', array( $router, 'init' ));
+add_action( 'plugins_loaded', array( $router, 'init' ) );

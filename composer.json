@@ -17,6 +17,7 @@
     "php-coveralls/php-coveralls": "*",
     "phpcompatibility/phpcompatibility-wp": "*",
     "phpunit/phpunit": "*",
+    "tareq1988/wp-php-cs-fixer": "dev-master",
     "wp-coding-standards/wpcs": "*",
     "wpsh/local": "0.2.3"
   },
