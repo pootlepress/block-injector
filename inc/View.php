@@ -95,7 +95,7 @@
 			<option value="bottom_after" <?php echo pmab_select_checker($_pmab_meta_tag_n_fix, 'bottom_after'); ?>>
 				Bottom
 			</option>
-			<option value="woo_hook" <?php echo pmab_select_checker($_pmab_meta_tag_n_fix, 'woo_hook'); ?>>Custom Hooks</option>
+			<option style="display:none;" value="woo_hook" <?php echo pmab_select_checker($_pmab_meta_tag_n_fix, 'woo_hook'); ?>>Custom Hooks</option>
 			<option value="h2_after" <?php echo pmab_select_checker($_pmab_meta_tag_n_fix, 'h2_after'); ?>>After
 				Heading
 			</option>
