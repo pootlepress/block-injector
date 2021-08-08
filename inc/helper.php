@@ -152,7 +152,7 @@ if (!function_exists('pmab_push_to_specific_content')) {
                                         echo "<div data-tag='$tag' data-number_of_blocks='$num_of_blocks' class='block_inject_div'> ".$p->post_content."</div>";
                                         echo '<script>window.onload = function(){                                          
                                                 document.querySelectorAll(".block_inject_div").forEach((d,k)=>{
-             n                                   let tags = d.dataset.tag === "h2" ? ".page-description h1,.page-description  h2,.page-description h3,.page-description h4,.page-description h5,.page-description h6" : ".page-description p";
+                                                let tags = d.dataset.tag === "h2" ? ".page-description h1,.page-description  h2,.page-description h3,.page-description h4,.page-description h5,.page-description h6" : ".page-description p";
                                                 document.querySelectorAll(tags).forEach((v,k)=>{k += 1;
                                                 if(d.dataset.number_of_blocks == k) {
                                                     v.after(d);
