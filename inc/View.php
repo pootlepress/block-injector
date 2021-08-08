@@ -35,10 +35,10 @@
 
 	</div>
 	<div class="category-box"
-	
+
 		 style="<?php echo $_pmab_meta_category == '' ? 'display: none;' : ''; ?> padding-bottom:1rem">
 		<label for="_pmab_meta_category"><?php _e('Categories', 'pmab'); ?></label>
-		<select name="_pmab_meta_category" id="_pmab_meta_category" class="postbox">
+		<select name="_pmab_meta_category[]" multiple="multiple"  id="_pmab_meta_category" class="postbox">
 			<option disabled selected style="font-weight: bolder;">Select Category </option>
 			<?php
             foreach ($_pmab_categories as $category):
@@ -49,7 +49,7 @@
 		</select>
 	</div>
 	<div class="woo-category-box"
-	
+
 		 style="<?php echo $_pmab_meta_woo_category == '' ? 'display: none;' : ''; ?> padding-bottom:1rem">
 		<label for="_pmab_meta_woo_category"><?php _e('Product Categories', 'pmab'); ?></label>
 		<select name="_pmab_meta_woo_category" id="_pmab_meta_woo_category" class="postbox">
@@ -85,7 +85,7 @@
 			   value="<?php echo esc_attr($_pmab_meta_tags); ?>" size="25" class="postbox"/>
 
 	</div>
-	
+
 	<div style="padding-bottom:1rem;">
 		<label for="_pmab_meta_tag_n_fix"><b style="font-size:16px"><?php _e('Position', 'pmab'); ?></b></label>
 		<select name="_pmab_meta_tag_n_fix" id="_pmab_meta_tag_n_fix" class="postbox col-12">
@@ -115,7 +115,7 @@
 		</select>
 	</div>
 
-	
+
 	<div class="certain_num"
 		 style=" <?php echo $_pmab_meta_number_of_blocks === '' ? 'display: none;' : ''; ?> padding-bottom:1rem"><label
 				for="_pmab_meta_number_of_blocks">
