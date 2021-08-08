@@ -765,7 +765,7 @@ if (!function_exists('pmab_filter_hook')) {
                 return pmab_posts_filter_content($thisposts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, 'is_page');
                 break;
             case 'all_post':
-                if (is_single()) {
+                if (is_single() && (!is_woocommerce() && !is_product() && !is_shop() && !is_product_category())){
                     return pmab_filter_exclude_content($thisposts_exclude, $inject_content_type2, 'post_exclude', $content, $tag, $num_of_blocks, $p);
                 }
                 break;
