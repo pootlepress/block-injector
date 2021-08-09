@@ -719,12 +719,12 @@ if (!function_exists('pmab_filter_hook')) {
                     return pmab_posts_filter_content($woo_tag_posts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, 'is_single');
                 }
                 break;
-            case 'category':
+             case 'category':
                 if (is_single()) {
                     $categories = wp_get_post_categories(get_post()->ID);
-
+                    
                     foreach ($categories as $cat) {
-                        if (in_array( $cat ,$category )) {
+                        if (in_array( $cat ,$category)) {
                             if ($inject_content_type2 === 'post_exclude' && in_array(get_post()->ID, $thisposts_exclude, false)) {
                                 return $content;
                             } else {
