@@ -1,4 +1,5 @@
 jQuery(document).ready(function($){
+    $('.js-example-basic-single').select2();
     $('#_pmab_meta_type').on('change', function() {
         if(this.value == 'post' || this.value == 'page' || this.value == 'woo_product'){
             $('.specificpost').show();
@@ -29,7 +30,7 @@ jQuery(document).ready(function($){
         } else{    
             $('.tags').hide(); 
             $('#_pmab_meta_tags').val('');
-x        }
+      }
     });
     $('#_pmab_meta_tag_n_fix').on('change', function() { 
         if(this.value == 'h2_after' || this.value == 'p_after' ){
@@ -66,4 +67,3 @@ x        }
         }        
     });
 });
-
