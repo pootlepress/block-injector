@@ -63,6 +63,19 @@ if (! class_exists('PMAB_Router')) {
                 ),
                 $this->plugin->asset_version()
             );
+			
+			wp_register_script(
+                'select2',
+                "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"
+            );
+            wp_enqueue_script( 'select2' );
+
+            wp_register_style(
+                'style',
+                "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+            );
+            
+            wp_enqueue_style( 'style' );
         }
 
         /**
