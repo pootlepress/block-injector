@@ -1,3 +1,9 @@
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+ <?php 
+echo '<script type="text/JavaScript" src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"> 
+     </script>'	 
+;
+?>
 <div>
 	<div class="" style="padding-bottom:1rem;">
 		<label for="_pmab_meta_type"><b style="font-size:16px"><?php _e('Location', 'pmab'); ?></b></label>
@@ -34,16 +40,16 @@
 
 
 	</div>
-	<div class="category-box"
+		<div class="category-box"
 
 		 style="<?php echo $_pmab_meta_category == '' ? 'display: none;' : ''; ?> padding-bottom:1rem">
-		<label for="_pmab_meta_category"><?php _e('Categories', 'pmab'); ?></label>
-		<select name="_pmab_meta_category[]" multiple="multiple"  id="_pmab_meta_category" class="postbox">
-			<option disabled selected style="font-weight: bolder;">Select Category </option>
+		<label for="_pmab_meta_category[]"><?php _e('Categories', 'pmab'); ?></label>
+		<select class="js-example-basic-single" name="_pmab_meta_category[]" multiple="multiple"  id="_pmab_meta_category[]" class="postbox" style="width:100%;">
 			<?php
             foreach ($_pmab_categories as $category):
-                ?>
-				<option value="<?php echo $category->cat_ID ?>" <?php echo pmab_select_checker($_pmab_meta_category, $category->cat_ID); ?>><?php echo $category->name ?></option>
+				$selected = in_array($category->term_id, $_pmab_meta_category) ? 'selected="selected"' : '';		
+                ?>			
+				<option <?php echo $selected; ?> value="<?php echo $category->cat_ID?>" <?php echo pmab_select_checker($_pmab_meta_category, $category->cat_ID);?>><?php echo $category->name ?></option>
 			<?php
             endforeach; ?>
 		</select>
