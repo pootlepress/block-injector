@@ -20,12 +20,19 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 		protected $plugin;
 
 		/**
+		 * Content interface.
+		 * @var PMAB_Content
+		 */
+		protected $content;
+
+		/**
 		 * Setup the plugin instance.
 		 *
 		 * @param PMAB_Plugin $plugin Instance of the plugin abstraction.
 		 */
-		public function __construct( PMAB_Plugin $plugin ) {
+		public function __construct( PMAB_Plugin $plugin , PMAB_Content $content ) {
 			$this->plugin = $plugin;
+			$this->content = $content;
 		}
 
 		/**
@@ -38,7 +45,7 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 			add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 			add_action( 'save_post', array( $this, 'save_post' ) );
 
-			pmab_push_to_specific_content();
+			$this->content->push_to_specific_content();
 		}
 
 		/**
@@ -120,6 +127,20 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 						'edit_published_posts'   => 'edit_pages',
 					),
 				)
+			);
+
+			register_taxonomy(
+				'block_injector_location',
+				[ $this->post_type ],
+				[
+					'hierarchical'      => false,
+					'show_ui'           => false,
+					'show_in_nav_menus' => false,
+					'query_var'         => is_admin(),
+					'rewrite'           => false,
+					'public'            => false,
+					'label'             => __( 'Block injector location', 'pmab' ),
+				]
 			);
 		}
 
