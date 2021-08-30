@@ -2,15 +2,14 @@
 
 /**
  * Router class.
- *
  * @package BlockInjector
  */
 
-if ( ! class_exists( 'PMAB_Router' ) ) {
+if ( ! class_exists( 'class-router' ) ) {
 	/**
 	 * Plugin Router.
 	 */
-	class PMAB_Router {
+	class router {
 		private $post_type = 'block_injector';
 
 		/**
@@ -30,8 +29,8 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 		 *
 		 * @param PMAB_Plugin $plugin Instance of the plugin abstraction.
 		 */
-		public function __construct( PMAB_Plugin $plugin , PMAB_Content $content ) {
-			$this->plugin = $plugin;
+		public function __construct( PMAB_Plugin $plugin, PMAB_Content $content ) {
+			$this->plugin  = $plugin;
 			$this->content = $content;
 		}
 
@@ -232,7 +231,7 @@ if ( ! class_exists( 'PMAB_Router' ) ) {
 			// Display the form, using the current value & Template .
 
 			$this->view_template(
-				plugin_dir_path( __FILE__ ) . 'View.php',
+				plugin_dir_path( __FILE__ ) . 'tpl-meta-box.php',
 				array(
 					'_pmab_meta_type'                  => $_pmab_meta_type,
 					'_pmab_meta_type2'                 => $_pmab_meta_type2,

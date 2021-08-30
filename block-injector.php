@@ -14,10 +14,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 require_once 'inc/helper.php';
-require_once 'inc/PMAB_Content.php';
-require_once 'inc/PMAB_Plugin.php';
-require_once 'inc/PMAB_Router.php';
+require_once 'inc/class-content.php';
+require_once 'inc/class-plugin.php';
+require_once 'inc/class-router.php';
 
-$router = new PMAB_Router( new PMAB_Plugin( __FILE__ ), new PMAB_Content() );
+$router = new router( new PMAB_Plugin( __FILE__ ), new PMAB_Content() );
 
 add_action( 'plugins_loaded', array( $router, 'init' ) );

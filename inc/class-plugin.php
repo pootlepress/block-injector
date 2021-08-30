@@ -2,10 +2,10 @@
 
 /**
  * Plugin class.
- *
  * @package PutBlocksAnywhere
  */
-if ( ! class_exists( 'PMAB_Plugin' ) ) {
+
+if ( ! class_exists( 'class-plugin' ) ) {
 	/**
 	 * WordPress plugin interface.
 	 */
@@ -31,8 +31,8 @@ if ( ! class_exists( 'PMAB_Plugin' ) ) {
 		 * @param string $plugin_file_path Absolute path to the main plugin file.
 		 */
 		public function __construct( string $plugin_file_path ) {
-			$this->file        = $plugin_file_path;
-			$this->dir         = dirname( $plugin_file_path );
+			$this->file = $plugin_file_path;
+			$this->dir  = dirname( $plugin_file_path );
 		}
 
 		/**
