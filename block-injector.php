@@ -16,8 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once 'inc/helper.php';
 require_once 'inc/class-content.php';
 require_once 'inc/class-plugin.php';
-require_once 'inc/class-router.php';
+require_once 'inc/class-admin.php';
 
-$router = new router( new PMAB_Plugin( __FILE__ ), new PMAB_Content() );
+$router = new PMAB_Admin( new PMAB_Plugin( __FILE__ ), new PMAB_Content() );
 
 add_action( 'plugins_loaded', array( $router, 'init' ) );

@@ -127,9 +127,6 @@ echo '<script type="text/JavaScript" src="https://cdn.jsdelivr.net/npm/select2@4
 		<label for="_pmab_meta_hook"><b style="font-size:16px"><?php _e( 'Select Hooks', 'pmab' ); ?></b></label>
 		<select name="_pmab_meta_hook" id="_pmab_meta_hook" class="postbox col-12">
 			<option value="" style="font-weight: bolder;">Hooks</option>
-			<?php
-			require( 'WooCommerce_Hooks.php' );
-			?>
 		</select>
 	</div>
 

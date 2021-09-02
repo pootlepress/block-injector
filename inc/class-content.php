@@ -11,20 +11,57 @@ if ( ! class_exists( 'class-content' ) ) {
 
 		private $pmab_metas = array();
 
+		private $known_query_objects = [
+			'post',
+			'page',
+			'product',
+			'product_cat',
+		];
+
 		public function __construct() {
-			$this->extract_block_injectors_with_metas();
+			add_action( 'template_redirect', [ $this, 'extract_block_injectors_with_metas' ] );
+			add_action( 'template_redirect', [ $this, 'push_to_specific_content' ], 11 );
 		}
 
-		private function extract_block_injectors_with_metas() {
-			foreach (
-				get_posts(
+		private function get_block_injectors() {
+//			wp_get_object_terms( $post->ID, 'block_injector_location' )
+
+			$queried_object = get_queried_object();
+
+			$location_terms = [ 'any' ];
+			$queried_object_type = get_class( $queried_object );
+
+			if ( 'WP_Post' === $queried_object_type && in_array( $queried_object->post_type, $this->known_query_objects ) ) {
+				$location_terms = [ $queried_object->post_type ];
+			} else if ( 'WP_Post_Type' === $queried_object_type && $queried_object->name === 'product' ) {
+				$location_terms = [ 'shop' ];
+			} else if ( 'WP_Term' === $queried_object_type && in_array( $queried_object->taxonomy, $this->known_query_objects ) ) {
+				$location_terms = [ $queried_object->taxonomy ];
+			}
+
+			$query_args = array(
+				'post_type'      => 'block_injector',
+				'post_status'    => 'publish',
+				'posts_per_page' => - 1,
+			);
+
+			if ( ! empty( $location_terms ) ) {
+				$query_args['tax_query'] = array(
 					array(
-						'post_type'      => 'block_injector',
-						'post_status'    => 'publish',
-						'posts_per_page' => - 1,
-					)
-				) as $p
-			) {
+						'taxonomy' => 'block_injector_location',
+						'field'    => 'slug',
+						'terms'    => $location_terms,
+					),
+				);
+			}
+
+			$block_injectors = get_posts( $query_args );
+
+			return $block_injectors;
+		}
+
+		public function extract_block_injectors_with_metas() {
+			foreach ( $this->get_block_injectors() as $p ) {
 				// get the meta you need form each post_pmab_meta_specific_post
 				$pmab_meta = array(
 					'p'                    => $p,
@@ -414,12 +451,14 @@ if ( ! class_exists( 'class-content' ) ) {
 			);
 		}
 
-		private function check( $function, $add_param ) {
-			if ( is_null( $add_param ) ) {
-				return function_exists( $function ) && $$function();
-			}
+		private static function check( $function, $add_param = null ) {
+			if ( function_exists( $function ) ) {
+				if ( $add_param ) {
+					return $function( $add_param );
+				}
 
-			return function_exists( $function ) && $$function( $add_param );
+				return $function();
+			}
 		}
 
 		// Content Filter Hook.
@@ -466,7 +505,7 @@ if ( ! class_exists( 'class-content' ) ) {
 			// Check if we're inside the main loop in a single Post.
 			if ( array_key_exists( $inject_content_type, $checks ) ) {
 				$variables = $checks[ $inject_content_type ];
-				if ( $this->check( $variables[0], $variables[1] ) ) {
+				if ( self::check( $variables[0], $variables[1] ) ) {
 					if ( $tag_type === 'woo_hook' ) {
 						pmab_custom_hook_content( $woo_hooks, $content, $tag, $num_of_blocks, $p );
 					} else {
@@ -488,7 +527,7 @@ if ( ! class_exists( 'class-content' ) ) {
 					}
 					break;
 				case 'woo_shop':
-					if ( $this->check( 'is_shop' ) ) {
+					if ( self::check( 'is_shop' ) ) {
 
 						if ( $tag_type === 'woo_hook' ) {
 							break;
@@ -615,17 +654,19 @@ if ( ! class_exists( 'class-content' ) ) {
 		public function push_to_specific_content() {
 			foreach ( $this->pmab_metas as $pmab_meta ) {
 				extract( $pmab_meta );
+
 				if ( empty( $tag_type ) || ! isset( $tag_type[0] ) || ! $dateandtime ) {
 					continue;
 				}
-				$that = $this;
+
 				add_filter(
 					'the_content',
-					static function ( $content ) use ( $p, $tag, $num_of_blocks, $that ) {
+					static function ( $content ) use ( $p, $tag, $num_of_blocks ) {
 						return PMAB_Content::filter_hook( $content, $p, $tag, $num_of_blocks );
 					},
 					0
 				);
+
 				if ( method_exists( $this, $inject_content_type ) ) {
 					$this->$inject_content_type( $pmab_meta );
 				}

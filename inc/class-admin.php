@@ -5,11 +5,13 @@
  * @package BlockInjector
  */
 
-if ( ! class_exists( 'class-router' ) ) {
+include 'class-admin-save-post.php';
+
+if ( ! class_exists( 'PMAB_Admin' ) ) {
 	/**
 	 * Plugin Router.
 	 */
-	class router {
+	class PMAB_Admin extends PMAB_Admin_Save_Post {
 		private $post_type = 'block_injector';
 
 		/**
@@ -43,8 +45,6 @@ if ( ! class_exists( 'class-router' ) ) {
 			add_action( 'init', array( $this, 'register_post_type' ) );
 			add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 			add_action( 'save_post', array( $this, 'save_post' ) );
-
-			$this->content->push_to_specific_content();
 		}
 
 		/**
@@ -148,10 +148,10 @@ if ( ! class_exists( 'class-router' ) ) {
 		 *
 		 * @return void
 		 */
-		public function add_meta_box(): void {
+		public function add_meta_box() {
 			// Limit meta box to certain post types.
 			add_meta_box(
-				'some_meta_box_name',
+				'pmab_block_injector_meta',
 				__( 'Location and Position', 'pmab' ),
 				array( $this, 'render_meta_box_content' ),
 				$this->post_type,
@@ -159,32 +159,6 @@ if ( ! class_exists( 'class-router' ) ) {
 				'high'
 			);
 		}
-
-		/**
-		 * Save the meta box container.
-		 *
-		 * @param mixed $post_id The post object.
-		 *
-		 * @return void
-		 */
-		public function save_post( $post_id ): void {
-			if ( isset( $_POST['_pmab_meta_number_of_blocks'], $_POST['_pmab_meta_type'], $_POST['pmab_plugin_field'] ) && wp_verify_nonce( $_POST['pmab_plugin_field'], 'pmab_plugin_nonce' ) ) {
-				update_post_meta( $post_id, '_pmab_meta_number_of_blocks', sanitize_text_field( $_POST['_pmab_meta_number_of_blocks'] ) );
-				update_post_meta( $post_id, '_pmab_meta_specific_post', sanitize_text_field( $_POST['_pmab_meta_specific_post'] ) );
-				update_post_meta( $post_id, '_pmab_meta_specific_woocategory', sanitize_text_field( $_POST['_pmab_meta_specific_woocategory'] ) );
-				update_post_meta( $post_id, '_pmab_meta_specific_post_exclude', sanitize_text_field( $_POST['_pmab_meta_specific_post_exclude'] ) );
-				update_post_meta( $post_id, '_pmab_meta_tags', sanitize_text_field( $_POST['_pmab_meta_tags'] ) );
-				update_post_meta( $post_id, '_pmab_meta_category', $_POST['_pmab_meta_category'] );
-				update_post_meta( $post_id, '_pmab_meta_woo_category', $_POST['_pmab_meta_woo_category'] );
-				update_post_meta( $post_id, '_pmab_meta_type', sanitize_text_field( $_POST['_pmab_meta_type'] ) );
-				update_post_meta( $post_id, '_pmab_meta_type2', sanitize_text_field( $_POST['_pmab_meta_type2'] ) );
-				update_post_meta( $post_id, '_pmab_meta_tag_n_fix', sanitize_text_field( $_POST['_pmab_meta_tag_n_fix'] ?? 'top_before' ) );
-				update_post_meta( $post_id, '_pmab_meta_hook', sanitize_text_field( $_POST['_pmab_meta_hook'] ) );
-				update_post_meta( $post_id, '_pmab_meta_expiredate', sanitize_text_field( $_POST['_pmab_meta_expiredate'] ) );
-				update_post_meta( $post_id, '_pmab_meta_startdate', sanitize_text_field( $_POST['_pmab_meta_startdate'] ) );
-			}
-		}
-
 
 		/**
 		 * Render Meta Box content.
@@ -209,7 +183,6 @@ if ( ! class_exists( 'class-router' ) ) {
 			$_pmab_meta_startdate             = get_post_meta( $post->ID, '_pmab_meta_startdate', true );
 			$_pmab_meta_category              = get_post_meta( $post->ID, '_pmab_meta_category', true );
 			$_pmab_meta_woo_category          = get_post_meta( $post->ID, '_pmab_meta_woo_category', true );
-
 
 			$args          = array(
 				"hide_empty" => 0,
