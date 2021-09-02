@@ -2,6 +2,12 @@
 
 
 class PMAB_Admin_Save_Post {
+
+	/**
+	 * Update PMAB_Content::known_query_objects after any changes here.
+	 * @uses PMAB_Content::known_query_objects
+	 * @var string[] Terms to set for location type
+	 */
 	protected $location_taxonomy_maps = [
 		'post_page'              => 'any,post,page,product,product_cat,shop',
 		'all_post'               => 'post',

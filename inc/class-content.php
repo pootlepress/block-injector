@@ -11,6 +11,12 @@ if ( ! class_exists( 'class-content' ) ) {
 
 		private $pmab_metas = array();
 
+		/**
+		 * Update props under after any changes to location taxonomy terms
+		 * List of post types and taxonomies we support, others are included in any.
+		 * @uses PMAB_Admin_Save_Post::$location_taxonomy_maps
+		 * @var string[]
+		 */
 		private $known_query_objects = [
 			'post',
 			'page',
