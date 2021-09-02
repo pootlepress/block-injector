@@ -70,6 +70,27 @@ if ( ! class_exists( 'class-content' ) ) {
 			}
 		}
 
+		private function block_inject_div_with_script( $tag, $num_of_blocks, $p ) {
+			$num_of_blocks = $tag == "p" ? $num_of_blocks : $num_of_blocks + 1;
+			?>
+			<div data-tag='<?php echo $tag ?>' data-number_of_blocks='<?php echo $num_of_blocks ?>' class='block_inject_div'>
+				<?php echo $p->post_content ?>
+			</div>
+			<script>
+				window.onload = function() {
+					document.querySelectorAll( ".block_inject_div" ).forEach( ( d, k ) => {
+						let tags = d.dataset.tag === "h2" ?
+							".page-description h1,.page-description  h2,.page-description h3,.page-description h4,.page-description h5,.page-description h6" :
+							".page-description p";
+						document.querySelectorAll( tags ).forEach( ( v, k ) => {
+							d.dataset.number_of_blocks == k + 1 ? v.after( d ) : '';
+						} );
+					} );
+				}
+			</script>
+			<?php
+		}
+
 		private function woo_all_pages( $pmab_meta ) {
 			extract( $pmab_meta );
 			if ( $tag == 'woo' ) {
@@ -87,20 +108,7 @@ if ( ! class_exists( 'class-content' ) ) {
 					'woocommerce_archive_description',
 					static function ( $content ) use ( $p, $tag, $num_of_blocks ) {
 						if ( is_product_category() ) {
-							$num_of_blocks = $tag == "p" ? $num_of_blocks : $num_of_blocks + 1;
-							echo "<div data-tag='$tag' data-number_of_blocks='$num_of_blocks' class='block_inject_div'> " . $p->post_content . "</div>";
-							echo '<script>window.onload = function(){
-                                        document.querySelectorAll(".block_inject_div").forEach((d,k)=>{
-                                        let tags = d.dataset.tag === "h2" ? ".page-description h1,.page-description  h2,.page-description h3,.page-description h4,.page-description h5,.page-description h6" : ".page-description p";
-                                        document.querySelectorAll(tags).forEach((v,k)=>{k += 1;
-                                        if(d.dataset.number_of_blocks == k) {
-                                            v.after(d);
-                                        }
-
-                                        })
-
-                                    })
-                                }</script>';
+							$this->block_inject_div_with_script( $tag, $num_of_blocks, $p );
 						}
 					},
 					0
@@ -135,20 +143,7 @@ if ( ! class_exists( 'class-content' ) ) {
 					'woocommerce_archive_description',
 					static function ( $content ) use ( $p, $tag, $num_of_blocks ) {
 						if ( is_shop() ) {
-							$num_of_blocks = $tag == "p" ? $num_of_blocks : $num_of_blocks + 1;
-							echo "<div data-tag='$tag' data-number_of_blocks='$num_of_blocks' class='block_inject_div'> " . $p->post_content . "</div>";
-							echo '<script>window.onload = function(){
-                                    document.querySelectorAll(".block_inject_div").forEach((d,k)=>{
-                                    let tags = d.dataset.tag === "h2" ? ".page-description h1,.page-description  h2,.page-description h3,.page-description h4,.page-description h5,.page-description h6" : ".page-description p";
-                                    document.querySelectorAll(tags).forEach((v,k)=>{k += 1;
-                                    if(d.dataset.number_of_blocks == k) {
-                                        v.after(d);
-                                    }
-
-                                    })
-
-                                })
-                            }</script>';
+							$this->block_inject_div_with_script( $tag, $num_of_blocks, $p );
 						}
 					},
 					0
@@ -184,20 +179,7 @@ if ( ! class_exists( 'class-content' ) ) {
 					'woocommerce_archive_description',
 					static function ( $content ) use ( $p, $tag, $num_of_blocks, $specific_woocategory ) {
 						if ( is_product_category( $specific_woocategory ) ) {
-							$num_of_blocks = $tag == "p" ? $num_of_blocks : $num_of_blocks + 1;
-							echo "<div data-tag='$tag' data-number_of_blocks='$num_of_blocks' class='block_inject_div'> " . $p->post_content . "</div>";
-							echo '<script>window.onload = function(){
-                                    document.querySelectorAll(".block_inject_div").forEach((d,k)=>{
-                                    let tags = d.dataset.tag === "h2" ? ".page-description h1,.page-description  h2,.page-description h3,.page-description h4,.page-description h5,.page-description h6" : ".page-description p";
-                                    document.querySelectorAll(tags).forEach((v,k)=>{k += 1;
-                                    if(d.dataset.number_of_blocks == k) {
-                                        v.after(d);
-                                    }
-
-                                    })
-
-                                })
-                            }</script>';
+							$this->block_inject_div_with_script( $tag, $num_of_blocks, $p );
 						}
 					},
 					0
@@ -645,7 +627,7 @@ if ( ! class_exists( 'class-content' ) ) {
 					0
 				);
 				if ( method_exists( $this, $inject_content_type ) ) {
-					$this->$$inject_content_type( $pmab_meta );
+					$this->$inject_content_type( $pmab_meta );
 				}
 
 			}
