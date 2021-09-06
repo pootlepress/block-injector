@@ -35,21 +35,24 @@ if ( ! class_exists( 'class-content' ) ) {
 			$queried_object = get_queried_object();
 
 			$location_terms = [ 'any' ];
-			$queried_object_type = get_class( $queried_object );
-
-			if ( 'WP_Post' === $queried_object_type && in_array( $queried_object->post_type, $this->known_query_objects ) ) {
-				$location_terms = [ $queried_object->post_type ];
-			} else if ( 'WP_Post_Type' === $queried_object_type && $queried_object->name === 'product' ) {
-				$location_terms = [ 'shop' ];
-			} else if ( 'WP_Term' === $queried_object_type && in_array( $queried_object->taxonomy, $this->known_query_objects ) ) {
-				$location_terms = [ $queried_object->taxonomy ];
-			}
 
 			$query_args = array(
 				'post_type'      => 'block_injector',
 				'post_status'    => 'publish',
 				'posts_per_page' => - 1,
 			);
+
+			if ( $queried_object ) {
+				$queried_object_type = get_class( $queried_object );
+
+				if ( 'WP_Post' === $queried_object_type && in_array( $queried_object->post_type, $this->known_query_objects ) ) {
+					$location_terms = [ $queried_object->post_type ];
+				} else if ( 'WP_Post_Type' === $queried_object_type && $queried_object->name === 'product' ) {
+					$location_terms = [ 'shop' ];
+				} else if ( 'WP_Term' === $queried_object_type && in_array( $queried_object->taxonomy, $this->known_query_objects ) ) {
+					$location_terms = [ $queried_object->taxonomy ];
+				}
+			}
 
 			if ( ! empty( $location_terms ) ) {
 				$query_args['tax_query'] = array(
@@ -68,7 +71,6 @@ if ( ! class_exists( 'class-content' ) ) {
 
 		public function extract_block_injectors_with_metas() {
 			foreach ( $this->get_block_injectors() as $p ) {
-				// get the meta you need form each post_pmab_meta_specific_post
 				$pmab_meta = array(
 					'p'                    => $p,
 					'num_of_blocks'        => get_post_meta( $p->ID, '_pmab_meta_number_of_blocks', true ),
@@ -113,63 +115,72 @@ if ( ! class_exists( 'class-content' ) ) {
 			}
 		}
 
-		private function block_inject_div_with_script( $tag, $num_of_blocks, $p ) {
+		private static function block_inject_div_with_script( $tag, $num_of_blocks, $p, $tag_selector = '' ) {
 			$num_of_blocks = $tag == "p" ? $num_of_blocks : $num_of_blocks + 1;
 			?>
-			<div data-tag='<?php echo $tag ?>' data-number_of_blocks='<?php echo $num_of_blocks ?>' class='block_inject_div'>
+			<div
+				id='block_inject_div-<?php echo $p->ID ?>' class='block_inject_div'
+				data-tag='<?php echo $tag ?>'
+				data-tag_selector='<?php echo $tag_selector ?>'
+				data-number_of_blocks='<?php echo $num_of_blocks ?>'>
 				<?php echo $p->post_content ?>
 			</div>
 			<script>
-				window.onload = function() {
-					document.querySelectorAll( ".block_inject_div" ).forEach( ( d, k ) => {
-						let tags = d.dataset.tag === "h2" ?
-							".page-description h1,.page-description  h2,.page-description h3,.page-description h4,.page-description h5,.page-description h6" :
-							".page-description p";
-						document.querySelectorAll( tags ).forEach( ( v, k ) => {
-							d.dataset.number_of_blocks == k + 1 ? v.after( d ) : '';
+				(function() {
+					var target = document.querySelector( '#block_inject_div-<?php echo $p->ID ?>' );
+					window.addEventListener('load', (event) => {
+						var tag_selector = target.dataset.tag_selector;
+						if ( ! tag_selector ) {
+							tag_selector = target.dataset.tag === "h2" ?
+								".page-description h1,.page-description  h2,.page-description h3,.page-description h4,.page-description h5,.page-description h6" :
+								".page-description p,.site-main p";
+						}
+						var inserted = false;
+						var matchedBlocks = document.querySelectorAll( tag_selector );
+						console.log( matchedBlocks );
+						matchedBlocks[0].parentNode.insertBefore( target, matchedBlocks[0] );
+						var position = target.dataset.number_of_blocks;
+						matchedBlocks.forEach( ( v, k ) => {
+							if ( position === k + 1 || k + 1 === matchedBlocks.length && position > 9999 ) {
+								v.after( target );
+								inserted = true;
+							}
 						} );
-					} );
-				}
+					});
+				})();
 			</script>
 			<?php
 		}
 
-		private function woo_all_pages( $pmab_meta ) {
-			extract( $pmab_meta );
-			if ( $tag == 'woo' ) {
-				add_filter(
-					'woocommerce_breadcrumb',
-					static function ( $content ) use ( $p, $tag, $num_of_blocks, $woo_hooks ) {
-						if ( is_product_category() ) {
-							pmab_custom_hook_content( $woo_hooks, $p->post_content, $tag, $num_of_blocks, $p );
+		private function push_content_post_page( $pmab_meta ) {
+
+			if ( is_home() ) {
+				extract( $pmab_meta );
+				add_action(
+					'wp_footer',
+					static function ( $content ) use ( $p, $tag, $num_of_blocks ) {
+						$selector = '';
+						if ( 'h2' !== $tag ) {
+							$selector = ".site-main .type-post";
 						}
+						PMAB_Content::block_inject_div_with_script( $tag, $num_of_blocks, $p, $selector );
 					},
 					0
-				);
-			} else if ( ! in_array( $tag, array( 'top', 'bottom' ) ) ) {
-				add_filter(
-					'woocommerce_archive_description',
-					static function ( $content ) use ( $p, $tag, $num_of_blocks ) {
-						if ( is_product_category() ) {
-							$this->block_inject_div_with_script( $tag, $num_of_blocks, $p );
-						}
-					},
-					0
-				);
-			} else {
-				add_filter(
-					'woocommerce_archive_description',
-					static function ( $content ) use ( $p, $tag, $num_of_blocks ) {
-						if ( is_product_category() ) {
-							echo $p->post_content;
-						}
-					},
-					$num_of_blocks
 				);
 			}
+			$this->push_content_woo_all_pages( $pmab_meta );
 		}
 
-		private function woo_shop( $pmab_meta ) {
+		private function push_content_woo_all_pages( $pmab_meta ) {
+			$this->push_content_woo_shop( $pmab_meta );
+			$this->push_content_woo_category_pages( $pmab_meta );
+			$this->push_content_woo_all_products( $pmab_meta );
+			$this->push_content_woo_product( $pmab_meta );
+			$this->push_content_woo_pro_category( $pmab_meta );
+			$this->push_content_woo_tags( $pmab_meta );
+		}
+
+		private function push_content_woo_shop( $pmab_meta ) {
 			extract( $pmab_meta );
 			if ( $tag == 'woo' ) {
 				add_filter(
@@ -186,7 +197,7 @@ if ( ! class_exists( 'class-content' ) ) {
 					'woocommerce_archive_description',
 					static function ( $content ) use ( $p, $tag, $num_of_blocks ) {
 						if ( is_shop() ) {
-							$this->block_inject_div_with_script( $tag, $num_of_blocks, $p );
+							PMAB_Content::block_inject_div_with_script( $tag, $num_of_blocks, $p );
 						}
 					},
 					0
@@ -205,8 +216,13 @@ if ( ! class_exists( 'class-content' ) ) {
 			}
 		}
 
-		private function woo_category_pages( $pmab_meta ) {
+		private function push_content_woo_all_category_pages( $pmab_meta ) {
+			$this->push_content_woo_category_pages( $pmab_meta );
+		}
+
+		private function push_content_woo_category_pages( $pmab_meta ) {
 			extract( $pmab_meta );
+
 			if ( $tag == 'woo' ) {
 				add_filter(
 					'woocommerce_breadcrumb',
@@ -222,7 +238,7 @@ if ( ! class_exists( 'class-content' ) ) {
 					'woocommerce_archive_description',
 					static function ( $content ) use ( $p, $tag, $num_of_blocks, $specific_woocategory ) {
 						if ( is_product_category( $specific_woocategory ) ) {
-							$this->block_inject_div_with_script( $tag, $num_of_blocks, $p );
+							PMAB_Content::block_inject_div_with_script( $tag, $num_of_blocks, $p );
 						}
 					},
 					0
@@ -242,7 +258,7 @@ if ( ! class_exists( 'class-content' ) ) {
 
 		}
 
-		private function woo_all_products( $pmab_meta ) {
+		private function push_content_woo_all_products( $pmab_meta ) {
 			extract( $pmab_meta );
 			if ( $tag === 'top' ) {
 				add_filter(
@@ -265,7 +281,7 @@ if ( ! class_exists( 'class-content' ) ) {
 			}
 		}
 
-		private function woo_product( $pmab_meta ) {
+		private function push_content_woo_product( $pmab_meta ) {
 			extract( $pmab_meta );
 			if ( $tag === 'top' ) {
 				add_filter(
@@ -308,7 +324,7 @@ if ( ! class_exists( 'class-content' ) ) {
 			}
 		}
 
-		private function woo_pro_category( $pmab_meta ) {
+		private function push_content_woo_pro_category( $pmab_meta ) {
 			extract( $pmab_meta );
 			if ( $tag == 'top' ) {
 				add_filter(
@@ -322,7 +338,6 @@ if ( ! class_exists( 'class-content' ) ) {
 										if ( $tag === 'top' ) {
 											echo $p->post_content;
 										}
-
 									}
 								}
 							}
@@ -351,7 +366,7 @@ if ( ! class_exists( 'class-content' ) ) {
 			}
 		}
 
-		private function woo_tags( $pmab_meta ) {
+		private function push_content_woo_tags( $pmab_meta ) {
 			extract( $pmab_meta );
 			if ( $tag === 'top' ) {
 				add_filter(
@@ -485,7 +500,7 @@ if ( ! class_exists( 'class-content' ) ) {
 
 			$type = ( $inject_content_type == 'page' ) ? 'include' : 'post__in';
 
-			$thisposts = get_pages(
+			$thisposts = get_posts(
 				array(
 					'posts_per_page' => - 1,
 					$type            => $specific_post,
@@ -538,7 +553,6 @@ if ( ! class_exists( 'class-content' ) ) {
 						if ( $tag_type === 'woo_hook' ) {
 							break;
 						} else if ( $tag === 'bottom' ) {
-
 
 							pmab_custom_hook_content( 'woocommerce_after_shop_loop', $content, $tag, 1, $p );
 							break;
@@ -673,10 +687,10 @@ if ( ! class_exists( 'class-content' ) ) {
 					0
 				);
 
-				if ( method_exists( $this, $inject_content_type ) ) {
-					$this->$inject_content_type( $pmab_meta );
+				$callback = "push_content_$inject_content_type";
+				if ( method_exists( $this, $callback ) ) {
+					$this->$callback( $pmab_meta );
 				}
-
 			}
 		}
 	}
