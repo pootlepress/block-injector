@@ -1,7 +1,7 @@
 <?php
 
 
-class PMAB_Admin_Save_Post {
+class PMAB_Admin_Post {
 
 	/**
 	 * Update PMAB_Content::known_query_objects after any changes here.
@@ -44,6 +44,58 @@ class PMAB_Admin_Save_Post {
 		'_pmab_meta_expiredate',
 		'_pmab_meta_startdate',
 	];
+
+	protected function post_type_args() {
+		return array(
+			'labels' => array(
+				'name'               => __( 'Block Injector', 'pmab' ),
+				'singular_name'      => __( 'Block Injector', 'pmab' ),
+				'add_new'            => __( 'Add New', 'pmab' ),
+				'add_new_item'       => __( 'Add New Block Injector', 'pmab' ),
+				'edit_item'          => __( 'Edit Block Injector', 'pmab' ),
+				'new_item'           => __( 'New Block Injector', 'pmab' ),
+				'all_items'          => __( 'Block Injector', 'pmab' ),
+				'view_item'          => __( 'View Block Injector', 'pmab' ),
+				'search_items'       => __( 'Search Block Injector', 'pmab' ),
+				'not_found'          => __( 'Nothing found', 'pmab' ),
+				'not_found_in_trash' => __( 'Nothing found in Trash', 'pmab' ),
+				'parent_item_colon'  => '',
+			),
+
+			'public'              => true,
+			'show_ui'             => true,
+			'show_in_menu'        => true,
+			'publicly_queryable'  => false,
+			'can_export'          => true,
+			'query_var'           => true,
+			'has_archive'         => false,
+			'hierarchical'        => false,
+			'show_in_rest'        => true,
+			'exclude_from_search' => true,
+
+			'supports' => array(
+				'title',
+				'editor',
+			),
+
+			'capabilities' => array(
+				'edit_post'              => 'edit_pages',
+				'read_post'              => 'edit_pages',
+				'delete_post'            => 'edit_pages',
+				'edit_posts'             => 'edit_pages',
+				'edit_others_posts'      => 'edit_pages',
+				'publish_posts'          => 'edit_pages',
+				'read_private_posts'     => 'edit_pages',
+				'read'                   => 'edit_pages',
+				'delete_posts'           => 'edit_pages',
+				'delete_private_posts'   => 'edit_pages',
+				'delete_published_posts' => 'edit_pages',
+				'delete_others_posts'    => 'edit_pages',
+				'edit_private_posts'     => 'edit_pages',
+				'edit_published_posts'   => 'edit_pages',
+			),
+		);
+	}
 
 	/**
 	 * Saves taxonomies for the post based on $location type.

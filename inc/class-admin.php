@@ -5,13 +5,13 @@
  * @package BlockInjector
  */
 
-include 'class-admin-save-post.php';
+include 'class-admin-post.php';
 
 if ( ! class_exists( 'PMAB_Admin' ) ) {
 	/**
 	 * Plugin Router.
 	 */
-	class PMAB_Admin extends PMAB_Admin_Save_Post {
+	class PMAB_Admin extends PMAB_Admin_Post {
 		private $post_type = 'block_injector';
 
 		/**
@@ -43,6 +43,8 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 		public function init(): void {
 			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
 			add_action( 'init', array( $this, 'register_post_type' ) );
+			add_action( "manage_{$this->post_type}_posts_columns", array( $this, 'posts_columns' ) );
+			add_action( "manage_{$this->post_type}_posts_custom_column", array( $this, 'posts_columns_filter' ), 10, 2 );
 			add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 			add_action( 'save_post', array( $this, 'save_post' ) );
 		}
@@ -75,58 +77,7 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 		 * @return void
 		 */
 		public function register_post_type(): void {
-			register_post_type(
-				$this->post_type,
-				array(
-					'labels' => array(
-						'name'               => __( 'Block Injector', 'pmab' ),
-						'singular_name'      => __( 'Block Injector', 'pmab' ),
-						'add_new'            => __( 'Add New', 'pmab' ),
-						'add_new_item'       => __( 'Add New Block Injector', 'pmab' ),
-						'edit_item'          => __( 'Edit Block Injector', 'pmab' ),
-						'new_item'           => __( 'New Block Injector', 'pmab' ),
-						'all_items'          => __( 'Block Injector', 'pmab' ),
-						'view_item'          => __( 'View Block Injector', 'pmab' ),
-						'search_items'       => __( 'Search Block Injector', 'pmab' ),
-						'not_found'          => __( 'Nothing found', 'pmab' ),
-						'not_found_in_trash' => __( 'Nothing found in Trash', 'pmab' ),
-						'parent_item_colon'  => '',
-					),
-
-					'public'              => true,
-					'show_ui'             => true,
-					'show_in_menu'        => true,
-					'publicly_queryable'  => false,
-					'can_export'          => true,
-					'query_var'           => true,
-					'has_archive'         => false,
-					'hierarchical'        => false,
-					'show_in_rest'        => true,
-					'exclude_from_search' => true,
-
-					'supports' => array(
-						'title',
-						'editor',
-					),
-
-					'capabilities' => array(
-						'edit_post'              => 'edit_pages',
-						'read_post'              => 'edit_pages',
-						'delete_post'            => 'edit_pages',
-						'edit_posts'             => 'edit_pages',
-						'edit_others_posts'      => 'edit_pages',
-						'publish_posts'          => 'edit_pages',
-						'read_private_posts'     => 'edit_pages',
-						'read'                   => 'edit_pages',
-						'delete_posts'           => 'edit_pages',
-						'delete_private_posts'   => 'edit_pages',
-						'delete_published_posts' => 'edit_pages',
-						'delete_others_posts'    => 'edit_pages',
-						'edit_private_posts'     => 'edit_pages',
-						'edit_published_posts'   => 'edit_pages',
-					),
-				)
-			);
+			register_post_type( $this->post_type, $this->post_type_args() );
 
 			register_taxonomy(
 				'block_injector_location',
@@ -223,6 +174,55 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 					'_pmab_woo_categories'             => $woocategories,
 				)
 			);
+		}
+
+		public function posts_columns( $columns ) {
+
+
+			return
+				array_slice( $columns, 0, 2, true ) +
+				[
+					'_pmab_meta_type'      => 'Location',
+					'_pmab_meta_tag_n_fix' => 'Position',
+				] + array_slice( $columns, 2, null, true );
+		}
+
+		public function posts_columns_filter( $column, $post ) {
+			if ( in_array( $column, [ '_pmab_meta_type', '_pmab_meta_tag_n_fix' ] ) ) {
+				$labels = [
+					'_pmab_meta_type'      => [
+						'post_page'              => 'Entire Website',
+						'all_post'               => 'All Posts\n\t\t\t',
+						'post'                   => 'Specific Posts',
+						'category'               => 'Posts By Category',
+						'tags'                   => 'Posts By Tag',
+						'all_page'               => 'All Pages',
+						'page'                   => 'Specific Page',
+						'woo_all_pages'          => 'All WooCommerce Pages',
+						'woo_all_products'       => 'All Products',
+						'woo_pro_category'       => 'Products by Category',
+						'woo_tags'               => 'Products by Tag',
+						'woo_product'            => 'Specific Product',
+						'woo_all_category_pages' => 'All Category Pages',
+						'woo_category_page'      => 'Specific Category Page',
+						'woo_shop'               => 'Shop Page',
+						'woo_account'            => 'My Account Page',
+						'woo_basket'             => 'Basket Page',
+						'woo_checkout'           => 'Checkout Page',
+					],
+					'_pmab_meta_tag_n_fix' => [
+						'top_before'   => 'Top',
+						'bottom_after' => 'Bottom',
+						'h2_after'     => 'After Heading',
+						'p_after'      => 'After Blocks',
+					]
+				];
+				$meta = get_post_meta( $post, $column, 'single' );
+
+				if ( ! empty( $labels[$column][$meta] ) ) {
+					echo $labels[ $column ][ $meta ];
+				}
+			}
 		}
 
 		/*
