@@ -19,7 +19,7 @@ class PMAB_Admin_Post {
 		'woo_all_pages'          => 'shop,page,product,product_cat,product_tag',
 		'woo_all_products'       => 'product',
 		'woo_pro_category'       => 'product,by-category',
-		'woo_tags'               => 'product,by-tag',
+		'woo_pro_tags'               => 'product,by-tag',
 		'woo_product'            => 'product,by-id',
 		'woo_all_category_pages' => 'product_cat',
 		'woo_category_page'      => 'product_cat',
@@ -111,6 +111,11 @@ class PMAB_Admin_Post {
 	}
 
 	protected function save_metas( $post_id ) {
+
+		if ( ! empty( $_POST['_pmab_meta_category'] ) && is_array( $_POST['_pmab_meta_category'] ) ) {
+			$_POST['_pmab_meta_category'] = implode( ',', $_POST['_pmab_meta_category'] );
+		}
+
 		foreach ( $this->post_metas as $post_meta ) {
 			update_post_meta( $post_id, $post_meta, sanitize_text_field( $_POST[$post_meta] ) );
 		}

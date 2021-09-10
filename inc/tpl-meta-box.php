@@ -1,12 +1,16 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
-<?php
-echo '<script type="text/JavaScript" src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js">
-     </script>';
-?>
-<div>
+<script type="text/JavaScript" src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<style>
+	#pmab_metabox select, #pmab_metabox input {
+		box-sizing: border-box;
+		border: 1px solid #757575;
+		width: 100%;
+	}
+</style>
+<div id="pmab_metabox">
 	<div class="" style="padding-bottom:1rem;">
 		<label for="_pmab_meta_type"><b style="font-size:16px"><?php _e( 'Location', 'pmab' ); ?></b></label>
-		<select name="_pmab_meta_type" id="_pmab_meta_type" class="postbox">
+		<select name="_pmab_meta_type" id="_pmab_meta_type">
 			<option value="post_page" selected>Entire Website</option>
 			<option disabled style="font-weight: bolder;">Post</option>
 			<option value="all_post" <?php selected( $_pmab_meta_type, 'all_post' ); ?>>All Posts
@@ -29,7 +33,7 @@ echo '<script type="text/JavaScript" src="https://cdn.jsdelivr.net/npm/select2@4
 				<option value="woo_pro_category" <?php selected( $_pmab_meta_type, 'woo_pro_category' ); ?>>Products by
 					Category
 				</option>
-				<option value="woo_tags" <?php selected( $_pmab_meta_type, 'woo_tags' ); ?>>Products by Tag</option>
+				<option value="woo_pro_tags" <?php selected( $_pmab_meta_type, 'woo_pro_tags' ); ?>>Products by Tag</option>
 				<option value="woo_product" <?php selected( $_pmab_meta_type, 'woo_product' ); ?>>Specific Product</option>
 				<option value="woo_all_category_pages" <?php selected( $_pmab_meta_type, 'woo_all_category_pages' ); ?>>All
 					Category Pages
@@ -67,7 +71,7 @@ echo '<script type="text/JavaScript" src="https://cdn.jsdelivr.net/npm/select2@4
 
 			 style="<?php echo $_pmab_meta_woo_category == '' ? 'display: none;' : ''; ?> padding-bottom:1rem">
 		<label for="_pmab_meta_woo_category"><?php _e( 'Product Categories', 'pmab' ); ?></label>
-		<select name="_pmab_meta_woo_category" id="_pmab_meta_woo_category" class="postbox">
+		<select name="_pmab_meta_woo_category" id="_pmab_meta_woo_category">
 			<option disabled selected style="font-weight: bolder;">Select Category</option>
 			<?php
 			foreach ( $_pmab_woo_categories as $category ):
@@ -83,7 +87,7 @@ echo '<script type="text/JavaScript" src="https://cdn.jsdelivr.net/npm/select2@4
 		<label for="_pmab_meta_specific_post"><?php _e( 'IDs', 'pmab' ); ?> <span
 				style="font-size:8px;">Comma Seperated</span></label>
 		<input type="text" id="_pmab_meta_specific_post" name="_pmab_meta_specific_post"
-					 value="<?php echo esc_attr( $_pmab_meta_specific_post ); ?>" size="25" class="postbox"/>
+					 value="<?php echo esc_attr( $_pmab_meta_specific_post ); ?>" size="25"/>
 
 	</div>
 	<div class="specificwoocategory"
@@ -91,14 +95,14 @@ echo '<script type="text/JavaScript" src="https://cdn.jsdelivr.net/npm/select2@4
 		<label for="_pmab_meta_specific_woocategory"><?php _e( 'IDs', 'pmab' ); ?> <span
 				style="font-size:8px;">Comma Seperated</span></label>
 		<input type="text" id="_pmab_meta_specific_woocategory" name="_pmab_meta_specific_woocategory"
-					 value="<?php echo esc_attr( $_pmab_meta_specific_woocategory ); ?>" size="25" class="postbox"/>
+					 value="<?php echo esc_attr( $_pmab_meta_specific_woocategory ); ?>" size="25"/>
 
 	</div>
 	<div class="tags" style="<?php echo $_pmab_meta_tags === '' ? 'display: none;' : ''; ?> padding-bottom:1rem">
 		<label for="_pmab_meta_tags"><?php _e( 'Tag IDs', 'pmab' ); ?> <span
 				style="font-size:8px;">Comma Seperated</span></label>
 		<input type="text" id="_pmab_meta_tags" name="_pmab_meta_tags"
-					 value="<?php echo esc_attr( $_pmab_meta_tags ); ?>" size="25" class="postbox"/>
+					 value="<?php echo esc_attr( $_pmab_meta_tags ); ?>" size="25"/>
 
 	</div>
 
@@ -137,45 +141,25 @@ echo '<script type="text/JavaScript" src="https://cdn.jsdelivr.net/npm/select2@4
 			<?php _e( 'After Certain Number', 'pmab' ); ?>
 		</label>
 		<input type="number" id="_pmab_meta_number_of_blocks" name="_pmab_meta_number_of_blocks"
-					 value="<?php echo esc_attr( $_pmab_meta_number_of_blocks ); ?>" size="25" class="postbox"/>
-	</div>
-	<div style="padding-bottom:1rem;">
-		<select name="" id="" class="postbox " style="display:none">
-			<option value="" selected>Exclude</option>
-		</select>
-	</div>
-	<div style="padding-bottom:1rem;">
-		<label for="_pmab_meta_type2"><b
-				style="font-size:16px"><?php _e( 'Exclude Post & Pages', 'pmab' ); ?></b></label>
-		<select name="_pmab_meta_type2" id="_pmab_meta_type2" class="postbox">
-			<option value="" style="font-weight: bolder;">Exclude Option</option>
-			<option value="post_exclude" <?php selected( $_pmab_meta_type2, 'post_exclude' ); ?>>
-				Specific Posts
-			</option>
-			<option value="post_exclude" <?php selected( $_pmab_meta_type2, 'post_exclude' ); ?>>
-				Specific Products
-			</option>
-			<option value="page_exclude" <?php selected( $_pmab_meta_type2, 'page_exclude' ); ?>>
-				Specific Pages
-			</option>
-		</select>
+					 value="<?php echo esc_attr( $_pmab_meta_number_of_blocks ); ?>" size="25"/>
 	</div>
 	<div class="specificpost_exclude"
-			 style="<?php echo $_pmab_meta_specific_post_exclude === '' ? 'display: none;' : ''; ?> padding-bottom:1rem">
-		<label for="_pmab_meta_specific_post_exclude"><?php _e( 'IDs', 'pmab' ); ?> <span style="font-size:8px;">Comma Seperated</span></label>
+			 style="padding-bottom:1rem">
+		<label for="_pmab_meta_specific_post_exclude"><?php _e( 'Post IDs to exclude', 'pmab' ); ?> <span
+				style="font-size:8px;">Comma Seperated</span></label>
 		<input type="text" id="_pmab_meta_specific_post_exclude" name="_pmab_meta_specific_post_exclude"
-					 value="<?php echo esc_attr( $_pmab_meta_specific_post_exclude ); ?>" size="25" class="postbox"/>
+					 value="<?php echo esc_attr( $_pmab_meta_specific_post_exclude ); ?>" size="25"/>
 	</div>
-</div>
-<div style="padding-bottom:1rem;">
-	<label for="_pmab_meta_startdate"><?php _e( 'Select Start Date', 'pmab' ); ?></label>
-	<input type="datetime-local" id="_pmab_meta_startdate" name="_pmab_meta_startdate"
-				 value="<?php echo esc_attr( $_pmab_meta_startdate ); ?>" size="25" class="postbox"/>
-</div>
+	<div style="padding-bottom:1rem;">
+		<label for="_pmab_meta_startdate"><?php _e( 'Select Start Date', 'pmab' ); ?></label>
+		<input type="datetime-local" id="_pmab_meta_startdate" name="_pmab_meta_startdate"
+					 value="<?php echo esc_attr( $_pmab_meta_startdate ); ?>" size="25"/>
+	</div>
 
 
-<div style="padding-bottom:1rem;">
-	<label for="_pmab_meta_expiredate"><?php _e( 'Select Expiry Date', 'pmab' ); ?></label>
-	<input type="datetime-local" id="_pmab_meta_expiredate" name="_pmab_meta_expiredate"
-				 value="<?php echo esc_attr( $_pmab_meta_expiredate ); ?>" size="25" class="postbox"/>
+	<div style="padding-bottom:1rem;">
+		<label for="_pmab_meta_expiredate"><?php _e( 'Select Expiry Date', 'pmab' ); ?></label>
+		<input type="datetime-local" id="_pmab_meta_expiredate" name="_pmab_meta_expiredate"
+					 value="<?php echo esc_attr( $_pmab_meta_expiredate ); ?>" size="25"/>
+	</div>
 </div>

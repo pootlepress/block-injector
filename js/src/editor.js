@@ -25,7 +25,7 @@ jQuery( document ).ready( function ( $ ) {
 			$( '.specificwoocategory' ).hide();
 			$( '#_pmab_meta_specific_woocategory' ).val( '' );
 		}
-		if ( this.value === 'tags' || this.value === 'woo_tags' ) {
+		if ( this.value === 'tags' || this.value === 'woo_pro_tags' ) {
 			$( '.tags' ).show();
 		} else {
 			$( '.tags' ).hide();

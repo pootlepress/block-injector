@@ -201,7 +201,7 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 						'woo_all_pages'          => 'All WooCommerce Pages',
 						'woo_all_products'       => 'All Products',
 						'woo_pro_category'       => 'Products by Category',
-						'woo_tags'               => 'Products by Tag',
+						'woo_pro_tags'               => 'Products by Tag',
 						'woo_product'            => 'Specific Product',
 						'woo_all_category_pages' => 'All Category Pages',
 						'woo_category_page'      => 'Specific Category Page',

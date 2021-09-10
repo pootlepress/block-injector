@@ -83,9 +83,12 @@ if ( ! function_exists( 'pmab_posts_filter_content' ) ) {
 	 */
 	function pmab_posts_filter_content( $posts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, $function_name ) {
 		foreach ( $posts as $post ) {
-			if ( $function_name( $post->ID ) ) {
+			if ( is_object( $post ) ) {
+				$post = $post->ID;
+			}
+			if ( $function_name( $post ) ) {
 
-				if ( $inject_content_type2 === 'post_exclude' && ! in_array( $post->ID, $thisposts_exclude, true ) ) {
+				if ( $inject_content_type2 === 'post_exclude' && ! in_array( $post, $thisposts_exclude, true ) ) {
 
 					if ( $tag == 'top' && is_product() ) {
 						pmab_custom_hook_content( 'woocommerce_before_single_product', $content, $tag, 1, $p );

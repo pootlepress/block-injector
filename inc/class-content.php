@@ -29,6 +29,44 @@ if ( ! class_exists( 'class-content' ) ) {
 			add_action( 'template_redirect', [ $this, 'push_to_specific_content' ], 11 );
 		}
 
+		private function _post_id_in_list( $post_id, $included ) {
+			if ( is_string( $included ) ) {
+				$included = explode( ',', str_replace( ' ', '', $included ) );
+			}
+
+			return in_array( $post_id, $included );
+		}
+
+		/**
+		 *
+		 * @param $post_id
+		 * @param $term_ids
+		 * @param $taxonomy
+		 * @param array $exclude_posts
+		 *
+		 * @return bool
+		 */
+		private static function current_single_post_has_matching_terms( $term_ids, $taxonomy, $exclude_posts = [] ) {
+
+			$post_id = get_post()->ID;
+
+			// Page is singular post page and post isn't excluded
+			if ( ! is_singular() || in_array( $post_id, $exclude_posts, false ) ) {
+				return false;
+			}
+
+			$applied_terms = wp_get_object_terms( $post_id, $taxonomy, [ 'fields' => 'ids' ] );
+			$term_ids      = explode( ',', str_replace( ' ', '', $term_ids ) );
+
+			foreach ( $applied_terms as $tag ) {
+				if ( in_array( "$tag", $term_ids ) ) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		private function get_block_injectors() {
 //			wp_get_object_terms( $post->ID, 'block_injector_location' )
 
@@ -71,18 +109,21 @@ if ( ! class_exists( 'class-content' ) ) {
 
 		public function extract_block_injectors_with_metas() {
 			foreach ( $this->get_block_injectors() as $p ) {
-				$pmab_meta = array(
-					'p'                    => $p,
-					'num_of_blocks'        => get_post_meta( $p->ID, '_pmab_meta_number_of_blocks', true ),
-					'tag_type'             => get_post_meta( $p->ID, '_pmab_meta_tag_n_fix', true ),
-					'startdate'            => get_post_meta( $p->ID, '_pmab_meta_startdate', true ),
-					'expiredate'           => get_post_meta( $p->ID, '_pmab_meta_expiredate', true ),
-					'inject_content_type'  => get_post_meta( $p->ID, '_pmab_meta_type', true ),
-					'specific_woocategory' => get_post_meta( $p->ID, '_pmab_meta_specific_woocategory', true ),
-					'category'             => get_post_meta( $p->ID, '_pmab_meta_category', true ),
-					'woo_category'         => get_post_meta( $p->ID, '_pmab_meta_woo_category', true ),
-					'tags'                 => get_post_meta( $p->ID, '_pmab_meta_tags', true ),
-					'woo_hooks'            => get_post_meta( $p->ID, '_pmab_meta_hook', true ),
+				$specific_post_exclude = get_post_meta( $p->ID, '_pmab_meta_specific_post_exclude', true );
+				$pmab_meta             = array(
+					'p'                     => $p,
+					'num_of_blocks'         => get_post_meta( $p->ID, '_pmab_meta_number_of_blocks', true ),
+					'specific_post_exclude' => $specific_post_exclude,
+					'thisposts_exclude'     => is_string( $specific_post_exclude ) ? explode( ',', $specific_post_exclude ) : array(),
+					'tag_type'              => get_post_meta( $p->ID, '_pmab_meta_tag_n_fix', true ),
+					'startdate'             => get_post_meta( $p->ID, '_pmab_meta_startdate', true ),
+					'expiredate'            => get_post_meta( $p->ID, '_pmab_meta_expiredate', true ),
+					'inject_content_type'   => get_post_meta( $p->ID, '_pmab_meta_type', true ),
+					'specific_woocategory'  => get_post_meta( $p->ID, '_pmab_meta_specific_woocategory', true ),
+					'category'              => get_post_meta( $p->ID, '_pmab_meta_category', true ),
+					'woo_category'          => get_post_meta( $p->ID, '_pmab_meta_woo_category', true ),
+					'tags'                  => get_post_meta( $p->ID, '_pmab_meta_tags', true ),
+					'woo_hooks'             => get_post_meta( $p->ID, '_pmab_meta_hook', true ),
 				);
 
 				$specific_post              = get_post_meta( $p->ID, '_pmab_meta_specific_post', true );
@@ -126,28 +167,30 @@ if ( ! class_exists( 'class-content' ) ) {
 				<?php echo $p->post_content ?>
 			</div>
 			<script>
-				(function() {
-					var target = document.querySelector( '#block_inject_div-<?php echo $p->ID ?>' );
-					window.addEventListener('load', (event) => {
-						var tag_selector = target.dataset.tag_selector;
-						if ( ! tag_selector ) {
-							tag_selector = target.dataset.tag === "h2" ?
-								".page-description h1,.page-description  h2,.page-description h3,.page-description h4,.page-description h5,.page-description h6" :
-								".page-description p,.site-main p";
-						}
-						var inserted = false;
-						var matchedBlocks = document.querySelectorAll( tag_selector );
-						console.log( matchedBlocks );
-						matchedBlocks[0].parentNode.insertBefore( target, matchedBlocks[0] );
-						var position = target.dataset.number_of_blocks;
-						matchedBlocks.forEach( ( v, k ) => {
-							if ( position === k + 1 || k + 1 === matchedBlocks.length && position > 9999 ) {
-								v.after( target );
-								inserted = true;
+				(
+					function () {
+						var target = document.querySelector( '#block_inject_div-<?php echo $p->ID ?>' );
+						window.addEventListener( 'load', ( event ) => {
+							var tag_selector = target.dataset.tag_selector;
+							if ( !tag_selector ) {
+								tag_selector = target.dataset.tag === "h2" ?
+									".page-description h1,.page-description  h2,.page-description h3,.page-description h4,.page-description h5,.page-description h6" :
+									".page-description p,.site-main p";
 							}
+							var inserted = false;
+							var matchedBlocks = document.querySelectorAll( tag_selector );
+							console.log( matchedBlocks );
+							matchedBlocks[0].parentNode.insertBefore( target, matchedBlocks[0] );
+							var position = target.dataset.number_of_blocks;
+							matchedBlocks.forEach( ( v, k ) => {
+								if ( position === k + 1 || k + 1 === matchedBlocks.length && position > 9999 ) {
+									v.after( target );
+									inserted = true;
+								}
+							} );
 						} );
-					});
-				})();
+					}
+				)();
 			</script>
 			<?php
 		}
@@ -173,11 +216,11 @@ if ( ! class_exists( 'class-content' ) ) {
 
 		private function push_content_woo_all_pages( $pmab_meta ) {
 			$this->push_content_woo_shop( $pmab_meta );
-			$this->push_content_woo_category_pages( $pmab_meta );
+			$this->push_content_woo_category_page( $pmab_meta );
 			$this->push_content_woo_all_products( $pmab_meta );
 			$this->push_content_woo_product( $pmab_meta );
 			$this->push_content_woo_pro_category( $pmab_meta );
-			$this->push_content_woo_tags( $pmab_meta );
+			$this->push_content_woo_pro_tags( $pmab_meta );
 		}
 
 		private function push_content_woo_shop( $pmab_meta ) {
@@ -217,10 +260,10 @@ if ( ! class_exists( 'class-content' ) ) {
 		}
 
 		private function push_content_woo_all_category_pages( $pmab_meta ) {
-			$this->push_content_woo_category_pages( $pmab_meta );
+			$this->push_content_woo_category_page( $pmab_meta );
 		}
 
-		private function push_content_woo_category_pages( $pmab_meta ) {
+		private function push_content_woo_category_page( $pmab_meta ) {
 			extract( $pmab_meta );
 
 			if ( $tag == 'woo' ) {
@@ -283,192 +326,75 @@ if ( ! class_exists( 'class-content' ) ) {
 
 		private function push_content_woo_product( $pmab_meta ) {
 			extract( $pmab_meta );
-			if ( $tag === 'top' ) {
-				add_filter(
-					'woocommerce_before_single_product',
-					static function ( $content ) use ( $p, $tag, $specific_post ) {
-						$wooposts = get_posts(
-							array(
-								'post_type'      => 'product',
-								'posts_per_page' => - 1,
-								'post__in'       => $specific_post,
-							)
-						);
-						foreach ( $wooposts as $post ) {
-							if ( is_single( $post->ID ) ) {
-								echo $p->post_content;
-							}
-						}
-					},
-					0
-				);
-			} else if ( $tag == 'woo' ) {
-				add_filter(
-					'woocommerce_breadcrumb',
-					static function ( $content ) use ( $p, $tag, $num_of_blocks, $woo_hooks, $specific_post ) {
-						$wooposts = get_posts(
-							array(
-								'post_type'      => 'product',
-								'posts_per_page' => - 1,
-								'post__in'       => $specific_post,
-							)
-						);
-						foreach ( $wooposts as $post ) {
-							if ( is_single( $post->ID ) ) {
-								pmab_custom_hook_content( $woo_hooks, $p->post_content, $tag, $num_of_blocks, $p );
-							}
-						}
-					},
-					0
-				);
+			if ( is_singular( 'product' ) && $this->_post_id_in_list( get_post()->ID, $specific_post ) ) {
+
+				if ( $tag === 'top' ) {
+					add_filter(
+						'woocommerce_before_single_product',
+						static function ( $content ) use ( $p, $tag, $specific_post ) {
+							echo $p->post_content;
+						},
+						0
+					);
+				} else if ( $tag == 'woo' ) {
+					add_filter(
+						'woocommerce_breadcrumb',
+						static function ( $content ) use ( $p, $tag, $num_of_blocks, $woo_hooks, $specific_post ) {
+							pmab_custom_hook_content( $woo_hooks, $p->post_content, $tag, $num_of_blocks, $p );
+						},
+						0
+					);
+				}
 			}
 		}
 
 		private function push_content_woo_pro_category( $pmab_meta ) {
 			extract( $pmab_meta );
-			if ( $tag == 'top' ) {
-				add_filter(
-					'woocommerce_before_single_product',
-					static function ( $content ) use ( $p, $tag, $woo_category, $woo_hooks ) {
-						if ( is_single() ) {
-							$categories = get_the_terms( get_post()->ID, 'product_cat' );
-							if ( $categories ) {
-								foreach ( $categories as $cat ) {
-									if ( $cat->term_id == $woo_category ) {
-										if ( $tag === 'top' ) {
-											echo $p->post_content;
-										}
-									}
-								}
-							}
-						}
-
-					},
-					0
-				);
-			} else if ( $tag == 'woo' ) {
-				add_filter(
-					'woocommerce_breadcrumb',
-					static function ( $content ) use ( $p, $tag, $woo_category, $woo_hooks ) {
-						if ( is_single() ) {
-							$categories = get_the_terms( get_post()->ID, 'product_cat' );
-							if ( $categories ) {
-								foreach ( $categories as $cat ) {
-									if ( $cat->term_id == $woo_category ) {
-										pmab_custom_hook_content( $woo_hooks, $p->post_content, $tag, $num_of_blocks, $p );
-									}
-								}
-							}
-						}
-					},
-					0
-				);
+			if ( self::current_single_post_has_matching_terms( $woo_category, 'product_cat', $thisposts_exclude ) ) {
+				if ( $tag !== 'top' ) {
+					add_filter(
+						'woocommerce_before_single_product',
+						static function ( $content ) use ( $p, $tag, $woo_category, $woo_hooks ) {
+							echo $p->post_content;
+						},
+						0
+					);
+				}
 			}
 		}
 
-		private function push_content_woo_tags( $pmab_meta ) {
+		private function push_content_woo_pro_tags( $pmab_meta ) {
 			extract( $pmab_meta );
-			if ( $tag === 'top' ) {
-				add_filter(
-					'woocommerce_before_single_product',
-					static function ( $content ) use ( $p, $tags, $num_of_blocks ) {
-						$woo_tag_posts = $tags ? get_posts(
-							array(
-								'post_type'      => 'product',
-								'posts_per_page' => - 1,
-								'tax_query'      => array(
-									array(
-										'taxonomy' => 'product_tag',
-										'terms'    => explode(
-											',',
-											$tags
-										),
-									)
-								)
-							)
-						) : array();
-						foreach ( $woo_tag_posts as $post ) {
-							if ( is_single( $post->ID ) ) {
-								echo $p->post_content;
-							}
-						}
-					},
-					0
-				);
-			} else if ( $tag == 'woo' ) {
-
-				add_filter(
-					'woocommerce_breadcrumb',
-					static function ( $content ) use ( $p, $tags, $num_of_blocks, $woo_hooks ) {
-
-						$woo_tag_posts = $tags ? get_posts(
-							array(
-								'post_type'      => 'product',
-								'posts_per_page' => - 1,
-								'tax_query'      => array(
-									array(
-										'taxonomy' => 'product_tag',
-										'terms'    => explode(
-											',',
-											$tags
-										),
-									)
-								)
-							)
-						) : array();
-
-						foreach ( $woo_tag_posts as $post ) {
-							$tag = 'woo';
-							if ( is_single( $post->ID ) ) {
-								pmab_custom_hook_content( $woo_hooks, $p->post_content, $tag, $num_of_blocks, $p );
-							}
-						}
-					},
-					0
-				);
-
+			if ( self::current_single_post_has_matching_terms( $woo_category, 'product_cat', $thisposts_exclude ) ) {
+				if ( $tag === 'top' ) {
+					add_filter(
+						'woocommerce_before_single_product',
+						static function ( $content ) use ( $p, $tags, $num_of_blocks ) {
+							echo $p->post_content;
+						},
+						0
+					);
+				}
 			}
 		}
 
 		static private function extract_meta_for_filter_hook( $p ) {
 			$tags = get_post_meta( $p->ID, '_pmab_meta_tags', true );
 
+			$specific_post_exclude = get_post_meta( $p->ID, '_pmab_meta_specific_post_exclude', true );
+
 			return array(
 				'inject_content_type'   => get_post_meta( $p->ID, '_pmab_meta_type', true ),
 				'inject_content_type2'  => get_post_meta( $p->ID, '_pmab_meta_type2', true ),
 				'specific_post'         => get_post_meta( $p->ID, '_pmab_meta_specific_post', true ),
 				'specific_woocategory'  => get_post_meta( $p->ID, '_pmab_meta_specific_woocategory', true ),
-				'specific_post_exclude' => get_post_meta( $p->ID, '_pmab_meta_specific_post_exclude', true ),
+				'specific_post_exclude' => $specific_post_exclude,
+				'thisposts_exclude'     => is_string( $specific_post_exclude ) ? explode( ',', $specific_post_exclude ) : array(),
 				'tags'                  => $tags,
 				'category'              => get_post_meta( $p->ID, '_pmab_meta_category', true ),
 				'woo_category'          => get_post_meta( $p->ID, '_pmab_meta_woo_category', true ),
 				'tag_type'              => get_post_meta( $p->ID, '_pmab_meta_tag_n_fix', true ),
 				'woo_hooks'             => get_post_meta( $p->ID, '_pmab_meta_hook', true ),
-				'tag_posts'             => $tags ? get_posts(
-					array(
-						'posts_per_page' => - 1,
-						'tag__in'        => explode(
-							',',
-							$tags
-						),
-					)
-				) : array(),
-				'woo_tag_posts'         => $tags ? get_posts(
-					array(
-						'post_type'      => 'product',
-						'posts_per_page' => - 1,
-						'tax_query'      => array(
-							array(
-								'taxonomy' => 'product_tag',
-								'field'    => 'id',
-								'terms'    => explode(
-									',',
-									$tags
-								),
-							)
-						)
-					)
-				) : array(),
 			);
 		}
 
@@ -497,23 +423,6 @@ if ( ! class_exists( 'class-content' ) ) {
 			$thisposts_exclude    = is_string( $specific_post_exclude ) ? explode( ',', $specific_post_exclude ) : array();
 			$specific_post        = is_string( $specific_post ) ? explode( ',', $specific_post ) : array();
 			$specific_woocategory = is_string( $specific_woocategory ) ? explode( ',', $specific_woocategory ) : array();
-
-			$type = ( $inject_content_type == 'page' ) ? 'include' : 'post__in';
-
-			$thisposts = get_posts(
-				array(
-					'posts_per_page' => - 1,
-					$type            => $specific_post,
-				)
-			);
-
-			$wooposts = get_posts(
-				array(
-					'post_type'      => 'product',
-					'posts_per_page' => - 1,
-					'post__in'       => $specific_post,
-				)
-			);
 
 			$checks = array(
 				'woo_all_category_pages' => array( 'is_product_category', null ),
@@ -564,61 +473,33 @@ if ( ! class_exists( 'class-content' ) ) {
 					}
 					break;
 				case 'tags':
-					return pmab_posts_filter_content( $tag_posts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, 'is_single' );
-				case 'woo_tags':
-					if ( $tag_type === 'woo_hook' ) {
-						break;
-					} else if ( $tag === 'top' ) {
-
-					} else {
-
-						return pmab_posts_filter_content( $woo_tag_posts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, 'is_single' );
+					if ( self::current_single_post_has_matching_terms( $tags, 'post_tag', $thisposts_exclude ) ) {
+						return pmab_update_content( $content, $tag, $num_of_blocks, $p );
 					}
-					break;
-				case 'category':
-					if ( is_single() ) {
-						$categories = wp_get_post_categories( get_post()->ID );
-
-						foreach ( $categories as $cat ) {
-							if ( in_array( $cat, $category ) ) {
-								if ( $inject_content_type2 === 'post_exclude' && in_array( get_post()->ID, $thisposts_exclude, false ) ) {
-									return $content;
-								} else {
-									return pmab_update_content( $content, $tag, $num_of_blocks, $p );
-								}
-							}
+				case 'woo_pro_tags':
+					if ( self::current_single_post_has_matching_terms( $tags, 'product_tag', $thisposts_exclude ) ) {
+						if ( $tag !== 'top' ) {
+							return pmab_update_content( $content, $tag, $num_of_blocks, $p );
 						}
 					}
 					break;
+				case 'category':
+					if ( self::current_single_post_has_matching_terms( $category, 'category', $thisposts_exclude ) ) {
+						return pmab_update_content( $content, $tag, $num_of_blocks, $p );
+					}
+					break;
 				case 'woo_pro_category':
-					if ( is_single() ) {
-						$categories = get_the_terms( get_post()->ID, 'product_cat' );
-						if ( $categories ) {
-							foreach ( $categories as $cat ) {
-								if ( $cat->term_id == $woo_category ) {
-
-									if ( $inject_content_type2 === 'post_exclude' && in_array( get_post()->ID, $thisposts_exclude, false ) ) {
-										return $content;
-									} else if ( $tag === 'top' ) {
-
-										break;
-									} else {
-										if ( $tag_type === 'woo_hook' ) {
-											break;
-										} else {
-											return pmab_update_content( $content, $tag, $num_of_blocks, $p );
-										}
-									}
-								}
-							}
+					if ( self::current_single_post_has_matching_terms( $woo_category, 'product_cat', $thisposts_exclude ) ) {
+						if ( $tag !== 'top' ) {
+							return pmab_update_content( $content, $tag, $num_of_blocks, $p );
 						}
 					}
 					break;
 				case 'post':
-					return pmab_posts_filter_content( $thisposts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, 'is_single' );
+					return pmab_posts_filter_content( $specific_post, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, 'is_single' );
 					break;
 				case 'page':
-					return pmab_posts_filter_content( $thisposts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, 'is_page' );
+					return pmab_posts_filter_content( $specific_post, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, 'is_page' );
 					break;
 				case 'all_post':
 					if ( is_single() && ( ! is_woocommerce() && ! is_product() && ! is_shop() && ! is_product_category() ) ) {
@@ -637,27 +518,15 @@ if ( ! class_exists( 'class-content' ) ) {
 					break;
 				case 'woo_all_products':
 					if ( is_product() ) {
-						if ( $tag_type === 'woo_hook' ) {
-
-							break;
-						} else if ( $tag === 'top' ) {
-
-							break;
-						} else {
-
+						if ( $tag !== 'top' ) {
 							return pmab_filter_exclude_content( $thisposts_exclude, $inject_content_type2, 'post_exclude', $content, $tag, $num_of_blocks, $p );
 						}
 						break;
 					}
 				case 'woo_product':
 					if ( is_product() ) {
-						if ( $tag_type === 'woo_hook' ) {
-
-							break;
-						} else if ( $tag === 'top' ) {
-							break;
-						} else {
-							return pmab_posts_filter_content( $wooposts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, 'is_single' );
+						if ( $tag !== 'top' ) {
+							return pmab_posts_filter_content( $specific_post, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, 'is_single' );
 						}
 						break;
 					}
