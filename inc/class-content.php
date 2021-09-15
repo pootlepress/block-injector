@@ -225,17 +225,7 @@ if ( ! class_exists( 'class-content' ) ) {
 
 		private function push_content_woo_shop( $pmab_meta ) {
 			extract( $pmab_meta );
-			if ( $tag == 'woo' ) {
-				add_filter(
-					'woocommerce_breadcrumb',
-					static function ( $content ) use ( $tag, $num_of_blocks, $p, $woo_hooks ) {
-						if ( is_shop() ) {
-							pmab_custom_hook_content( $woo_hooks, $p->post_content, $tag, $num_of_blocks, $p );
-						}
-					},
-					0
-				);
-			} else if ( ! in_array( $tag, array( 'top', 'bottom' ) ) ) {
+			if ( $tag === 'top' ) {
 				add_filter(
 					'woocommerce_archive_description',
 					static function ( $content ) use ( $p, $tag, $num_of_blocks ) {
@@ -248,13 +238,13 @@ if ( ! class_exists( 'class-content' ) ) {
 
 			} else {
 				add_filter(
-					'woocommerce_archive_description',
+					'woocommerce_after_shop_loop',
 					static function ( $content ) use ( $p, $tag, $num_of_blocks ) {
 						if ( is_shop() ) {
 							echo $p->post_content;
 						}
 					},
-					$num_of_blocks
+					9999
 				);
 			}
 		}
@@ -266,18 +256,8 @@ if ( ! class_exists( 'class-content' ) ) {
 		private function push_content_woo_category_page( $pmab_meta ) {
 			extract( $pmab_meta );
 
-			if ( $tag == 'woo' ) {
-				add_filter(
-					'woocommerce_breadcrumb',
-					static function ( $content ) use ( $p, $tag, $num_of_blocks, $woo_hooks, $specific_woocategory ) {
-						if ( is_product_category( $specific_woocategory ) ) {
-							pmab_custom_hook_content( $woo_hooks, $p->post_content, $tag, $num_of_blocks, $p );
-						}
-					},
-					0
-				);
-			} else if ( ! in_array( $tag, array( 'top', 'bottom' ) ) ) {
-				add_filter(
+			if ( $tag === 'top' ) {
+				add_action(
 					'woocommerce_archive_description',
 					static function ( $content ) use ( $p, $tag, $num_of_blocks, $specific_woocategory ) {
 						if ( is_product_category( $specific_woocategory ) ) {
@@ -288,14 +268,14 @@ if ( ! class_exists( 'class-content' ) ) {
 				);
 
 			} else {
-				add_filter(
-					'woocommerce_archive_description',
+				add_action(
+					'woocommerce_after_shop_loop',
 					static function ( $content ) use ( $p, $tag, $specific_woocategory ) {
 						if ( is_product_category( $specific_woocategory ) ) {
 							echo $p->post_content;
 						}
 					},
-					$num_of_blocks
+					9999
 				);
 			}
 
@@ -311,36 +291,17 @@ if ( ! class_exists( 'class-content' ) ) {
 					},
 					0
 				);
-			} else if ( $tag == 'woo' ) {
-				add_filter(
-					'woocommerce_breadcrumb',
-					static function ( $content ) use ( $p, $tag, $num_of_blocks, $woo_hooks ) {
-						if ( is_product() ) {
-							pmab_custom_hook_content( $woo_hooks, $p->post_content, $tag, $num_of_blocks, $p );
-						}
-					},
-					0
-				);
 			}
 		}
 
 		private function push_content_woo_product( $pmab_meta ) {
 			extract( $pmab_meta );
 			if ( is_singular( 'product' ) && $this->_post_id_in_list( get_post()->ID, $specific_post ) ) {
-
 				if ( $tag === 'top' ) {
 					add_filter(
 						'woocommerce_before_single_product',
 						static function ( $content ) use ( $p, $tag, $specific_post ) {
 							echo $p->post_content;
-						},
-						0
-					);
-				} else if ( $tag == 'woo' ) {
-					add_filter(
-						'woocommerce_breadcrumb',
-						static function ( $content ) use ( $p, $tag, $num_of_blocks, $woo_hooks, $specific_post ) {
-							pmab_custom_hook_content( $woo_hooks, $p->post_content, $tag, $num_of_blocks, $p );
 						},
 						0
 					);
@@ -350,8 +311,11 @@ if ( ! class_exists( 'class-content' ) ) {
 
 		private function push_content_woo_pro_category( $pmab_meta ) {
 			extract( $pmab_meta );
+
 			if ( self::current_single_post_has_matching_terms( $woo_category, 'product_cat', $thisposts_exclude ) ) {
-				if ( $tag !== 'top' ) {
+//				echo "<h6>$p->post_title : $inject_content_type [$tag] </h6>";
+
+				if ( $tag === 'top' ) {
 					add_filter(
 						'woocommerce_before_single_product',
 						static function ( $content ) use ( $p, $tag, $woo_category, $woo_hooks ) {
@@ -558,6 +522,7 @@ if ( ! class_exists( 'class-content' ) ) {
 
 				$callback = "push_content_$inject_content_type";
 				if ( method_exists( $this, $callback ) ) {
+//					echo "<h6>$p->post_title : $inject_content_type $callback</h6>";
 					$this->$callback( $pmab_meta );
 				}
 			}
