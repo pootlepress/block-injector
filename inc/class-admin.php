@@ -187,12 +187,67 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 				] + array_slice( $columns, 2, null, true );
 		}
 
+		private function posts_columns_filter_metadata_terms( $meta ) {
+
+			$meta = is_string( $meta ) ? explode( ',', str_replace( ' ', '', $meta ) ) : $meta;
+
+			$terms = get_terms( [
+				'taxonomy' => [ 'product_cat', 'product_tag', 'category', 'post_tag' ],
+				'include'    => $meta,
+				'hide_empty'  => false,
+			] );
+
+			$meta = wp_list_pluck( $terms, 'name' );
+
+			return implode( ', ', $meta );
+		}
+
+		private function posts_columns_filter_metadata_posts( $meta ) {
+			$meta = is_string( $meta ) ? explode( ',', str_replace( ' ', '', $meta ) ) : $meta;
+
+			$posts = get_posts( [
+				'post_type'   => 'any',
+				'post_status' => 'any',
+				'post__in'    => $meta
+			] );
+
+			$meta = wp_list_pluck( $posts, 'post_title' );
+
+			return implode( ', ', $meta );
+		}
+
+		public function posts_columns_filter_metadata( $column, $post, $meta ) {
+			$additional_metadata = [
+				'_pmab_meta_type' => [
+					'post'              => [ '_pmab_meta_specific_post', 'posts' ],
+					'category'          => [ '_pmab_meta_category', 'terms' ],
+					'tags'              => [ '_pmab_meta_tags', 'terms' ],
+					'page'              => [ '_pmab_meta_specific_post', 'posts' ],
+					'woo_pro_category'  => [ '_pmab_meta_woo_category', 'terms' ],
+					'woo_pro_tags'      => [ '_pmab_meta_tags', 'terms' ],
+					'woo_product'       => [ '_pmab_meta_specific_post', 'posts' ],
+					'woo_category_page' => [ '_pmab_meta_specific_woocategory', 'terms' ],
+				]
+			];
+
+			if ( ! empty( $additional_metadata[ $column ][ $meta ] ) ) {
+				$metadata_to_fetch = $additional_metadata[ $column ][ $meta ];
+				$meta = get_post_meta( $post, $metadata_to_fetch[0], 'single' );
+
+				$callback = "posts_columns_filter_metadata_{$metadata_to_fetch[1]}";
+				if ( method_exists( $this, $callback ) ) {
+					$meta = $this->$callback( $meta );
+				}
+				return ' (<small>' . $meta . '</small>)';
+			}
+		}
+
 		public function posts_columns_filter( $column, $post ) {
 			if ( in_array( $column, [ '_pmab_meta_type', '_pmab_meta_tag_n_fix' ] ) ) {
 				$labels = [
 					'_pmab_meta_type'      => [
 						'post_page'              => 'Entire Website',
-						'all_post'               => 'All Posts\n\t\t\t',
+						'all_post'               => 'All Posts',
 						'post'                   => 'Specific Posts',
 						'category'               => 'Posts By Category',
 						'tags'                   => 'Posts By Tag',
@@ -201,7 +256,7 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 						'woo_all_pages'          => 'All WooCommerce Pages',
 						'woo_all_products'       => 'All Products',
 						'woo_pro_category'       => 'Products by Category',
-						'woo_pro_tags'               => 'Products by Tag',
+						'woo_pro_tags'           => 'Products by Tag',
 						'woo_product'            => 'Specific Product',
 						'woo_all_category_pages' => 'All Category Pages',
 						'woo_category_page'      => 'Specific Category Page',
@@ -217,10 +272,11 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 						'p_after'      => 'After Blocks',
 					]
 				];
+
 				$meta = get_post_meta( $post, $column, 'single' );
 
-				if ( ! empty( $labels[$column][$meta] ) ) {
-					echo $labels[ $column ][ $meta ];
+				if ( ! empty( $labels[ $column ][ $meta ] ) ) {
+					echo $labels[ $column ][ $meta ] . ' ' . $this->posts_columns_filter_metadata( $column, $post, $meta );
 				}
 			}
 		}
