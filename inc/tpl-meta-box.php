@@ -6,6 +6,10 @@
 		border: 1px solid #757575;
 		width: 100%;
 	}
+
+	#pmab_metabox .select2-container {
+		width: 100% !important;
+	}
 </style>
 <div id="pmab_metabox">
 	<div class="" style="padding-bottom:1rem;">
@@ -55,14 +59,15 @@
 	<div class="category-box"
 			 style="<?php echo $_pmab_meta_category == '' ? 'display: none;' : ''; ?> padding-bottom:1rem">
 		<label for="_pmab_meta_category[]"><?php _e( 'Categories', 'pmab' ); ?></label>
-		<select class="js-example-basic-single" name="_pmab_meta_category[]" multiple="multiple" id="_pmab_meta_category[]"
-						class="postbox" style="width:100%;">
+		<?php $_pmab_meta_category = explode( ',', str_replace( ' ', '', $_pmab_meta_category ) ); ?>
+		<select class="pmab-multi-select" name="_pmab_meta_category[]" multiple id="_pmab_meta_category[]"
+						class="postbox">
 			<?php
 			foreach ( $_pmab_categories as $category ):
-				$selected = in_array( $category->term_id, $_pmab_meta_category ) ? 'selected="selected"' : '';
+				$cat_ID = $category->cat_ID;
 				?>
-				<option <?php echo $selected; ?>
-					value="<?php echo $category->cat_ID ?>" <?php selected( $_pmab_meta_category, $category->cat_ID ); ?>><?php echo $category->name ?></option>
+				<option <?php selected( in_array( $cat_ID, $_pmab_meta_category ) ) ?> value="<?php echo $cat_ID ?>">
+					<?php echo $category->name ?></option>
 			<?php
 			endforeach; ?>
 		</select>
@@ -72,12 +77,13 @@
 			 style="<?php echo $_pmab_meta_woo_category == '' ? 'display: none;' : ''; ?> padding-bottom:1rem">
 		<label for="_pmab_meta_woo_category"><?php _e( 'Product Categories', 'pmab' ); ?></label>
 		<select name="_pmab_meta_woo_category" id="_pmab_meta_woo_category">
-			<option disabled selected style="font-weight: bolder;">Select Category</option>
+			<option disabled selected>Select Category</option>
 			<?php
 			foreach ( $_pmab_woo_categories as $category ):
+				$cat_ID = $category->cat_ID;
 				?>
-				<option
-					value="<?php echo $category->cat_ID ?>" <?php selected( $_pmab_meta_woo_category, $category->cat_ID ); ?>><?php echo $category->name ?></option>
+				<option value="<?php echo $cat_ID ?>" <?php selected( $_pmab_meta_woo_category, $cat_ID ); ?>>
+					<?php echo $category->name ?></option>
 			<?php
 			endforeach; ?>
 		</select>
@@ -90,13 +96,19 @@
 					 value="<?php echo esc_attr( $_pmab_meta_specific_post ); ?>" size="25"/>
 
 	</div>
-	<div class="specificwoocategory"
-			 style="<?php echo $_pmab_meta_specific_woocategory === '' ? 'display: none;' : ''; ?> padding-bottom:1rem ">
-		<label for="_pmab_meta_specific_woocategory"><?php _e( 'IDs', 'pmab' ); ?> <span
-				style="font-size:8px;">Comma Seperated</span></label>
-		<input type="text" id="_pmab_meta_specific_woocategory" name="_pmab_meta_specific_woocategory"
-					 value="<?php echo esc_attr( $_pmab_meta_specific_woocategory ); ?>" size="25"/>
-
+	<div class="specificwoocategory">
+		<label for="_pmab_meta_specific_woocategory"><?php _e( 'Product categories', 'pmab' ); ?></label>
+		<?php $_pmab_meta_specific_woocategory = explode( ',', str_replace( ' ', '', $_pmab_meta_specific_woocategory ) ); ?>
+		<select class="pmab-multi-select" name="_pmab_meta_specific_woocategory[]" multiple id="_pmab_meta_specific_woocategory">
+			<?php
+			foreach ( $_pmab_woo_categories as $category ):
+				$cat_ID = $category->cat_ID;
+				?>
+				<option <?php selected( in_array( $cat_ID, $_pmab_meta_specific_woocategory ) ) ?> value="<?php echo $cat_ID ?>">
+				<?php echo $category->name ?></option>
+			<?php
+			endforeach; ?>
+		</select>
 	</div>
 	<div class="tags" style="<?php echo $_pmab_meta_tags === '' ? 'display: none;' : ''; ?> padding-bottom:1rem">
 		<label for="_pmab_meta_tags"><?php _e( 'Tag IDs', 'pmab' ); ?> <span
@@ -118,10 +130,10 @@
 			<option style="display:none;" value="woo_hook" <?php selected( $_pmab_meta_tag_n_fix, 'woo_hook' ); ?>>Custom
 				Hooks
 			</option>
-			<option value="h2_after" <?php selected( $_pmab_meta_tag_n_fix, 'h2_after' ); ?>>After
+			<option class="pmab-no-woo" value="h2_after" <?php selected( $_pmab_meta_tag_n_fix, 'h2_after' ); ?>>After
 				Heading
 			</option>
-			<option value="p_after" <?php selected( $_pmab_meta_tag_n_fix, 'p_after' ); ?>>After
+			<option class="pmab-no-woo" value="p_after" <?php selected( $_pmab_meta_tag_n_fix, 'p_after' ); ?>>After
 				Blocks
 			</option>
 		</select>

@@ -62,7 +62,7 @@ class PMAB_Admin_Post {
 				'parent_item_colon'  => '',
 			),
 
-			'public'              => true,
+			'public'              => false,
 			'show_ui'             => true,
 			'show_in_menu'        => true,
 			'publicly_queryable'  => false,
@@ -114,6 +114,10 @@ class PMAB_Admin_Post {
 
 		if ( ! empty( $_POST['_pmab_meta_category'] ) && is_array( $_POST['_pmab_meta_category'] ) ) {
 			$_POST['_pmab_meta_category'] = implode( ',', $_POST['_pmab_meta_category'] );
+		}
+
+		if ( ! empty( $_POST['_pmab_meta_specific_woocategory'] ) && is_array( $_POST['_pmab_meta_specific_woocategory'] ) ) {
+			$_POST['_pmab_meta_specific_woocategory'] = implode( ',', $_POST['_pmab_meta_specific_woocategory'] );
 		}
 
 		foreach ( $this->post_metas as $post_meta ) {

@@ -1,6 +1,14 @@
 jQuery( document ).ready( function ( $ ) {
-	$( '.js-example-basic-single' ).select2();
+
+	$( '.pmab-multi-select' ).select2();
+
 	$( '#_pmab_meta_type' ).on( 'change', function () {
+		if ( this.value.indexOf( 'woo' ) === 0 ) {
+			$( '.pmab-no-woo' ).hide();
+		} else {
+			$( '.pmab-no-woo' ).show();
+		}
+
 		if ( this.value === 'post' || this.value === 'page' || this.value === 'woo_product' ) {
 			$( '.specificpost' ).show();
 		} else {
@@ -32,6 +40,9 @@ jQuery( document ).ready( function ( $ ) {
 			$( '#_pmab_meta_tags' ).val( '' );
 		}
 	} );
+
+	$( '#_pmab_meta_type' ).change();
+
 	$( '#_pmab_meta_tag_n_fix' ).on( 'change', function () {
 		if ( this.value === 'h2_after' || this.value === 'p_after' ) {
 			$( '.certain_num' ).show();
