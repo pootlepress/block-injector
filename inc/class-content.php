@@ -72,6 +72,8 @@ if ( ! class_exists( 'class-content' ) ) {
 
 			$queried_object = get_queried_object();
 
+//			echo '<pre>' . print_r( $queried_object, 1 ) . '</pre>';
+
 			$location_terms = [ 'any' ];
 
 			$query_args = array(
@@ -197,14 +199,14 @@ if ( ! class_exists( 'class-content' ) ) {
 
 		private function push_content_post_page( $pmab_meta ) {
 
-			if ( is_home() ) {
+			if ( is_home() || is_category() || is_tag() ) {
 				extract( $pmab_meta );
 				add_action(
 					'wp_footer',
 					static function ( $content ) use ( $p, $tag, $num_of_blocks ) {
 						$selector = '';
 						if ( 'h2' !== $tag ) {
-							$selector = ".site-main .type-post";
+							$selector = ".post.status-publish";
 						}
 						PMAB_Content::block_inject_div_with_script( $tag, $num_of_blocks, $p, $selector );
 					},
