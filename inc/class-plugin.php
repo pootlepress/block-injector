@@ -11,6 +11,21 @@ if ( ! class_exists( 'class-plugin' ) ) {
 	 */
 	class PMAB_Plugin {
 
+		/** @var self Instance */
+		private static $_instance;
+
+		/**
+		 * Returns instance of current calss
+		 * @return self Instance
+		 */
+		public static function instance( $file = '' ) {
+			if ( ! self::$_instance ) {
+				self::$_instance = new self( $file );
+			}
+
+			return self::$_instance;
+		}
+
 		/**
 		 * Absolute path to the main plugin file.
 		 *
@@ -30,7 +45,7 @@ if ( ! class_exists( 'class-plugin' ) ) {
 		 *
 		 * @param string $plugin_file_path Absolute path to the main plugin file.
 		 */
-		public function __construct( string $plugin_file_path ) {
+		protected function __construct( string $plugin_file_path ) {
 			$this->file = $plugin_file_path;
 			$this->dir  = dirname( $plugin_file_path );
 		}

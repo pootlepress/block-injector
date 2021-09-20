@@ -43,6 +43,7 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 		public function init(): void {
 			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
 			add_action( 'init', array( $this, 'register_post_type' ) );
+			add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 			add_action( "manage_{$this->post_type}_posts_columns", array( $this, 'posts_columns' ) );
 			add_action( "manage_{$this->post_type}_posts_custom_column", array( $this, 'posts_columns_filter' ), 10, 2 );
 			add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
@@ -92,6 +93,22 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 					'label'             => __( 'Block injector location', 'pmab' ),
 				]
 			);
+		}
+
+		public function admin_menu() {
+			add_submenu_page(
+				"edit.php?post_type=$this->post_type",
+				__( 'How to use Block injector', 'pmab' ),
+				__( 'Introduction', 'pmab' ),
+				'manage_options',
+				'block-injector-intro',
+				[ $this, 'admin_page_tpl' ],
+				10
+			);
+		}
+
+		public function admin_page_tpl() {
+			require 'tpl-admin-page.php';
 		}
 
 		/**
