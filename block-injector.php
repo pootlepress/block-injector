@@ -3,8 +3,9 @@
  * Plugin Name: Block Injector
  * Description: A WordPress plugin that lets you inject content into Post and Page content.
  * Version: 1.0.0
+ * Plugin URI: https://pootlepress.com/block-injector/
  * Author: PootlePress
- * Author URI: https://github.com/pootlepress/put-blocks-anywhere
+ * Author URI: https://pootlepress.com/
  * Text Domain: block-injector
  *
  * @package Block Injector
