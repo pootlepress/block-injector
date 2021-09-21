@@ -34,7 +34,7 @@ if ( ! function_exists( 'block_injector_fs' ) ) {
 
 			$block_injector_fs = fs_dynamic_init( array(
 				'id'                  => '9001',
-				'slug'                => 'blockinjector',
+				'slug'                => 'block-injector',
 				'type'                => 'plugin',
 				'public_key'          => 'pk_dc610c4658e1657b7bd55e7b9ffff',
 				'is_premium'          => true,
