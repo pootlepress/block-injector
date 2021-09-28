@@ -48,6 +48,27 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 			add_action( "manage_{$this->post_type}_posts_custom_column", array( $this, 'posts_columns_filter' ), 10, 2 );
 			add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 			add_action( 'save_post', array( $this, 'save_post' ) );
+			add_action( 'wp_ajax_pmab_posts', array( $this, 'admin_ajax_pmab_posts' ) );
+		}
+
+		public function admin_ajax_pmab_posts() {
+			$resp = [
+				'post'    => [],
+				'page'    => [],
+				'product' => [],
+			];
+
+			global $wpdb;
+
+			$posts = $wpdb->get_results(
+				"SELECT ID, post_title as title, post_type as type FROM {$wpdb->prefix}posts " .
+				"WHERE post_type IN ( 'post', 'page', 'product' ) ORDER BY title ASC LIMIT 999" );
+
+			foreach ( $posts as $p ) {
+				$resp[$p->type][] = [$p->ID, $p->title];
+			}
+			header('Content-type: application/json');
+			die( json_encode( $resp ) );
 		}
 
 		/**
@@ -60,6 +81,14 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 				$this->plugin->asset_url( 'js/src/editor.js' ),
 				array( 'lodash', 'react', 'wp-block-editor', ),
 				$this->plugin->asset_version()
+			);
+
+			wp_localize_script(
+				'put-me-anywhere-block-js',
+				'pmabProps',
+				[
+					'adminAjax' => admin_url( '/admin-ajax.php' ),
+				]
 			);
 
 			wp_enqueue_script(
@@ -157,7 +186,7 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 				'orderby'    => 'name',
 				'exclude'    => '',
 				'include'    => '',
-				'parent'     => 0
+//				'parent'     => 0
 			);
 			$categories    = get_categories( $args );
 			$wooargs       = array(
@@ -166,7 +195,7 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 				'orderby'    => 'name',
 				'exclude'    => '',
 				'include'    => '',
-				'parent'     => 0
+//				'parent'     => 0
 			);
 			$woocategories = get_categories( $wooargs );
 			// Display the form, using the current value & Template .

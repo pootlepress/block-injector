@@ -112,12 +112,16 @@ class PMAB_Admin_Post {
 
 	protected function save_metas( $post_id ) {
 
-		if ( ! empty( $_POST['_pmab_meta_category'] ) && is_array( $_POST['_pmab_meta_category'] ) ) {
-			$_POST['_pmab_meta_category'] = implode( ',', $_POST['_pmab_meta_category'] );
-		}
+		$multi_values = [
+			'_pmab_meta_category',
+			'_pmab_meta_specific_woocategory',
+			'_pmab_meta_specific_post',
+		];
 
-		if ( ! empty( $_POST['_pmab_meta_specific_woocategory'] ) && is_array( $_POST['_pmab_meta_specific_woocategory'] ) ) {
-			$_POST['_pmab_meta_specific_woocategory'] = implode( ',', $_POST['_pmab_meta_specific_woocategory'] );
+		foreach ( $multi_values as $multi_value ) {
+			if ( ! empty( $_POST[$multi_value] ) && is_array( $_POST[$multi_value] ) ) {
+				$_POST[$multi_value] = implode( ',', $_POST[$multi_value] );
+			}
 		}
 
 		foreach ( $this->post_metas as $post_meta ) {

@@ -168,7 +168,7 @@ if ( ! function_exists( 'pmab_filter_exclude_content' ) ) {
 			if ( $tag == 'top' && is_product() ) {
 				pmab_custom_hook_content( 'woocommerce_before_single_product', $content, $tag, 1, $p );
 
-				return;
+				return $content;
 			} else {
 				return pmab_update_content( $content, $tag, $num_of_blocks, $p );
 			}
@@ -180,7 +180,7 @@ if ( ! function_exists( 'pmab_filter_exclude_content' ) ) {
 		if ( $tag == 'top' && is_product() ) {
 			pmab_custom_hook_content( 'woocommerce_before_single_product', $content, $tag, 1, $p );
 
-			return;
+			return $content;
 		} else {
 			return pmab_update_content( $content, $tag, $num_of_blocks, $p );
 		}

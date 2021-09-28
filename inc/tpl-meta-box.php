@@ -10,6 +10,36 @@
 	#pmab_metabox .select2-container {
 		width: 100% !important;
 	}
+
+	#pmab_metabox .select2-selection--multiple .select2-selection__rendered,
+	#pmab_metabox .select2-search--inline textarea.select2-search__field {
+		/*display: inline-block;*/
+		/*margin: 0;*/
+		/*vertical-align: middle;*/
+	}
+
+	span.select2-search.select2-search--inline {
+		min-width: 7%;
+		display: inline-block;
+		margin-bottom: .1em;
+	}
+
+	#pmab_metabox .select2-search--inline textarea.select2-search__field {
+		/*margin-left: 4px;*/
+		/*min-width: 10px;*/
+	}
+
+	#pmab_metabox .select2-selection__choice {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: calc(100% - 1em);
+		margin: 5px 0 0 5px;
+	}
+
+	#pmab_metabox ul.select2-selection__rendered {
+		display: inline;
+	}
 </style>
 <div id="pmab_metabox">
 	<div class="" style="padding-bottom:1rem;">
@@ -34,11 +64,10 @@
 				</option>
 				<option value="woo_all_products" <?php selected( $_pmab_meta_type, 'woo_all_products' ); ?>>All Products
 				</option>
-				<option value="woo_pro_category" <?php selected( $_pmab_meta_type, 'woo_pro_category' ); ?>>Products by
-					Category
+				<option value="woo_product" <?php selected( $_pmab_meta_type, 'woo_product' ); ?>>Specific Product</option>
+				<option value="woo_pro_category" <?php selected( $_pmab_meta_type, 'woo_pro_category' ); ?>>Products by Category
 				</option>
 				<option value="woo_pro_tags" <?php selected( $_pmab_meta_type, 'woo_pro_tags' ); ?>>Products by Tag</option>
-				<option value="woo_product" <?php selected( $_pmab_meta_type, 'woo_product' ); ?>>Specific Product</option>
 				<option value="woo_all_category_pages" <?php selected( $_pmab_meta_type, 'woo_all_category_pages' ); ?>>All
 					Category Pages
 				</option>
@@ -88,13 +117,13 @@
 			endforeach; ?>
 		</select>
 	</div>
-	<div class="specificpost"
+	<div class="pmab-specific-posts"
 			 style="<?php echo $_pmab_meta_specific_post == '' ? 'display: none;' : ''; ?> padding-bottom:1rem ">
-		<label for="_pmab_meta_specific_post"><?php _e( 'IDs', 'pmab' ); ?> <span
-				style="font-size:8px;">Comma Seperated</span></label>
-		<input type="text" id="_pmab_meta_specific_post" name="_pmab_meta_specific_post"
-					 value="<?php echo esc_attr( $_pmab_meta_specific_post ); ?>" size="25"/>
-
+		<label for="_pmab_meta_specific_post"><?php _e( 'Select', 'pmab' ); ?></label>
+		<select type="text" id="_pmab_meta_specific_post" multiple name="_pmab_meta_specific_post[]"
+						class="pmab-multi-select" data-value="<?php echo $_pmab_meta_specific_post ?>">
+			<?php ?>
+		</select>
 	</div>
 	<div class="specificwoocategory">
 		<label for="_pmab_meta_specific_woocategory"><?php _e( 'Product categories', 'pmab' ); ?></label>
@@ -127,8 +156,11 @@
 			<option value="bottom_after" <?php selected( $_pmab_meta_tag_n_fix, 'bottom_after' ); ?>>
 				Bottom
 			</option>
-			<option style="display:none;" value="woo_hook" <?php selected( $_pmab_meta_tag_n_fix, 'woo_hook' ); ?>>Custom
-				Hooks
+			<option class="pmab-product-options" value="before_add_to_cart_form" <?php selected( $_pmab_meta_tag_n_fix, 'before_add_to_cart_form' ); ?>>
+				Before add to cart
+			</option>
+			<option class="pmab-product-options" value="after_add_to_cart_form" <?php selected( $_pmab_meta_tag_n_fix, 'after_add_to_cart_form' ); ?>>
+				After add to cart
 			</option>
 			<option class="pmab-no-woo" value="h2_after" <?php selected( $_pmab_meta_tag_n_fix, 'h2_after' ); ?>>After
 				Heading
@@ -155,7 +187,7 @@
 		<input type="number" id="_pmab_meta_number_of_blocks" name="_pmab_meta_number_of_blocks"
 					 value="<?php echo esc_attr( $_pmab_meta_number_of_blocks ); ?>" size="25"/>
 	</div>
-	<div class="specificpost_exclude"
+	<div class="pmab-specific-posts-exclude"
 			 style="padding-bottom:1rem">
 		<label for="_pmab_meta_specific_post_exclude"><?php _e( 'Post IDs to exclude', 'pmab' ); ?> <span
 				style="font-size:8px;">Comma Seperated</span></label>
