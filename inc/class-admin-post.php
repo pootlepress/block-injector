@@ -32,6 +32,7 @@ class PMAB_Admin_Post {
 	protected $post_metas = [
 		'_pmab_meta_number_of_blocks',
 		'_pmab_meta_specific_post',
+		'_pmab_meta_priority',
 		'_pmab_meta_specific_woocategory',
 		'_pmab_meta_specific_post_exclude',
 		'_pmab_meta_tags',

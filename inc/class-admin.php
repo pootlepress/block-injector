@@ -65,9 +65,9 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 				"WHERE post_type IN ( 'post', 'page', 'product' ) ORDER BY title ASC LIMIT 999" );
 
 			foreach ( $posts as $p ) {
-				$resp[$p->type][] = [$p->ID, $p->title];
+				$resp[ $p->type ][] = [ $p->ID, $p->title ];
 			}
-			header('Content-type: application/json');
+			header( 'Content-type: application/json' );
 			die( json_encode( $resp ) );
 		}
 
@@ -175,6 +175,7 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 			$_pmab_meta_type                  = get_post_meta( $post->ID, '_pmab_meta_type', true );
 			$_pmab_meta_type2                 = get_post_meta( $post->ID, '_pmab_meta_type2', true );
 			$_pmab_meta_tag_n_fix             = get_post_meta( $post->ID, '_pmab_meta_tag_n_fix', true );
+			$_pmab_meta_priority              = get_post_meta( $post->ID, '_pmab_meta_priority', true );
 			$_pmab_meta_hook                  = get_post_meta( $post->ID, '_pmab_meta_hook', true );
 			$_pmab_meta_expiredate            = get_post_meta( $post->ID, '_pmab_meta_expiredate', true );
 			$_pmab_meta_startdate             = get_post_meta( $post->ID, '_pmab_meta_startdate', true );
@@ -211,6 +212,7 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 					'_pmab_meta_specific_post_exclude' => $_pmab_meta_specific_post_exclude,
 					'_pmab_meta_tags'                  => $_pmab_meta_tags,
 					'_pmab_meta_tag_n_fix'             => $_pmab_meta_tag_n_fix,
+					'_pmab_meta_priority'             => $_pmab_meta_priority,
 					'_pmab_meta_hook'                  => $_pmab_meta_hook,
 					'_pmab_meta_expiredate'            => $_pmab_meta_expiredate,
 					'_pmab_meta_startdate'             => $_pmab_meta_startdate,
@@ -238,9 +240,9 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 			$meta = is_string( $meta ) ? explode( ',', str_replace( ' ', '', $meta ) ) : $meta;
 
 			$terms = get_terms( [
-				'taxonomy' => [ 'product_cat', 'product_tag', 'category', 'post_tag' ],
+				'taxonomy'   => [ 'product_cat', 'product_tag', 'category', 'post_tag' ],
 				'include'    => $meta,
-				'hide_empty'  => false,
+				'hide_empty' => false,
 			] );
 
 			$meta = wp_list_pluck( $terms, 'name' );
@@ -278,12 +280,13 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 
 			if ( ! empty( $additional_metadata[ $column ][ $meta ] ) ) {
 				$metadata_to_fetch = $additional_metadata[ $column ][ $meta ];
-				$meta = get_post_meta( $post, $metadata_to_fetch[0], 'single' );
+				$meta              = get_post_meta( $post, $metadata_to_fetch[0], 'single' );
 
 				$callback = "posts_columns_filter_metadata_{$metadata_to_fetch[1]}";
 				if ( method_exists( $this, $callback ) ) {
 					$meta = $this->$callback( $meta );
 				}
+
 				return ' (<small>' . $meta . '</small>)';
 			}
 		}

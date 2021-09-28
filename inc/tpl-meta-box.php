@@ -162,11 +162,38 @@
 			<option class="pmab-product-options" value="after_add_to_cart_form" <?php selected( $_pmab_meta_tag_n_fix, 'after_add_to_cart_form' ); ?>>
 				After add to cart
 			</option>
+			<option class="pmab-product-options" value="product_tabs" <?php selected( $_pmab_meta_tag_n_fix, 'product_tabs' ); ?>>
+				Before product tabs
+			</option>
+			<option class="pmab-product-options" value="product_after_tabs" <?php selected( $_pmab_meta_tag_n_fix, 'product_after_tabs' ); ?>>
+				After product tabs
+			</option>
+			<option class="pmab-product-options" value="product_meta_start" <?php selected( $_pmab_meta_tag_n_fix, 'product_meta_start' ); ?>>
+				Before category text
+			</option>
+			<option class="pmab-product-options" value="product_meta_end" <?php selected( $_pmab_meta_tag_n_fix, 'product_meta_end' ); ?>>
+				After category text
+			</option>
 			<option class="pmab-no-woo" value="h2_after" <?php selected( $_pmab_meta_tag_n_fix, 'h2_after' ); ?>>After
 				Heading
 			</option>
 			<option class="pmab-no-woo" value="p_after" <?php selected( $_pmab_meta_tag_n_fix, 'p_after' ); ?>>After
 				Blocks
+			</option>
+		</select>
+	</div>
+
+	<div style="padding-bottom:1rem;">
+		<label for="_pmab_meta_priority"><?php _e( 'Priority', 'pmab' ); ?></label>
+		<select name="_pmab_meta_priority" id="_pmab_meta_priority" class="postbox col-12">
+			<option class="pmab-product-options" value="10" <?php selected( $_pmab_meta_priority, '10' ); ?>>
+				Default
+			</option>
+			<option class="pmab-product-options" value="0" <?php selected( $_pmab_meta_priority, '0' ); ?>>
+				Show before others
+			</option>
+			<option class="pmab-product-options" value="20" <?php selected( $_pmab_meta_priority, '20' ); ?>>
+				Show after others
 			</option>
 		</select>
 	</div>

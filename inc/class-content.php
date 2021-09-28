@@ -80,6 +80,9 @@ if ( ! class_exists( 'class-content' ) ) {
 				'post_type'      => 'block_injector',
 				'post_status'    => 'publish',
 				'posts_per_page' => - 1,
+				'order' => 'ASC',
+				'orderby' => 'meta_value',
+				'meta_key' => '_pmab_meta_priority',
 			);
 
 			if ( $queried_object ) {
@@ -111,13 +114,16 @@ if ( ! class_exists( 'class-content' ) ) {
 
 		public function extract_block_injectors_with_metas() {
 			foreach ( $this->get_block_injectors() as $p ) {
+
 				$specific_post_exclude = get_post_meta( $p->ID, '_pmab_meta_specific_post_exclude', true );
+				$tag_type      = get_post_meta( $p->ID, '_pmab_meta_tag_n_fix', true );
 				$pmab_meta             = array(
 					'p'                     => $p,
 					'num_of_blocks'         => get_post_meta( $p->ID, '_pmab_meta_number_of_blocks', true ),
 					'specific_post_exclude' => $specific_post_exclude,
 					'thisposts_exclude'     => is_string( $specific_post_exclude ) ? explode( ',', $specific_post_exclude ) : array(),
-					'tag_type'              => get_post_meta( $p->ID, '_pmab_meta_tag_n_fix', true ),
+					'priority'              => get_post_meta( $p->ID, '_pmab_meta_priority', true ),
+					'tag_type'              => $tag_type,
 					'startdate'             => get_post_meta( $p->ID, '_pmab_meta_startdate', true ),
 					'expiredate'            => get_post_meta( $p->ID, '_pmab_meta_expiredate', true ),
 					'inject_content_type'   => get_post_meta( $p->ID, '_pmab_meta_type', true ),
@@ -128,16 +134,24 @@ if ( ! class_exists( 'class-content' ) ) {
 					'woo_hooks'             => get_post_meta( $p->ID, '_pmab_meta_hook', true ),
 				);
 
+				echo "<pre>$p->post_title $pmab_meta[priority]</pre>";
+
 				$specific_post              = get_post_meta( $p->ID, '_pmab_meta_specific_post', true );
 				$pmab_meta['specific_post'] = is_string( $specific_post ) ? explode( ',', $specific_post ) : array();
 				$pmab_meta['dateandtime']   = pmab_expire_checker( $pmab_meta['startdate'], $pmab_meta['expiredate'] );
 
 				$num_of_blocks = get_post_meta( $p->ID, '_pmab_meta_number_of_blocks', true );
-				$tag_type      = get_post_meta( $p->ID, '_pmab_meta_tag_n_fix', true );
-				$tag_type      = is_string( $tag_type ) ? explode( '_', $tag_type ) : array();
 
-				if ( ! empty ( $tag_type ) && isset( $tag_type[0] ) ) {
-					$tag              = $tag_type[0];
+				$tag_map = [
+					'top_before'   => 'top',
+					'bottom_after' => 'bottom',
+					'h2_after'     => 'h2',
+					'p_after'      => 'p',
+				];
+
+				$tag = isset( $tag_map[ $tag_type ] ) ? $tag_map[ $tag_type ] : $tag_type;
+
+				if ( $tag ) {
 					$pmab_meta['tag'] = $tag;
 					switch ( $tag ) {
 						case 'top':
@@ -166,7 +180,7 @@ if ( ! class_exists( 'class-content' ) ) {
 				data-tag='<?php echo $tag ?>'
 				data-tag_selector='<?php echo $tag_selector ?>'
 				data-number_of_blocks='<?php echo $num_of_blocks ?>'>
-				<?php echo $p->post_content ?>
+				<?php PMAB_Content::output_injection( $p ); ?>
 			</div>
 			<script>
 				(
@@ -241,9 +255,9 @@ if ( ! class_exists( 'class-content' ) ) {
 			} else {
 				add_filter(
 					'woocommerce_after_shop_loop',
-					static function ( $content ) use ( $p, $tag, $num_of_blocks ) {
+					static function ( $content ) use ( $p ) {
 						if ( is_shop() ) {
-							echo $p->post_content;
+							PMAB_Content::output_injection( $p );
 						}
 					},
 					9999
@@ -274,7 +288,7 @@ if ( ! class_exists( 'class-content' ) ) {
 					'woocommerce_after_shop_loop',
 					static function ( $content ) use ( $p, $tag, $specific_woocategory ) {
 						if ( is_product_category( $specific_woocategory ) ) {
-							echo $p->post_content;
+							PMAB_Content::output_injection( $p );
 						}
 					},
 					9999
@@ -283,22 +297,35 @@ if ( ! class_exists( 'class-content' ) ) {
 
 		}
 
+		/**
+		 * Outputs injection content
+		 * @param WP_Post $injection
+		 */
+		private static function output_injection( $injection ) {
+			echo "<div style='clear:both;'>$injection->post_content</div>";
+		}
+
 		private function _push_content_product( $pmab_meta ) {
 			extract( $pmab_meta );
 
 			$hooks = [
-				'top'    => ['woocommerce_before_single_product', 0],
-				'bottom' => ['woocommerce_after_single_product', 999],
-				'before_add_to_cart_form' => ['woocommerce_before_add_to_cart_form', 0],
-				'after_add_to_cart_form' => ['woocommerce_after_add_to_cart_form', 999],
+				'top'                     => [ 'woocommerce_before_single_product', 0 ],
+				'bottom'                  => [ 'woocommerce_after_single_product', 999 ],
+				'before_add_to_cart_form' => [ 'woocommerce_before_add_to_cart_form', 0 ],
+				'after_add_to_cart_form'  => [ 'woocommerce_after_add_to_cart_form', 999 ],
+				'product_tabs'            => [ 'woocommerce_product_tabs', 0 ],
+				'product_after_tabs'      => [ 'woocommerce_product_after_tabs', 999 ],
+				'product_meta_start'      => [ 'woocommerce_product_meta_start', 0 ],
+				'product_meta_end'        => [ 'woocommerce_product_meta_end', 999 ],
 			];
 
 			if ( ! empty( $hooks[ $tag ] ) ) {
 				$hook = $hooks[ $tag ];
 				add_filter(
 					$hook[0],
-					static function ( $content ) use ( $p, $tag, $specific_post ) {
-						echo $p->post_content;
+					static function ( $param ) use ( $p ) {
+						PMAB_Content::output_injection( $p );
+						return $param;
 					},
 					$hook[1]
 				);
@@ -351,6 +378,7 @@ if ( ! class_exists( 'class-content' ) ) {
 				'tags'                  => $tags,
 				'category'              => get_post_meta( $p->ID, '_pmab_meta_category', true ),
 				'woo_category'          => get_post_meta( $p->ID, '_pmab_meta_woo_category', true ),
+				'priority'              => get_post_meta( $p->ID, '_pmab_meta_priority', true ),
 				'tag_type'              => get_post_meta( $p->ID, '_pmab_meta_tag_n_fix', true ),
 				'woo_hooks'             => get_post_meta( $p->ID, '_pmab_meta_hook', true ),
 			);
@@ -487,7 +515,7 @@ if ( ! class_exists( 'class-content' ) ) {
 				);
 
 
-//				echo "<h6>$p->post_title : $inject_content_type $tag</h6>";
+//				echo "<pre>$p->post_title : $inject_content_type $tag</pre>";
 
 				$callback = "push_content_$inject_content_type";
 				if ( method_exists( $this, $callback ) ) {

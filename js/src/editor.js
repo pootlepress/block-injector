@@ -11,11 +11,9 @@ jQuery( document ).ready( function ( $ ) {
 		}
 
 		var posts = pmabProps.allPosts[postType];
-		var preselectedPosts = $postsPicker.data('value');
+		var preselectedPosts = '' + $postsPicker.data('value');
 		preselectedPosts = ( preselectedPosts || '' ).split(',');
 		var selectedPosts = [];
-
-		console.log( postType, posts, $postsPicker.data('value') );
 
 		if ( posts ) {
 			console.log( posts );
