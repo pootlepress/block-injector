@@ -134,8 +134,6 @@ if ( ! class_exists( 'class-content' ) ) {
 					'woo_hooks'             => get_post_meta( $p->ID, '_pmab_meta_hook', true ),
 				);
 
-				echo "<pre>$p->post_title $pmab_meta[priority]</pre>";
-
 				$specific_post              = get_post_meta( $p->ID, '_pmab_meta_specific_post', true );
 				$pmab_meta['specific_post'] = is_string( $specific_post ) ? explode( ',', $specific_post ) : array();
 				$pmab_meta['dateandtime']   = pmab_expire_checker( $pmab_meta['startdate'], $pmab_meta['expiredate'] );
