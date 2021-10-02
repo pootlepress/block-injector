@@ -27,6 +27,45 @@ if ( ! class_exists( 'class-content' ) ) {
 		public function __construct() {
 			add_action( 'template_redirect', [ $this, 'extract_block_injectors_with_metas' ] );
 			add_action( 'template_redirect', [ $this, 'push_to_specific_content' ], 11 );
+			add_action( 'wp_print_footer_scripts', [ $this, 'footer_scripts' ], 11 );
+		}
+
+		public function footer_scripts() {
+			?>
+			<script>
+				!function () {
+					var jsBlocks = document.querySelectorAll( '.block_inject_div_js' );
+
+					jsBlocks.forEach( el => el.parentNode.removeChild( el ) );
+
+					window.addEventListener( 'load', ( event ) => {
+						for ( let i = jsBlocks.length - 1; i >= 0; i -- ) {
+							const target = jsBlocks[i];
+
+							console.log( target );
+
+							var tag_selector = target.dataset.tag_selector;
+							if ( !tag_selector ) {
+								tag_selector = target.dataset.tag === "h2" ?
+									".page-description h1,.page-description  h2,.page-description h3,.page-description h4,.page-description h5,.page-description h6" :
+									".page-description p,.site-main p";
+							}
+							var inserted = false;
+							var matchedBlocks = document.querySelectorAll( tag_selector );
+							matchedBlocks[0].parentNode.insertBefore( target, matchedBlocks[0] );
+							var position = target.dataset.number_of_blocks;
+							matchedBlocks.forEach( ( v, k ) => {
+								if ( position === k + 1 || k + 1 === matchedBlocks.length && position > 9999 ) {
+									v.after( target );
+									inserted = true;
+								}
+							} );
+						}
+					} );
+				}();
+			</script>
+
+			<?php
 		}
 
 		private function _post_id_in_list( $post_id, $included ) {
@@ -80,9 +119,9 @@ if ( ! class_exists( 'class-content' ) ) {
 				'post_type'      => 'block_injector',
 				'post_status'    => 'publish',
 				'posts_per_page' => - 1,
-				'order' => 'ASC',
-				'orderby' => 'meta_value',
-				'meta_key' => '_pmab_meta_priority',
+				'order'          => 'ASC',
+				'orderby'        => 'meta_value_num',
+				'meta_key'       => '_pmab_meta_priority',
 			);
 
 			if ( $queried_object ) {
@@ -116,7 +155,7 @@ if ( ! class_exists( 'class-content' ) ) {
 			foreach ( $this->get_block_injectors() as $p ) {
 
 				$specific_post_exclude = get_post_meta( $p->ID, '_pmab_meta_specific_post_exclude', true );
-				$tag_type      = get_post_meta( $p->ID, '_pmab_meta_tag_n_fix', true );
+				$tag_type              = get_post_meta( $p->ID, '_pmab_meta_tag_n_fix', true );
 				$pmab_meta             = array(
 					'p'                     => $p,
 					'num_of_blocks'         => get_post_meta( $p->ID, '_pmab_meta_number_of_blocks', true ),
@@ -174,38 +213,12 @@ if ( ! class_exists( 'class-content' ) ) {
 			$num_of_blocks = $tag == "p" ? $num_of_blocks : $num_of_blocks + 1;
 			?>
 			<div
-				id='block_inject_div-<?php echo $p->ID ?>' class='block_inject_div'
+				id='block_inject_div-<?php echo $p->ID ?>' class='block_inject_div_js'
 				data-tag='<?php echo $tag ?>'
 				data-tag_selector='<?php echo $tag_selector ?>'
 				data-number_of_blocks='<?php echo $num_of_blocks ?>'>
 				<?php PMAB_Content::output_injection( $p ); ?>
 			</div>
-			<script>
-				(
-					function () {
-						var target = document.querySelector( '#block_inject_div-<?php echo $p->ID ?>' );
-						window.addEventListener( 'load', ( event ) => {
-							var tag_selector = target.dataset.tag_selector;
-							if ( !tag_selector ) {
-								tag_selector = target.dataset.tag === "h2" ?
-									".page-description h1,.page-description  h2,.page-description h3,.page-description h4,.page-description h5,.page-description h6" :
-									".page-description p,.site-main p";
-							}
-							var inserted = false;
-							var matchedBlocks = document.querySelectorAll( tag_selector );
-							console.log( matchedBlocks );
-							matchedBlocks[0].parentNode.insertBefore( target, matchedBlocks[0] );
-							var position = target.dataset.number_of_blocks;
-							matchedBlocks.forEach( ( v, k ) => {
-								if ( position === k + 1 || k + 1 === matchedBlocks.length && position > 9999 ) {
-									v.after( target );
-									inserted = true;
-								}
-							} );
-						} );
-					}
-				)();
-			</script>
 			<?php
 		}
 
@@ -297,6 +310,7 @@ if ( ! class_exists( 'class-content' ) ) {
 
 		/**
 		 * Outputs injection content
+		 *
 		 * @param WP_Post $injection
 		 */
 		private static function output_injection( $injection ) {
@@ -323,6 +337,7 @@ if ( ! class_exists( 'class-content' ) ) {
 					$hook[0],
 					static function ( $param ) use ( $p ) {
 						PMAB_Content::output_injection( $p );
+
 						return $param;
 					},
 					$hook[1]

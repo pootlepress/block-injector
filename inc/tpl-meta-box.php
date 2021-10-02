@@ -1,10 +1,15 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
 <script type="text/JavaScript" src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <style>
-	#pmab_metabox select, #pmab_metabox input {
+	#pmab_metabox select,
+	#pmab_metabox input {
 		box-sizing: border-box;
-		border: 1px solid #757575;
 		width: 100%;
+	}
+
+	#pmab_metabox select,
+	#pmab_metabox input:not([type='range']) {
+		border: 1px solid #757575;
 	}
 
 	#pmab_metabox .select2-container {
@@ -24,6 +29,10 @@
 		margin-bottom: .1em;
 	}
 
+	.pmab-info-text {
+		font-size: 9px;
+	}
+
 	#pmab_metabox .select2-search--inline textarea.select2-search__field {
 		/*margin-left: 4px;*/
 		/*min-width: 10px;*/
@@ -39,6 +48,20 @@
 
 	#pmab_metabox ul.select2-selection__rendered {
 		display: inline;
+	}
+
+	#_pmab_meta_priority_labels {
+		display: flex;
+		justify-content: space-between;
+		text-transform: uppercase;
+		font-size: .7em;
+		opacity: .7;
+		padding: .7em 0 0;
+	}
+
+	#_pmab_meta_priority_labels option[label] {
+		flex: 50px 0;
+		text-align: center;
 	}
 </style>
 <div id="pmab_metabox">
@@ -141,7 +164,7 @@
 	</div>
 	<div class="tags" style="<?php echo $_pmab_meta_tags === '' ? 'display: none;' : ''; ?> padding-bottom:1rem">
 		<label for="_pmab_meta_tags"><?php _e( 'Tag IDs', 'pmab' ); ?> <span
-				style="font-size:8px;">Comma Seperated</span></label>
+				class="pmab-info-text">Comma Seperated</span></label>
 		<input type="text" id="_pmab_meta_tags" name="_pmab_meta_tags"
 					 value="<?php echo esc_attr( $_pmab_meta_tags ); ?>" size="25"/>
 
@@ -183,21 +206,6 @@
 		</select>
 	</div>
 
-	<div style="padding-bottom:1rem;">
-		<label for="_pmab_meta_priority"><?php _e( 'Priority', 'pmab' ); ?></label>
-		<select name="_pmab_meta_priority" id="_pmab_meta_priority" class="postbox col-12">
-			<option class="pmab-product-options" value="10" <?php selected( $_pmab_meta_priority, '10' ); ?>>
-				Default
-			</option>
-			<option class="pmab-product-options" value="0" <?php selected( $_pmab_meta_priority, '0' ); ?>>
-				Show before others
-			</option>
-			<option class="pmab-product-options" value="20" <?php selected( $_pmab_meta_priority, '20' ); ?>>
-				Show after others
-			</option>
-		</select>
-	</div>
-
 	<div class="woo_hook" style="<?php echo $_pmab_meta_hook == '' ? 'display: none;' : ''; ?> padding-bottom:1rem;">
 		<label for="_pmab_meta_hook"><b style="font-size:16px"><?php _e( 'Select Hooks', 'pmab' ); ?></b></label>
 		<select name="_pmab_meta_hook" id="_pmab_meta_hook" class="postbox col-12">
@@ -214,10 +222,35 @@
 		<input type="number" id="_pmab_meta_number_of_blocks" name="_pmab_meta_number_of_blocks"
 					 value="<?php echo esc_attr( $_pmab_meta_number_of_blocks ); ?>" size="25"/>
 	</div>
+
+	<div style="padding-bottom:1rem;">
+		<label for="_pmab_meta_priority">
+			<?php _e( 'Priority', 'pmab' ); ?>
+			<span class="pmab-info-text">Small priority values show first</span>
+		</label>
+
+		<input type="range" value="<?php echo esc_attr( $_pmab_meta_priority ); ?>" list="_pmab_meta_priority_labels"
+					 min="-25" max="25" step="5" name="_pmab_meta_priority" id="_pmab_meta_priority" class="col-12">
+
+		<datalist id="_pmab_meta_priority_labels">
+			<option value="-25" label="Show first"></option>
+			<option value="-20"></option>
+			<option value="-15"></option>
+			<option value="-10"></option>
+			<option value="-5"></option>
+			<option value="0" label="|"></option>
+			<option value="5"></option>
+			<option value="10"></option>
+			<option value="15"></option>
+			<option value="20"></option>
+			<option value="25" label="Show last"></option>
+		</datalist>
+	</div>
+
 	<div class="pmab-specific-posts-exclude"
 			 style="padding-bottom:1rem">
 		<label for="_pmab_meta_specific_post_exclude"><?php _e( 'Post IDs to exclude', 'pmab' ); ?> <span
-				style="font-size:8px;">Comma Seperated</span></label>
+				class="pmab-info-text">Comma Seperated</span></label>
 		<input type="text" id="_pmab_meta_specific_post_exclude" name="_pmab_meta_specific_post_exclude"
 					 value="<?php echo esc_attr( $_pmab_meta_specific_post_exclude ); ?>" size="25"/>
 	</div>

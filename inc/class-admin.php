@@ -201,6 +201,10 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 			$woocategories = get_categories( $wooargs );
 			// Display the form, using the current value & Template .
 
+			if ( ! $_pmab_meta_priority ) {
+				$_pmab_meta_priority = '0';
+			}
+
 			$this->view_template(
 				plugin_dir_path( __FILE__ ) . 'tpl-meta-box.php',
 				array(
