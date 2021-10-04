@@ -128,13 +128,13 @@
 
 			 style="<?php echo $_pmab_meta_woo_category == '' ? 'display: none;' : ''; ?> padding-bottom:1rem">
 		<label for="_pmab_meta_woo_category"><?php _e( 'Product Categories', 'pmab' ); ?></label>
-		<select name="_pmab_meta_woo_category" id="_pmab_meta_woo_category">
-			<option disabled selected>Select Category</option>
+		<?php $_pmab_meta_woo_category = explode( ',', str_replace( ' ', '', $_pmab_meta_woo_category ) ); ?>
+		<select class="pmab-multi-select" name="_pmab_meta_woo_category[]" id="_pmab_meta_woo_category" multiple>
 			<?php
 			foreach ( $_pmab_woo_categories as $category ):
 				$cat_ID = $category->cat_ID;
 				?>
-				<option value="<?php echo $cat_ID ?>" <?php selected( $_pmab_meta_woo_category, $cat_ID ); ?>>
+				<option <?php selected( in_array( $cat_ID, $_pmab_meta_woo_category ) ) ?> value="<?php echo $cat_ID ?>">
 					<?php echo $category->name ?></option>
 			<?php
 			endforeach; ?>

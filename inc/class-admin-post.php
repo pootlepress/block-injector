@@ -116,6 +116,7 @@ class PMAB_Admin_Post {
 		$multi_values = [
 			'_pmab_meta_category',
 			'_pmab_meta_specific_woocategory',
+			'_pmab_meta_woo_category',
 			'_pmab_meta_specific_post',
 		];
 
