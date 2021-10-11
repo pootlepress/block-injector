@@ -140,7 +140,7 @@ if ( ! class_exists( 'class-content' ) ) {
 					'category'              => get_post_meta( $p->ID, '_pmab_meta_category', true ),
 					'woo_category'          => get_post_meta( $p->ID, '_pmab_meta_woo_category', true ),
 					'tags'                  => get_post_meta( $p->ID, '_pmab_meta_tags', true ),
-					'woo_hooks'             => get_post_meta( $p->ID, '_pmab_meta_hook', true ),
+//					'woo_hooks'             => get_post_meta( $p->ID, '_pmab_meta_hook', true ),
 				);
 
 				$specific_post              = get_post_meta( $p->ID, '_pmab_meta_specific_post', true );

@@ -87,23 +87,14 @@ jQuery( document ).ready( function ( $ ) {
 	$( '#_pmab_meta_tag_n_fix' ).on( 'change', function () {
 		if ( this.value === 'h2_after' || this.value === 'p_after' ) {
 			$( '.certain_num' ).show();
-			$( '.woo_hook' ).hide();
 			$( '#_pmab_meta_hook' ).val( '' );
-		} else if ( this.value === 'woo_hook' ) {
-			$( '.woo_hook' ).show();
-			$( '.certain_num' ).hide();
-			$( '#_pmab_meta_number_of_blocks' ).val( '' );
 		} else if ( this.value === 'top_before' || this.value === 'bottom_after' ) {
 			$( '.certain_num' ).hide();
 			$( '#_pmab_meta_number_of_blocks' ).val( '' );
 			$( '#_pmab_meta_hook' ).val( '' );
-			$( '.woo_hook' ).hide();
-
 		} else {
 			$( '.certain_num' ).hide();
 			$( '#_pmab_meta_number_of_blocks' ).val( '' );
-			$( '.woo_hook' ).hide();
-
 		}
 
 	} );

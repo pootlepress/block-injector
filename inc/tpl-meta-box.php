@@ -206,14 +206,6 @@
 		</select>
 	</div>
 
-	<div class="woo_hook" style="<?php echo $_pmab_meta_hook == '' ? 'display: none;' : ''; ?> padding-bottom:1rem;">
-		<label for="_pmab_meta_hook"><b style="font-size:16px"><?php _e( 'Select Hooks', 'pmab' ); ?></b></label>
-		<select name="_pmab_meta_hook" id="_pmab_meta_hook" class="postbox col-12">
-			<option value="" style="font-weight: bolder;">Hooks</option>
-		</select>
-	</div>
-
-
 	<div class="certain_num"
 			 style=" <?php echo $_pmab_meta_number_of_blocks === '' ? 'display: none;' : ''; ?> padding-bottom:1rem"><label
 			for="_pmab_meta_number_of_blocks">

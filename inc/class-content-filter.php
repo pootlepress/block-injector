@@ -68,11 +68,7 @@ class PMAB_Content_Filter {
 		if ( array_key_exists( $inject_content_type, $checks ) ) {
 			$variables = $checks[ $inject_content_type ];
 			if ( self::check( $variables[0], $variables[1] ) ) {
-				if ( $tag_type === 'woo_hook' ) {
-					pmab_custom_hook_content( $woo_hooks, $content, $tag, $num_of_blocks, $p );
-				} else {
-					return pmab_filter_exclude_content( $thisposts_exclude, $inject_content_type2, 'page_exclude', $content, $tag, $num_of_blocks, $p );
-				}
+				return pmab_filter_exclude_content( $thisposts_exclude, $inject_content_type2, 'page_exclude', $content, $tag, $num_of_blocks, $p );
 			}
 		}
 
@@ -89,9 +85,7 @@ class PMAB_Content_Filter {
 			case 'woo_shop':
 				if ( self::check( 'is_shop' ) ) {
 
-					if ( $tag_type === 'woo_hook' ) {
-						break;
-					} else if ( $tag === 'bottom' ) {
+					if ( $tag === 'bottom' ) {
 
 						pmab_custom_hook_content( 'woocommerce_after_shop_loop', $content, $tag, 1, $p );
 						break;
@@ -161,7 +155,7 @@ class PMAB_Content_Filter {
 			'woo_category'          => get_post_meta( $p->ID, '_pmab_meta_woo_category', true ),
 			'priority'              => get_post_meta( $p->ID, '_pmab_meta_priority', true ),
 			'tag_type'              => get_post_meta( $p->ID, '_pmab_meta_tag_n_fix', true ),
-			'woo_hooks'             => get_post_meta( $p->ID, '_pmab_meta_hook', true ),
+//			'woo_hooks'             => get_post_meta( $p->ID, '_pmab_meta_hook', true ),
 		);
 	}
 
