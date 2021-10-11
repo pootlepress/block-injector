@@ -68,12 +68,11 @@ if ( ! class_exists( 'class-content' ) ) {
 			<?php
 		}
 
-		private function _post_id_in_list( $post_id, $included ) {
-			if ( is_string( $included ) ) {
-				$included = explode( ',', str_replace( ' ', '', $included ) );
-			}
-
-			return in_array( $post_id, $included );
+		private function _post_id_in_list( $post_id, $list ) {
+			return in_array(
+				$post_id,
+				PMAB_Content_Filter::maybe_explode( $list )
+			);
 		}
 
 		private function get_block_injectors() {
@@ -94,7 +93,7 @@ if ( ! class_exists( 'class-content' ) ) {
 				'meta_key'       => '_pmab_meta_priority',
 			);
 
-			if ( $queried_object ) {
+			if ( is_object( $queried_object ) ) {
 				$queried_object_type = get_class( $queried_object );
 
 				if ( 'WP_Post' === $queried_object_type && in_array( $queried_object->post_type, $this->known_query_objects ) ) {
@@ -106,15 +105,13 @@ if ( ! class_exists( 'class-content' ) ) {
 				}
 			}
 
-			if ( ! empty( $location_terms ) ) {
-				$query_args['tax_query'] = array(
-					array(
-						'taxonomy' => 'block_injector_location',
-						'field'    => 'slug',
-						'terms'    => $location_terms,
-					),
-				);
-			}
+			$query_args['tax_query'] = array(
+				array(
+					'taxonomy' => 'block_injector_location',
+					'field'    => 'slug',
+					'terms'    => $location_terms,
+				),
+			);
 
 			$block_injectors = get_posts( $query_args );
 
@@ -125,29 +122,22 @@ if ( ! class_exists( 'class-content' ) ) {
 			foreach ( $this->get_block_injectors() as $p ) {
 
 				$specific_post_exclude = get_post_meta( $p->ID, '_pmab_meta_specific_post_exclude', true );
-				$tag_type              = get_post_meta( $p->ID, '_pmab_meta_tag_n_fix', true );
-				$pmab_meta             = array(
-					'p'                     => $p,
-					'num_of_blocks'         => get_post_meta( $p->ID, '_pmab_meta_number_of_blocks', true ),
-					'specific_post_exclude' => $specific_post_exclude,
-					'thisposts_exclude'     => is_string( $specific_post_exclude ) ? explode( ',', $specific_post_exclude ) : array(),
-					'priority'              => get_post_meta( $p->ID, '_pmab_meta_priority', true ),
-					'tag_type'              => $tag_type,
-					'startdate'             => get_post_meta( $p->ID, '_pmab_meta_startdate', true ),
-					'expiredate'            => get_post_meta( $p->ID, '_pmab_meta_expiredate', true ),
-					'inject_content_type'   => get_post_meta( $p->ID, '_pmab_meta_type', true ),
-					'specific_woocategory'  => get_post_meta( $p->ID, '_pmab_meta_specific_woocategory', true ),
-					'category'              => get_post_meta( $p->ID, '_pmab_meta_category', true ),
-					'woo_category'          => get_post_meta( $p->ID, '_pmab_meta_woo_category', true ),
-					'tags'                  => get_post_meta( $p->ID, '_pmab_meta_tags', true ),
-//					'woo_hooks'             => get_post_meta( $p->ID, '_pmab_meta_hook', true ),
+
+				$pmab_meta = wp_parse_args(
+					PMAB_Content_Filter::extract_meta_for_filter_hook( $p ),
+					[
+						'p'             => $p,
+						'num_of_blocks' => get_post_meta( $p->ID, '_pmab_meta_number_of_blocks', true ),
+						'startdate'     => get_post_meta( $p->ID, '_pmab_meta_startdate', true ),
+						'expiredate'    => get_post_meta( $p->ID, '_pmab_meta_expiredate', true ),
+					]
 				);
 
-				$specific_post              = get_post_meta( $p->ID, '_pmab_meta_specific_post', true );
-				$pmab_meta['specific_post'] = is_string( $specific_post ) ? explode( ',', $specific_post ) : array();
 				$pmab_meta['dateandtime']   = pmab_expire_checker( $pmab_meta['startdate'], $pmab_meta['expiredate'] );
 
 				$num_of_blocks = get_post_meta( $p->ID, '_pmab_meta_number_of_blocks', true );
+
+				$tag = $pmab_meta['tag_type'];
 
 				$tag_map = [
 					'top_before'   => 'top',
@@ -156,13 +146,14 @@ if ( ! class_exists( 'class-content' ) ) {
 					'p_after'      => 'p',
 				];
 
-				$tag = isset( $tag_map[ $tag_type ] ) ? $tag_map[ $tag_type ] : $tag_type;
+				if ( isset( $tag_map[ $tag ] ) ) {
+					$tag = $tag_map[ $tag ];
+				}
 
 				if ( $tag ) {
 					$pmab_meta['tag'] = $tag;
 					switch ( $tag ) {
 						case 'top':
-						case 'woo':
 							$num_of_blocks = 0;
 							break;
 						case 'bottom':
@@ -173,6 +164,7 @@ if ( ! class_exists( 'class-content' ) ) {
 							break;
 					}
 				}
+
 				$pmab_meta['num_of_blocks'] = $num_of_blocks;
 
 				array_push( $this->pmab_metas, $pmab_meta );
@@ -225,8 +217,8 @@ if ( ! class_exists( 'class-content' ) ) {
 			if ( $tag === 'top' && PMAB_Content_Filter::check( 'is_shop' ) ) {
 				add_filter(
 					'woocommerce_archive_description',
-					static function ( $content ) use ( $p, $tag, $num_of_blocks ) {
-						PMAB_Content::block_inject_div_with_script( $tag, $num_of_blocks, $p );
+					static function ( $content ) use ( $p, $tag ) {
+						PMAB_Content::block_inject_div_with_script( $tag, $num_of_blocks = 0, $p );
 					},
 					0
 				);
@@ -252,9 +244,9 @@ if ( ! class_exists( 'class-content' ) ) {
 			if ( $tag === 'top' ) {
 				add_action(
 					'woocommerce_archive_description',
-					static function ( $content ) use ( $p, $tag, $num_of_blocks, $specific_woocategory ) {
+					static function ( $content ) use ( $p, $tag, $specific_woocategory ) {
 						if ( is_product_category( $specific_woocategory ) ) {
-							PMAB_Content::block_inject_div_with_script( $tag, $num_of_blocks, $p );
+							PMAB_Content::block_inject_div_with_script( $tag, $num_of_blocks = 0, $p );
 						}
 					},
 					0

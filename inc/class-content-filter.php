@@ -25,7 +25,7 @@ class PMAB_Content_Filter {
 		}
 
 		$applied_terms = wp_get_object_terms( $post_id, $taxonomy, [ 'fields' => 'ids' ] );
-		$term_ids      = explode( ',', str_replace( ' ', '', $term_ids ) );
+		$term_ids      = PMAB_Content_Filter::maybe_explode( $term_ids );
 
 		if ( is_wp_error( $applied_terms ) ) {
 			return false;
@@ -53,8 +53,6 @@ class PMAB_Content_Filter {
 	 */
 	static public function filter_hook( $content, $p, $tag, $num_of_blocks ) {
 		extract( self::extract_meta_for_filter_hook( $p ) );
-		$specific_post        = is_string( $specific_post ) ? explode( ',', $specific_post ) : array();
-		$specific_woocategory = is_string( $specific_woocategory ) ? explode( ',', $specific_woocategory ) : array();
 
 		$checks = array(
 			'woo_all_category_pages' => array( 'is_product_category', null ),
@@ -138,25 +136,34 @@ class PMAB_Content_Filter {
 	 *
 	 * @return array
 	 */
-	static private function extract_meta_for_filter_hook( $p ) {
+	static public function extract_meta_for_filter_hook( $p ) {
 		$tags = get_post_meta( $p->ID, '_pmab_meta_tags', true );
 
+		$specific_post = get_post_meta( $p->ID, '_pmab_meta_specific_post', true );
 		$specific_post_exclude = get_post_meta( $p->ID, '_pmab_meta_specific_post_exclude', true );
+		$specific_woocategory = get_post_meta( $p->ID, '_pmab_meta_specific_woocategory', true );
 
 		return array(
 			'inject_content_type'   => get_post_meta( $p->ID, '_pmab_meta_type', true ),
 			'inject_content_type2'  => get_post_meta( $p->ID, '_pmab_meta_type2', true ),
-			'specific_post'         => get_post_meta( $p->ID, '_pmab_meta_specific_post', true ),
-			'specific_woocategory'  => get_post_meta( $p->ID, '_pmab_meta_specific_woocategory', true ),
+			'specific_post'         => PMAB_Content_Filter::maybe_explode( $specific_post ),
+			'specific_woocategory'  => PMAB_Content_Filter::maybe_explode( $specific_woocategory ),
 			'specific_post_exclude' => $specific_post_exclude,
-			'thisposts_exclude'     => is_string( $specific_post_exclude ) ? explode( ',', $specific_post_exclude ) : array(),
+			'thisposts_exclude'     => PMAB_Content_Filter::maybe_explode( $specific_post_exclude ),
 			'tags'                  => $tags,
 			'category'              => get_post_meta( $p->ID, '_pmab_meta_category', true ),
 			'woo_category'          => get_post_meta( $p->ID, '_pmab_meta_woo_category', true ),
 			'priority'              => get_post_meta( $p->ID, '_pmab_meta_priority', true ),
 			'tag_type'              => get_post_meta( $p->ID, '_pmab_meta_tag_n_fix', true ),
-//			'woo_hooks'             => get_post_meta( $p->ID, '_pmab_meta_hook', true ),
 		);
+	}
+
+	public static function maybe_explode( $var ) {
+		if ( is_string( $var ) ) {
+			return explode( ',', str_replace( ' ', '', $var ) );
+		}
+
+		return $var;
 	}
 
 	public static function check( $function, $add_param = null ) {
