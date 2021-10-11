@@ -15,6 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 require_once 'inc/helper.php';
+require_once 'inc/class-content-filter.php';
 require_once 'inc/class-content.php';
 require_once 'inc/class-plugin.php';
 require_once 'inc/class-admin.php';
