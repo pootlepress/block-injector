@@ -78,8 +78,8 @@ class PMAB_Content_Filter {
 
 		switch ( $inject_content_type ) {
 			case 'woo_all_pages':
-				if ( class_exists( 'wooCommerce' ) && ( is_woocommerce() || is_front_page() || is_checkout() || is_account_page() || is_cart() || is_shop() ) ) {
-					if ( $tag == 'top' && ( is_shop() || is_product() ) ) {
+				if ( class_exists( 'wooCommerce' ) && ( is_woocommerce() || is_front_page() || is_checkout() || is_account_page() || is_cart() ) ) {
+					if ( $tag == 'top' && ( PMAB_Content_Filter::check( 'is_shop' ) || PMAB_Content_Filter::check( 'is_product' ) ) ) {
 						break;
 					} else {
 						return pmab_filter_exclude_content( $thisposts_exclude, $inject_content_type2, 'both', $content, $tag, $num_of_blocks, $p );
@@ -118,7 +118,7 @@ class PMAB_Content_Filter {
 				return pmab_posts_filter_content( $specific_post, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, 'is_page' );
 				break;
 			case 'all_post':
-				if ( is_single() && ( ! is_woocommerce() && ! is_product() && ! is_shop() && ! is_product_category() ) ) {
+				if ( is_single() && ! is_singular( 'product' ) ) {
 					return pmab_filter_exclude_content( $thisposts_exclude, $inject_content_type2, 'post_exclude', $content, $tag, $num_of_blocks, $p );
 				}
 				break;

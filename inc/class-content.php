@@ -222,13 +222,11 @@ if ( ! class_exists( 'class-content' ) ) {
 
 		private function push_content_woo_shop( $pmab_meta ) {
 			extract( $pmab_meta );
-			if ( $tag === 'top' ) {
+			if ( $tag === 'top' && PMAB_Content_Filter::check( 'is_shop' ) ) {
 				add_filter(
 					'woocommerce_archive_description',
 					static function ( $content ) use ( $p, $tag, $num_of_blocks ) {
-						if ( is_shop() ) {
-							PMAB_Content::block_inject_div_with_script( $tag, $num_of_blocks, $p );
-						}
+						PMAB_Content::block_inject_div_with_script( $tag, $num_of_blocks, $p );
 					},
 					0
 				);
@@ -237,9 +235,7 @@ if ( ! class_exists( 'class-content' ) ) {
 				add_filter(
 					'woocommerce_after_shop_loop',
 					static function ( $content ) use ( $p ) {
-						if ( is_shop() ) {
-							PMAB_Content::output_injection( $p );
-						}
+						PMAB_Content::output_injection( $p );
 					},
 					9999
 				);
