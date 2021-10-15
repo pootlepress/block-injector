@@ -98,14 +98,6 @@ jQuery( document ).ready( function ( $ ) {
 		}
 
 	} );
-	$( '#_pmab_meta_type2' ).on( 'change', function () {
-		if ( this.value === 'post_exclude' || this.value === 'page_exclude' ) {
-			$( '.pmab-specific-posts-exclude' ).show();
-		} else {
-			$( '.pmab-specific-posts-exclude' ).hide();
-			$( '#_pmab_meta_specific_post_exclude' ).val( '' );
-		}
-	} );
 
 	fetch( pmabProps.adminAjax + '?action=pmab_posts' )
 		.then( resp => resp.json() )

@@ -104,8 +104,6 @@
 			<?php } ?>
 
 		</select>
-
-
 	</div>
 
 	<div class="category-box"

@@ -173,7 +173,6 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 			$_pmab_meta_specific_post_exclude = get_post_meta( $post->ID, '_pmab_meta_specific_post_exclude', true );
 			$_pmab_meta_tags                  = get_post_meta( $post->ID, '_pmab_meta_tags', true );
 			$_pmab_meta_type                  = get_post_meta( $post->ID, '_pmab_meta_type', true );
-			$_pmab_meta_type2                 = get_post_meta( $post->ID, '_pmab_meta_type2', true );
 			$_pmab_meta_tag_n_fix             = get_post_meta( $post->ID, '_pmab_meta_tag_n_fix', true );
 			$_pmab_meta_priority              = get_post_meta( $post->ID, '_pmab_meta_priority', true );
 			$_pmab_meta_hook                  = get_post_meta( $post->ID, '_pmab_meta_hook', true );
@@ -209,7 +208,6 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 				plugin_dir_path( __FILE__ ) . 'tpl-meta-box.php',
 				array(
 					'_pmab_meta_type'                  => $_pmab_meta_type,
-					'_pmab_meta_type2'                 => $_pmab_meta_type2,
 					'_pmab_meta_number_of_blocks'      => $_pmab_meta_number_of_blocks,
 					'_pmab_meta_specific_post'         => $_pmab_meta_specific_post,
 					'_pmab_meta_specific_woocategory'  => $_pmab_meta_specific_woocategory,

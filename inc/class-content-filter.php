@@ -104,10 +104,10 @@ class PMAB_Content_Filter {
 				}
 				break;
 			case 'post':
-				return pmab_posts_filter_content( $specific_post, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, 'is_single' );
+				return pmab_posts_filter_content( $specific_post, $thisposts_exclude, $content, $tag, $num_of_blocks, $p, 'is_single' );
 				break;
 			case 'page':
-				return pmab_posts_filter_content( $specific_post, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, 'is_page' );
+				return pmab_posts_filter_content( $specific_post, $thisposts_exclude, $content, $tag, $num_of_blocks, $p, 'is_page' );
 				break;
 			case 'all_post':
 				if ( is_single() && ! is_singular( 'product' ) ) {
@@ -145,7 +145,6 @@ class PMAB_Content_Filter {
 
 		return array(
 			'inject_content_type'   => get_post_meta( $p->ID, '_pmab_meta_type', true ),
-			'inject_content_type2'  => get_post_meta( $p->ID, 'inject_content_type2', true ),
 			'specific_post'         => PMAB_Content_Filter::maybe_explode( $specific_post ),
 			'specific_woocategory'  => PMAB_Content_Filter::maybe_explode( $specific_woocategory ),
 			'specific_post_exclude' => $specific_post_exclude,

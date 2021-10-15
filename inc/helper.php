@@ -72,7 +72,6 @@ if ( ! function_exists( 'pmab_posts_filter_content' ) ) {
 	/**
 	 * @param mixed $posts
 	 * @param mixed $thisposts_exclude
-	 * @param mixed $inject_content_type2
 	 * @param mixed $content
 	 * @param mixed $tag
 	 * @param mixed $num_of_blocks
@@ -81,14 +80,14 @@ if ( ! function_exists( 'pmab_posts_filter_content' ) ) {
 	 *
 	 * @return mixed
 	 */
-	function pmab_posts_filter_content( $posts, $thisposts_exclude, $inject_content_type2, $content, $tag, $num_of_blocks, $p, $function_name ) {
+	function pmab_posts_filter_content( $posts, $thisposts_exclude, $content, $tag, $num_of_blocks, $p, $function_name ) {
 		foreach ( $posts as $post ) {
 			if ( is_object( $post ) ) {
 				$post = $post->ID;
 			}
 			if ( $function_name( $post ) ) {
 
-				if ( $inject_content_type2 === 'post_exclude' && ! in_array( $post, $thisposts_exclude, true ) ) {
+				if ( ! in_array( $post, $thisposts_exclude, true ) ) {
 
 					if ( $tag == 'top' && PMAB_Content_Filter::check( 'is_product' ) ) {
 						pmab_custom_hook_content( 'woocommerce_before_single_product', $content, $tag, 1, $p );
@@ -148,8 +147,6 @@ if ( ! function_exists( 'pmab_filter_exclude_content' ) ) {
 	// Exclude Filter Content
 	/**
 	 * @param mixed $thisposts_exclude
-	 * @param mixed $inject_content_type2
-	 * @param mixed $exclude_type
 	 * @param mixed $content
 	 * @param mixed $tag
 	 * @param mixed $num_of_blocks

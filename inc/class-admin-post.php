@@ -39,7 +39,6 @@ class PMAB_Admin_Post {
 		'_pmab_meta_category',
 		'_pmab_meta_woo_category',
 		'_pmab_meta_type',
-		'_pmab_meta_type2',
 		'_pmab_meta_tag_n_fix',
 		'_pmab_meta_hook',
 		'_pmab_meta_expiredate',
