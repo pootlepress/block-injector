@@ -27,7 +27,7 @@ if ( ! function_exists( 'pmab_update_content' ) ) {
 			$d = preg_replace_callback( $re, function ( $matches ) use ( &$i, $num_of_blocks, $p ) {
 				$i += 1;
 				if ( $i == $num_of_blocks ) {
-					return $matches[0] . $p->post_content;
+					return $matches[0] . PMAB_Content::output_injection( $p );
 				}
 
 				return $matches[0];
@@ -38,12 +38,11 @@ if ( ! function_exists( 'pmab_update_content' ) ) {
 
 
 		} else {
-			// die($p->post_content);
-
-
 			$content_array = explode( "</$tag>", $content );
 
-			array_splice( $content_array, $num_of_blocks, 0, array( $p->post_content ) );
+			array_splice( $content_array, $num_of_blocks, 0, array(
+				PMAB_Content::output_injection( $p )
+			) );
 
 			return implode( "</$tag>", $content_array );
 

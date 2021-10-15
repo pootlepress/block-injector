@@ -24,6 +24,12 @@ if ( ! class_exists( 'class-content' ) ) {
 			'product_cat',
 		];
 
+		/**
+		 * Is taxonomy
+		 * @var int|null
+		 */
+		private $is_tax;
+
 		public function __construct() {
 			add_action( 'template_redirect', [ $this, 'extract_block_injectors_with_metas' ] );
 			add_action( 'template_redirect', [ $this, 'push_to_specific_content' ], 11 );
@@ -102,6 +108,7 @@ if ( ! class_exists( 'class-content' ) ) {
 					$location_terms = [ 'shop' ];
 				} else if ( 'WP_Term' === $queried_object_type && in_array( $queried_object->taxonomy, $this->known_query_objects ) ) {
 					$location_terms = [ $queried_object->taxonomy ];
+					$this->is_tax = $queried_object->term_id;
 				}
 			}
 
@@ -227,7 +234,7 @@ if ( ! class_exists( 'class-content' ) ) {
 				add_filter(
 					'woocommerce_after_shop_loop',
 					static function ( $content ) use ( $p ) {
-						PMAB_Content::output_injection( $p );
+						echo PMAB_Content::output_injection( $p );
 					},
 					9999
 				);
@@ -235,6 +242,7 @@ if ( ! class_exists( 'class-content' ) ) {
 		}
 
 		private function push_content_woo_all_category_pages( $pmab_meta ) {
+			$pmab_meta['specific_woocategory'] = $this->is_tax; // Current taxonomy id so it always works
 			$this->push_content_woo_category_page( $pmab_meta );
 		}
 
@@ -257,7 +265,7 @@ if ( ! class_exists( 'class-content' ) ) {
 					'woocommerce_after_shop_loop',
 					static function ( $content ) use ( $p, $tag, $specific_woocategory ) {
 						if ( is_product_category( $specific_woocategory ) ) {
-							PMAB_Content::output_injection( $p );
+							echo PMAB_Content::output_injection( $p );
 						}
 					},
 					9999
@@ -271,8 +279,8 @@ if ( ! class_exists( 'class-content' ) ) {
 		 *
 		 * @param WP_Post $injection
 		 */
-		private static function output_injection( $injection ) {
-			echo "<div style='clear:both;'>$injection->post_content</div>";
+		public static function output_injection( $injection ) {
+			return "<div style='clear:both;'>$injection->post_content</div>";
 		}
 
 		private function _push_content_product( $pmab_meta ) {
@@ -294,8 +302,7 @@ if ( ! class_exists( 'class-content' ) ) {
 				add_filter(
 					$hook[0],
 					static function ( $param ) use ( $p ) {
-						PMAB_Content::output_injection( $p );
-
+						echo PMAB_Content::output_injection( $p );
 						return $param;
 					},
 					$hook[1]
@@ -356,7 +363,7 @@ if ( ! class_exists( 'class-content' ) ) {
 				);
 
 
-//				echo "<pre>$p->post_title : $inject_content_type $tag</pre>";
+				echo "<pre>$p->post_title : $inject_content_type $tag</pre>";
 
 				$callback = "push_content_$inject_content_type";
 				if ( method_exists( $this, $callback ) ) {
