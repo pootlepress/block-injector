@@ -66,7 +66,7 @@ class PMAB_Content_Filter {
 		if ( array_key_exists( $inject_content_type, $checks ) ) {
 			$variables = $checks[ $inject_content_type ];
 			if ( self::check( $variables[0], $variables[1] ) ) {
-				return pmab_filter_exclude_content( $thisposts_exclude, $inject_content_type2, 'page_exclude', $content, $tag, $num_of_blocks, $p );
+				return pmab_filter_exclude_content( $thisposts_exclude, $content, $tag, $num_of_blocks, $p );
 			}
 		}
 
@@ -76,7 +76,7 @@ class PMAB_Content_Filter {
 					if ( $tag == 'top' && ( PMAB_Content_Filter::check( 'is_shop' ) || PMAB_Content_Filter::check( 'is_product' ) ) ) {
 						break;
 					} else {
-						return pmab_filter_exclude_content( $thisposts_exclude, $inject_content_type2, 'both', $content, $tag, $num_of_blocks, $p );
+						return pmab_filter_exclude_content( $thisposts_exclude, $content, $tag, $num_of_blocks, $p );
 					}
 				}
 				break;
@@ -89,7 +89,7 @@ class PMAB_Content_Filter {
 						break;
 					} else {
 
-						return pmab_filter_exclude_content( $thisposts_exclude, $inject_content_type2, 'page_exclude', $content, $tag, $num_of_blocks, $p );
+						return pmab_filter_exclude_content( $thisposts_exclude, $content, $tag, $num_of_blocks, $p );
 						break;
 					}
 				}
@@ -111,17 +111,17 @@ class PMAB_Content_Filter {
 				break;
 			case 'all_post':
 				if ( is_single() && ! is_singular( 'product' ) ) {
-					return pmab_filter_exclude_content( $thisposts_exclude, $inject_content_type2, 'post_exclude', $content, $tag, $num_of_blocks, $p );
+					return pmab_filter_exclude_content( $thisposts_exclude, $content, $tag, $num_of_blocks, $p );
 				}
 				break;
 			case 'all_page':
 				if ( is_page() ) {
-					return pmab_filter_exclude_content( $thisposts_exclude, $inject_content_type2, 'page_exclude', $content, $tag, $num_of_blocks, $p );
+					return pmab_filter_exclude_content( $thisposts_exclude, $content, $tag, $num_of_blocks, $p );
 				}
 				break;
 			case 'post_page':
 				if ( is_page() || is_single() ) {
-					return pmab_filter_exclude_content( $thisposts_exclude, $inject_content_type2, 'both', $content, $tag, $num_of_blocks, $p );
+					return pmab_filter_exclude_content( $thisposts_exclude, $content, $tag, $num_of_blocks, $p );
 				}
 				break;
 		}
@@ -145,7 +145,7 @@ class PMAB_Content_Filter {
 
 		return array(
 			'inject_content_type'   => get_post_meta( $p->ID, '_pmab_meta_type', true ),
-			'inject_content_type2'  => get_post_meta( $p->ID, '_pmab_meta_type2', true ),
+			'inject_content_type2'  => get_post_meta( $p->ID, 'inject_content_type2', true ),
 			'specific_post'         => PMAB_Content_Filter::maybe_explode( $specific_post ),
 			'specific_woocategory'  => PMAB_Content_Filter::maybe_explode( $specific_woocategory ),
 			'specific_post_exclude' => $specific_post_exclude,

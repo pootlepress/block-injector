@@ -157,24 +157,17 @@ if ( ! function_exists( 'pmab_filter_exclude_content' ) ) {
 	 *
 	 * @return mixed
 	 */
-	function pmab_filter_exclude_content( $thisposts_exclude, $inject_content_type2, $exclude_type, $content, $tag, $num_of_blocks, $p ) {
+	function pmab_filter_exclude_content( $thisposts_exclude, $content, $tag, $num_of_blocks, $p ) {
+		if ( in_array( get_post()->ID, $thisposts_exclude, false ) ) {
+			return $content;
+		}
+
 		if ( $tag == 'top' && PMAB_Content_Filter::check( 'is_product' ) ) {
 			pmab_custom_hook_content( 'woocommerce_before_single_product', $content, $tag, 1, $p );
 
 			return $content;
-		} else {
-			if ( $exclude_type === 'both' ) {
-				$excludes = array( 'post_exclude', 'page_exclude', $exclude_type );
-
-				foreach ( $excludes as $exclude ) {
-					if ( $inject_content_type2 === $exclude && in_array( get_post()->ID, $thisposts_exclude, false ) ) {
-						return $content;
-					}
-				}
-
-				return pmab_update_content( $content, $tag, $num_of_blocks, $p );
-			}
-
 		}
+
+		return pmab_update_content( $content, $tag, $num_of_blocks, $p );
 	}
 }
