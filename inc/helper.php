@@ -16,38 +16,32 @@ if ( ! function_exists( 'pmab_update_content' ) ) {
 	 * @return string
 	 */
 	function pmab_update_content( $content, $tag, $num_of_blocks, $p ) {
-		if ( $num_of_blocks == 0 && $tag == 'p' ) {
-			return $content;
+		if ( $num_of_blocks == 0 ) {
+			return $p->post_content . $content;
 		}
+		if ( $num_of_blocks == PHP_INT_MAX ) {
+			return $content . $p->post_content;
+		}
+		$re = '/(<!-- \/[^ ]* -->\n\n)/m';
+
 		if ( $tag == 'h2' ) {
-			$re  = '/<(h\d)>.*\<\/\1>/m';
-			$str = $content;
-
-			$i = - 1;
-			$d = preg_replace_callback( $re, function ( $matches ) use ( &$i, $num_of_blocks, $p ) {
-				$i += 1;
-				if ( $i == $num_of_blocks ) {
-					return $matches[0] . PMAB_Content::output_injection( $p );
-				}
-
-				return $matches[0];
-
-			}, $str );
-
-			return $d;
-
-
-		} else {
-			$content_array = explode( "</$tag>", $content );
-
-			array_splice( $content_array, $num_of_blocks, 0, array(
-				PMAB_Content::output_injection( $p )
-			) );
-
-			return implode( "</$tag>", $content_array );
-
-
+			$re = '/<(h\d)>.*\<\/\1>/m';
 		}
+
+		$str = $content;
+
+		$i = 0;
+		$d = preg_replace_callback( $re, function ( $matches ) use ( &$i, $num_of_blocks, $p ) {
+			$i += 1;
+			if ( $i == $num_of_blocks ) {
+				return $matches[0] . $p->post_content . "\n\n";
+			}
+
+			return $matches[0];
+
+		}, $str );
+
+		return $d;
 	}
 }
 
