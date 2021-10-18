@@ -38,6 +38,7 @@ if ( ! class_exists( 'class-content' ) ) {
 
 		public function footer_scripts() {
 			?>
+			<style>.woocommerce-account .woocommerce:after {content: '';display: block;clear: both;}</style>
 			<script>
 				!function () {
 					var jsBlocks = document.querySelectorAll( '.block_inject_div_js' );
@@ -51,7 +52,7 @@ if ( ! class_exists( 'class-content' ) ) {
 							console.log( target );
 
 							var tag_selector = target.dataset.tag_selector;
-							if ( !tag_selector ) {
+							if ( ! tag_selector ) {
 								tag_selector = target.dataset.tag === "h2" ?
 									".page-description h1,.page-description  h2,.page-description h3,.page-description h4,.page-description h5,.page-description h6" :
 									".page-description p,.site-main p";
@@ -166,9 +167,6 @@ if ( ! class_exists( 'class-content' ) ) {
 						case 'bottom':
 							$num_of_blocks = PHP_INT_MAX;
 							break;
-						case 'h2':
-							$num_of_blocks --;
-							break;
 					}
 				}
 
@@ -179,14 +177,13 @@ if ( ! class_exists( 'class-content' ) ) {
 		}
 
 		private static function block_inject_div_with_script( $tag, $num_of_blocks, $p, $tag_selector = '' ) {
-			$num_of_blocks = $tag == "p" ? $num_of_blocks : $num_of_blocks + 1;
 			?>
 			<div
 				id='block_inject_div-<?php echo $p->ID ?>' class='block_inject_div_js'
 				data-tag='<?php echo $tag ?>'
 				data-tag_selector='<?php echo $tag_selector ?>'
 				data-number_of_blocks='<?php echo $num_of_blocks ?>'>
-				<?php PMAB_Content::output_injection( $p ); ?>
+				<?php echo PMAB_Content::output_injection( $p ); ?>
 			</div>
 			<?php
 		}
@@ -259,7 +256,6 @@ if ( ! class_exists( 'class-content' ) ) {
 					},
 					0
 				);
-
 			} else {
 				add_action(
 					'woocommerce_after_shop_loop',
@@ -280,7 +276,7 @@ if ( ! class_exists( 'class-content' ) ) {
 		 * @param WP_Post $injection
 		 */
 		public static function output_injection( $injection ) {
-			return "<div style='clear:both;'>$injection->post_content</div>";
+			return "<div class='block-injector-content' style='clear:both;'>$injection->post_content</div>";
 		}
 
 		private function _push_content_product( $pmab_meta ) {
@@ -363,7 +359,7 @@ if ( ! class_exists( 'class-content' ) ) {
 				);
 
 
-				echo "<pre>$p->post_title : $inject_content_type $tag</pre>";
+//				echo "<pre>$p->post_title : $inject_content_type $tag</pre>";
 
 				$callback = "push_content_$inject_content_type";
 				if ( method_exists( $this, $callback ) ) {
