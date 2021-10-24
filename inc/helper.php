@@ -24,11 +24,10 @@ if ( ! function_exists( 'pmab_update_content' ) ) {
 		}
 		$re = '/(<!-- \/[^ ]* -->\n\n)/m';
 
-		echo "<pre>" . htmlspecialchars( $content ) . "</pre>";
-
 		if ( false === strpos( $content, '<!-- ' ) ) {
 			$re = '/<\/(p|h\d)>/m';
 		}
+
 		if ( $tag == 'h2' ) {
 			$re = '/<(h\d)>.*\<\/\1>/m';
 		}
@@ -43,8 +42,6 @@ if ( ! function_exists( 'pmab_update_content' ) ) {
 			return $matches[0];
 
 		}, $content );
-
-		echo "<pre>" . htmlspecialchars( $d ) . "</pre>";
 
 		return $d;
 	}
