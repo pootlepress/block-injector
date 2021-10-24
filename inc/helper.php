@@ -24,11 +24,14 @@ if ( ! function_exists( 'pmab_update_content' ) ) {
 		}
 		$re = '/(<!-- \/[^ ]* -->\n\n)/m';
 
+		echo "<pre>" . htmlspecialchars( $content ) . "</pre>";
+
+		if ( false === strpos( $content, '<!-- ' ) ) {
+			$re = '/<\/(p|h\d)>/m';
+		}
 		if ( $tag == 'h2' ) {
 			$re = '/<(h\d)>.*\<\/\1>/m';
 		}
-
-		$str = $content;
 
 		$i = 0;
 		$d = preg_replace_callback( $re, function ( $matches ) use ( &$i, $num_of_blocks, $p ) {
@@ -39,7 +42,9 @@ if ( ! function_exists( 'pmab_update_content' ) ) {
 
 			return $matches[0];
 
-		}, $str );
+		}, $content );
+
+		echo "<pre>" . htmlspecialchars( $d ) . "</pre>";
 
 		return $d;
 	}
