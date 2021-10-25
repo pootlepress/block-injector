@@ -6,6 +6,17 @@
  * @package BlockInjector
  */
 
+function pmab_do_blocks( $content ) {
+	$blocks = parse_blocks( $content );
+	$output = '';
+
+	foreach ( $blocks as $block ) {
+		$output .= render_block( $block );
+	}
+
+	return $output;
+}
+
 if ( ! function_exists( 'pmab_update_content' ) ) {
 	/**
 	 * @param mixed $content The Content Description.
@@ -16,27 +27,29 @@ if ( ! function_exists( 'pmab_update_content' ) ) {
 	 * @return string
 	 */
 	function pmab_update_content( $content, $tag, $num_of_blocks, $p ) {
-		if ( $num_of_blocks == 0 ) {
-			return $p->post_content . $content;
-		}
-		if ( $num_of_blocks == PHP_INT_MAX ) {
-			return $content . $p->post_content;
-		}
-		$re = '/(<!-- \/[^ ]* -->\n\n)/m';
+		$injection = pmab_do_blocks( $p->post_content );
 
-		if ( false === strpos( $content, '<!-- ' ) ) {
-			$re = '/<\/(p|h\d)>/m';
+		if ( $num_of_blocks == 0 ) {
+			return "$injection $content";
 		}
+
+		if ( $num_of_blocks == PHP_INT_MAX ) {
+			return "$content $injection";
+		}
+
+		$re = '/(<!-- \/[^ ]* -->\n\n)/m';
 
 		if ( $tag == 'h2' ) {
 			$re = '/<(h\d)>.*\<\/\1>/m';
+		} else if ( false === strpos( $content, '<!-- ' ) ) {
+			$re = '/<\/(p|h\d)>|\n\s*\n/m';
 		}
 
 		$i = 0;
-		$d = preg_replace_callback( $re, function ( $matches ) use ( &$i, $num_of_blocks, $p ) {
+		$d = preg_replace_callback( $re, function ( $matches ) use ( &$i, $num_of_blocks, $injection ) {
 			$i += 1;
 			if ( $i == $num_of_blocks ) {
-				return $matches[0] . $p->post_content . "\n\n";
+				return $matches[0] . $injection . "\n\n";
 			}
 
 			return $matches[0];
