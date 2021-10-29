@@ -63,10 +63,30 @@
 		flex: 50px 0;
 		text-align: center;
 	}
+
+	.pmab-section-title {
+		font-size: 16px;
+		font-weight: bold;
+		display: block;
+		margin: 0.5em 0;
+	}
+
+	.pmab-shortcode-dl {
+		line-height: 1.6
+	}
+
+	.pmab-shortcode-dl dt {
+		font-family: monospace;
+	}
+
+	.pmab-shortcode-dl dd {
+		margin: 0 .1em .5em;
+	}
 </style>
 <div id="pmab_metabox">
 	<div class="" style="padding-bottom:1rem;">
-		<label for="_pmab_meta_type"><b style="font-size:16px"><?php _e( 'Location', 'pmab' ); ?></b></label>
+		<label class="pmab-section-title" for="_pmab_meta_type"><?php _e( 'Location', 'pmab' ); ?></label>
+
 		<select name="_pmab_meta_type" id="_pmab_meta_type">
 			<option value="post_page" selected>Entire Website</option>
 			<option disabled style="font-weight: bolder;">Post</option>
@@ -86,6 +106,18 @@
 				<option value="woo_all_pages" <?php selected( $_pmab_meta_type, 'woo_all_pages' ); ?>>All WooCommerce Pages
 				</option>
 				<option value="woo_all_products" <?php selected( $_pmab_meta_type, 'woo_all_products' ); ?>>All Products
+				</option>
+				<option value="woo_all_products_in_stock" <?php selected( $_pmab_meta_type, 'woo_all_products_in_stock' ); ?>>
+					Products in stock
+				</option>
+				<option value="woo_all_products_out_of_stock" <?php selected( $_pmab_meta_type, 'woo_all_products_out_of_stock' ); ?>>
+					Products out of stock
+				</option>
+				<option value="woo_all_products_on_backorder" <?php selected( $_pmab_meta_type, 'woo_all_products_on_backorder' ); ?>>
+					Products on backorder
+				</option>
+				<option value="woo_all_products_on_sale" <?php selected( $_pmab_meta_type, 'woo_all_products_on_sale' ); ?>>
+					Products on sale
 				</option>
 				<option value="woo_product" <?php selected( $_pmab_meta_type, 'woo_product' ); ?>>Specific Product</option>
 				<option value="woo_pro_category" <?php selected( $_pmab_meta_type, 'woo_pro_category' ); ?>>Products by Category
@@ -169,7 +201,7 @@
 	</div>
 
 	<div style="padding-bottom:1rem;">
-		<label for="_pmab_meta_tag_n_fix"><b style="font-size:16px"><?php _e( 'Position', 'pmab' ); ?></b></label>
+		<label class="pmab-section-title" for="_pmab_meta_tag_n_fix"><?php _e( 'Position', 'pmab' ); ?></label>
 		<select name="_pmab_meta_tag_n_fix" id="_pmab_meta_tag_n_fix" class="postbox col-12">
 			<option value="" disabled style="font-weight: bolder;">Position</option>
 			<option value="top_before" <?php selected( $_pmab_meta_tag_n_fix, 'top_before' ); ?>>Top
@@ -244,6 +276,10 @@
 		<input type="text" id="_pmab_meta_specific_post_exclude" name="_pmab_meta_specific_post_exclude"
 					 value="<?php echo esc_attr( $_pmab_meta_specific_post_exclude ); ?>" size="25"/>
 	</div>
+
+
+	<label class="pmab-section-title" for="_pmab_meta_type"><?php _e( 'Scheduling', 'pmab' ); ?></label>
+
 	<div style="padding-bottom:1rem;">
 		<label for="_pmab_meta_startdate"><?php _e( 'Select Start Date', 'pmab' ); ?></label>
 		<input type="datetime-local" id="_pmab_meta_startdate" name="_pmab_meta_startdate"
@@ -256,4 +292,35 @@
 		<input type="datetime-local" id="_pmab_meta_expiredate" name="_pmab_meta_expiredate"
 					 value="<?php echo esc_attr( $_pmab_meta_expiredate ); ?>" size="25"/>
 	</div>
+
+	<div style="padding-bottom:1rem;">
+		<label class="pmab-section-title" for="_pmab_responsive_visibility"><?php _e( 'Show on devices', 'pmab' ); ?></label>
+		<select name="_pmab_responsive_visibility" id="_pmab_responsive_visibility" class="postbox col-12">
+			<option value="" <?php selected( $_pmab_responsive_visibility, '' ); ?>>
+				All devices
+			</option>
+			<option value="desktop" <?php selected( $_pmab_responsive_visibility, 'desktop' ); ?>>
+				Desktop only
+			</option>
+			<option value="mobile" <?php selected( $_pmab_responsive_visibility, 'mobile' ); ?>>
+				Mobile only
+			</option>
+		</select>
+	</div>
+
+	<div>
+		<div class="pmab-section-title"><?php _e( 'Dynamic content', 'pmab' ); ?></div>
+		<p>Use these shortcodes to add dynamic post content in your injected blocks.</p>
+		<dl class="pmab-shortcode-dl">
+			<dt>[ib_title]</dt>
+			<dd>Shows current post title</dd>
+			<dt>[ib_price]</dt>
+			<dd>Shows product price</dd>
+			<dt>[ib_product_categories]</dt>
+			<dd>Shows product categories</dd>
+			<dt>[ib_stock]</dt>
+			<dd>Shows product stock</dd>
+		</dl>
+	</div>
+
 </div>

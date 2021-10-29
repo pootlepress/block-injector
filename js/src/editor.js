@@ -43,7 +43,7 @@ jQuery( document ).ready( function ( $ ) {
 			$( '.pmab-no-woo' ).show();
 		}
 
-		if ( this.value === 'woo_all_products' || this.value === 'woo_product' ) {
+		if ( this.value.indexOf( 'woo_all_products' ) === 0 || this.value === 'woo_product' ) {
 			$( '.pmab-product-options' ).show();
 		} else {
 			$( '.pmab-product-options' ).hide();

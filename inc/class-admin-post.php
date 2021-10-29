@@ -9,24 +9,28 @@ class PMAB_Admin_Post {
 	 * @var string[] Terms to set for location type
 	 */
 	protected $location_taxonomy_maps = [
-		'post_page'              => 'any,post,page,product,product_cat,shop',
-		'all_post'               => 'post',
-		'post'                   => 'post,by-id',
-		'category'               => 'post,by-category',
-		'tags'                   => 'post,by-tags',
-		'all_page'               => 'page',
-		'page'                   => 'page,by-id',
-		'woo_all_pages'          => 'shop,page,product,product_cat,product_tag',
-		'woo_all_products'       => 'product',
-		'woo_pro_category'       => 'product,by-category',
-		'woo_pro_tags'               => 'product,by-tag',
-		'woo_product'            => 'product,by-id',
-		'woo_all_category_pages' => 'product_cat',
-		'woo_category_page'      => 'product_cat',
-		'woo_shop'               => 'shop',
-		'woo_account'            => 'page',
-		'woo_basket'             => 'page',
-		'woo_checkout'           => 'page',
+		'post_page'                     => 'any,post,page,product,product_cat,shop',
+		'all_post'                      => 'post',
+		'post'                          => 'post,by-id',
+		'category'                      => 'post,by-category',
+		'tags'                          => 'post,by-tags',
+		'all_page'                      => 'page',
+		'page'                          => 'page,by-id',
+		'woo_all_pages'                 => 'shop,page,product,product_cat,product_tag',
+		'woo_all_products'              => 'product',
+		'woo_all_products_in_stock'     => 'product',
+		'woo_all_products_out_of_stock' => 'product',
+		'woo_all_products_on_backorder' => 'product',
+		'woo_all_products_on_sale'      => 'product',
+		'woo_pro_category'              => 'product,by-category',
+		'woo_pro_tags'                  => 'product,by-tag',
+		'woo_product'                   => 'product,by-id',
+		'woo_all_category_pages'        => 'product_cat',
+		'woo_category_page'             => 'product_cat',
+		'woo_shop'                      => 'shop',
+		'woo_account'                   => 'page',
+		'woo_basket'                    => 'page',
+		'woo_checkout'                  => 'page',
 	];
 
 	protected $post_metas = [
@@ -43,6 +47,7 @@ class PMAB_Admin_Post {
 		'_pmab_meta_hook',
 		'_pmab_meta_expiredate',
 		'_pmab_meta_startdate',
+		'_pmab_responsive_visibility',
 	];
 
 	protected function post_type_args() {
