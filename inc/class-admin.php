@@ -177,6 +177,9 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 			$_pmab_meta_priority              = get_post_meta( $post->ID, '_pmab_meta_priority', true );
 			$_pmab_meta_hook                  = get_post_meta( $post->ID, '_pmab_meta_hook', true );
 			$_pmab_meta_expiredate            = get_post_meta( $post->ID, '_pmab_meta_expiredate', true );
+			$_pmab_meta_on_days  							= get_post_meta( $post->ID, '_pmab_meta_on_days', true );
+			$_pmab_meta_from_time							= get_post_meta( $post->ID, '_pmab_meta_from_time', true );
+			$_pmab_meta_to_time  							= get_post_meta( $post->ID, '_pmab_meta_to_time', true );
 			$_pmab_responsive_visibility      = get_post_meta( $post->ID, '_pmab_responsive_visibility', true );
 			$_pmab_meta_startdate             = get_post_meta( $post->ID, '_pmab_meta_startdate', true );
 			$_pmab_meta_category              = get_post_meta( $post->ID, '_pmab_meta_category', true );
@@ -218,8 +221,11 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 					'_pmab_meta_priority'              => $_pmab_meta_priority,
 					'_pmab_meta_hook'                  => $_pmab_meta_hook,
 					'_pmab_meta_expiredate'            => $_pmab_meta_expiredate,
-					'_pmab_responsive_visibility'      => $_pmab_responsive_visibility,
 					'_pmab_meta_startdate'             => $_pmab_meta_startdate,
+					'_pmab_meta_on_days'               => $_pmab_meta_on_days,
+					'_pmab_meta_from_time'             => $_pmab_meta_from_time,
+					'_pmab_meta_to_time'               => $_pmab_meta_to_time,
+					'_pmab_responsive_visibility'      => $_pmab_responsive_visibility,
 					'_pmab_meta_category'              => $_pmab_meta_category,
 					'_pmab_meta_woo_category'          => $_pmab_meta_woo_category,
 					'_pmab_categories'                 => $categories,
@@ -323,6 +329,7 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 						'woo_checkout'                  => 'Checkout Page',
 					],
 					'_pmab_meta_tag_n_fix' => [
+						'above_header'   => 'Above Header',
 						'top_before'   => 'Top',
 						'bottom_after' => 'Bottom',
 						'h2_after'     => 'After Heading',

@@ -48,6 +48,9 @@ class PMAB_Admin_Post {
 		'_pmab_meta_expiredate',
 		'_pmab_meta_startdate',
 		'_pmab_responsive_visibility',
+		'_pmab_meta_on_days',
+		'_pmab_meta_from_time',
+		'_pmab_meta_to_time',
 	];
 
 	protected function post_type_args() {
@@ -122,6 +125,7 @@ class PMAB_Admin_Post {
 			'_pmab_meta_specific_woocategory',
 			'_pmab_meta_woo_category',
 			'_pmab_meta_specific_post',
+			'_pmab_meta_on_days',
 		];
 
 		foreach ( $multi_values as $multi_value ) {

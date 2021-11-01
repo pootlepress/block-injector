@@ -48,13 +48,21 @@ if ( ! class_exists( 'class-content' ) ) {
 			?>
 			<style>
 				.woocommerce-account .woocommerce:after {content: '';display: block;clear: both;}
-				@media only screen AND (min-width:768px){.block-injector-content.block-injector-mobile{display:none;}}
-				@media only screen AND (max-width:768px){.block-injector-content.block-injector-desktop{display:none;}}
+				@media only screen AND (min-width:768px){.block-injector-content.block-injector-resp-mobile{display:none;}}
+				@media only screen AND (max-width:768px){.block-injector-content.block-injector-resp-desktop{display:none;}}
 			</style>
 			<script>
 				!function () {
-					var jsBlocks = document.querySelectorAll( '.block_inject_div_js' );
+					function moveElement( el, target ) {
 
+					}
+
+
+
+					var topHeaderBlocks = document.querySelectorAll( '.block-injector-type-above_header' );
+					topHeaderBlocks.forEach( el => document.body.insertBefore( el, document.body.childNodes[0] ) );
+
+					var jsBlocks = document.querySelectorAll( '.block_inject_div_js' );
 					jsBlocks.forEach( el => el.parentNode.removeChild( el ) );
 
 					window.addEventListener( 'load', ( event ) => {
@@ -161,6 +169,7 @@ if ( ! class_exists( 'class-content' ) ) {
 				$tag = $pmab_meta['tag_type'];
 
 				$tag_map = [
+					'above_header'   => 'header',
 					'top_before'   => 'top',
 					'bottom_after' => 'bottom',
 					'h2_after'     => 'h2',
@@ -297,14 +306,19 @@ if ( ! class_exists( 'class-content' ) ) {
 				$meta['responsive_meta'] = get_post_meta( $p->ID, '_pmab_responsive_visibility', true );
 			}
 
-			$responsive_class = ! empty( $meta['responsive_visibility'] ) ?
-				'block-injector-' . $meta['responsive_visibility'] :
+			$classes = 'block-injector-content';
+
+			$classes .= ! empty( $meta['responsive_visibility'] ) ?
+				' block-injector-resp-' . $meta['responsive_visibility'] :
 				'';
 
+			$classes .= ! empty( $meta['tag_type'] ) ?
+				' block-injector-type-' . $meta['tag_type'] :
+				'';
 
 			$injection = pmab_process_injection( $injection->post_content );
 
-			return "<div class='block-injector-content $responsive_class' style='clear:both;'>$injection</div>";
+			return "<div class='$classes' style='clear:both;'>$injection</div>";
 		}
 
 		private function _push_content_product( $pmab_meta ) {
