@@ -325,6 +325,7 @@ if ( ! class_exists( 'class-content' ) ) {
 			extract( $pmab_meta );
 
 			$hooks = [
+				'header'                  => [ 'woocommerce_before_single_product', 0 ],
 				'top'                     => [ 'woocommerce_before_single_product', 0 ],
 				'bottom'                  => [ 'woocommerce_after_single_product', 999 ],
 				'before_add_to_cart_form' => [ 'woocommerce_before_add_to_cart_form', 0 ],

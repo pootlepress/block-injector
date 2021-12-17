@@ -34,6 +34,14 @@ jQuery( document ).ready( function ( $ ) {
 
 	}
 
+	$( '.pmab-toggle-checkbox' ).click( function() {
+		if ( this.checked ) {
+			this.parentNode.classList.add( 'is-checked' )
+		} else {
+			this.parentNode.classList.remove( 'is-checked' )
+		}
+	} );
+
 	$injType = $( '#_pmab_meta_type' );
 
 	$injType.on( 'change', function () {

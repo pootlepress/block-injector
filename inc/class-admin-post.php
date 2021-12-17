@@ -107,12 +107,13 @@ class PMAB_Admin_Post {
 
 	/**
 	 * Saves taxonomies for the post based on $location type.
+	 *
 	 * @param $post_id
 	 * @param $location
 	 */
 	protected function save_taxonomies( $post_id, $location ) {
-		if ( ! empty( $this->location_taxonomy_maps[$location] ) ) {
-			wp_set_object_terms( $post_id, explode( ',', $this->location_taxonomy_maps[$location] ), 'block_injector_location' );
+		if ( ! empty( $this->location_taxonomy_maps[ $location ] ) ) {
+			wp_set_object_terms( $post_id, explode( ',', $this->location_taxonomy_maps[ $location ] ), 'block_injector_location' );
 		} else {
 			wp_set_object_terms( $post_id, false, 'block_injector_location' );
 		}
@@ -129,13 +130,13 @@ class PMAB_Admin_Post {
 		];
 
 		foreach ( $multi_values as $multi_value ) {
-			if ( ! empty( $_POST[$multi_value] ) && is_array( $_POST[$multi_value] ) ) {
-				$_POST[$multi_value] = implode( ',', $_POST[$multi_value] );
+			if ( ! empty( $_POST[ $multi_value ] ) && is_array( $_POST[ $multi_value ] ) ) {
+				$_POST[ $multi_value ] = implode( ',', $_POST[ $multi_value ] );
 			}
 		}
 
 		foreach ( $this->post_metas as $post_meta ) {
-			update_post_meta( $post_id, $post_meta, sanitize_text_field( $_POST[$post_meta] ) );
+			update_post_meta( $post_id, $post_meta, sanitize_text_field( $_POST[ $post_meta ] ) );
 		}
 	}
 
@@ -146,14 +147,30 @@ class PMAB_Admin_Post {
 	 *
 	 * @return void
 	 */
-	public function save_post( $post_id ) {
+	public function save_post( $post_id, $post ) {
 		if (
 			isset( $_POST['_pmab_meta_number_of_blocks'], $_POST['_pmab_meta_type'], $_POST['pmab_plugin_field'] ) &&
 			wp_verify_nonce( $_POST['pmab_plugin_field'], 'pmab_plugin_nonce' )
 		) {
+			$this->save_status( $post );
 			$this->save_metas( $post_id );
 			$this->save_taxonomies( $post_id, $_POST['_pmab_meta_type'] );
 		}
 	}
 
+	private function save_status( $post ) {
+		global $wpdb;
+
+		$old_status = $post->post_status;
+
+		if ( empty( $_POST['_pmab_post_published'] ) ) {
+			if ( $old_status === 'publish' ) {
+				$post->post_status = 'draft';
+				$wpdb->update( $wpdb->posts, array( 'post_status' => 'draft' ), array( 'ID' => $post->ID ) );
+			}
+		} else if ( $post->post_status !== 'publish' ) {
+			$post->post_status = 'publish';
+			$wpdb->update( $wpdb->posts, array( 'post_status' => 'publish' ), array( 'ID' => $post->ID ) );
+		}
+	}
 }

@@ -12,7 +12,7 @@
 function pmab_shortcode_title() {
 	return get_the_title();
 }
-add_shortcode( 'ib_title', 'pmab_shortcode_title' );
+add_shortcode( 'bi_title', 'pmab_shortcode_title' );
 
 /**
  * Shortcode ib_price
@@ -27,7 +27,7 @@ function pmab_shortcode_price() {
 	}
 	return '';
 }
-add_shortcode( 'ib_price', 'pmab_shortcode_price' );
+add_shortcode( 'bi_price', 'pmab_shortcode_price' );
 
 /**
  * Shortcode ib_product_categories
@@ -45,6 +45,11 @@ function pmab_shortcode_product_categories( $atts ) {
 		$atts
 	);
 
+	$queried_object = get_queried_object();
+	if ( $queried_object && $queried_object->taxonomy == "product_cat" ) {
+		return $queried_object->name;
+	}
+
 	/** @var WC_Product */
 	global $product;
 
@@ -53,7 +58,7 @@ function pmab_shortcode_product_categories( $atts ) {
 	}
 	return '';
 }
-add_shortcode( 'ib_product_categories', 'pmab_shortcode_product_categories' );
+add_shortcode( 'bi_product_categories', 'pmab_shortcode_product_categories' );
 
 /**
  * Shortcode ib_stock
@@ -68,4 +73,4 @@ function pmab_shortcode_stock() {
 	}
 	return '';
 }
-add_shortcode( 'ib_stock', 'pmab_shortcode_stock' );
+add_shortcode( 'bi_stock', 'pmab_shortcode_stock' );

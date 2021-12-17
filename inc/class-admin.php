@@ -235,8 +235,6 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 		}
 
 		public function posts_columns( $columns ) {
-
-
 			return
 				array_slice( $columns, 0, 2, true ) +
 				[

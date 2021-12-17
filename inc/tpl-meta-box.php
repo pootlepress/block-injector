@@ -1,3 +1,7 @@
+<?php
+global $post;
+?>
+
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
 <script type="text/JavaScript" src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <style>
@@ -117,6 +121,18 @@
 </style>
 <div id="pmab_metabox">
 	<div class="" style="padding-bottom:1rem;">
+
+
+		<label class="pmab-section-title">
+			<span class="components-form-toggle <?php echo $post->post_status === 'publish' ? 'is-checked' : ''; ?>">
+				<input class="components-form-toggle__input pmab-toggle-checkbox" value="1"
+							 name="_pmab_post_published" <?php checked( $post->post_status === 'publish' ); ?>
+							 type="checkbox" aria-describedby="inspector-toggle-control-0__help">
+				<span class="components-form-toggle__track"></span>
+				<span class="components-form-toggle__thumb"></span>
+			</span>
+			<?php _e( 'Is active?', 'pmab' ); ?></label>
+
 		<label class="pmab-section-title" for="_pmab_meta_type"><?php _e( 'Location', 'pmab' ); ?></label>
 
 		<select name="_pmab_meta_type" id="_pmab_meta_type">
@@ -396,13 +412,13 @@
 		<div class="pmab-section-title"><?php _e( 'Dynamic content', 'pmab' ); ?></div>
 		<p>Use these shortcodes to add dynamic post content in your injected blocks.</p>
 		<dl class="pmab-shortcode-dl">
-			<dt>[ib_title]</dt>
+			<dt>[bi_title]</dt>
 			<dd>Shows current post title</dd>
-			<dt>[ib_price]</dt>
+			<dt>[bi_price]</dt>
 			<dd>Shows product price</dd>
-			<dt>[ib_product_categories]</dt>
+			<dt>[bi_product_categories]</dt>
 			<dd>Shows product categories</dd>
-			<dt>[ib_stock]</dt>
+			<dt>[bi_stock]</dt>
 			<dd>Shows product stock</dd>
 		</dl>
 	</div>
