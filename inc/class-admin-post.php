@@ -147,12 +147,12 @@ class PMAB_Admin_Post {
 	 *
 	 * @return void
 	 */
-	public function save_post( $post_id, $post ) {
+	public function save_post( $post_id ) {
 		if (
 			isset( $_POST['_pmab_meta_number_of_blocks'], $_POST['_pmab_meta_type'], $_POST['pmab_plugin_field'] ) &&
 			wp_verify_nonce( $_POST['pmab_plugin_field'], 'pmab_plugin_nonce' )
 		) {
-			$this->save_status( $post );
+//			$this->save_status( $post );
 			$this->save_metas( $post_id );
 			$this->save_taxonomies( $post_id, $_POST['_pmab_meta_type'] );
 		}
