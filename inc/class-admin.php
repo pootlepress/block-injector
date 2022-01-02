@@ -116,6 +116,8 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 		 * @return void
 		 */
 		public function enqueue_editor_assets() {
+
+			if ( get_post_type() !== $this->post_type ) return;
 			wp_enqueue_script(
 				'put-me-anywhere-block-js',
 				$this->plugin->asset_url( 'js/src/editor.js' ),
