@@ -1,5 +1,14 @@
 <?php
 global $post;
+function render_options( $options, $field_value, $class ) {
+	$options_html = '';
+	foreach ( $options as $option_val => $label ) {
+		$selected = selected( $field_value, $option_val, false );
+		$options_html .= "<option class='{$class}' value='{$option_val}' {$selected}>$label</option>";
+
+	}
+	return $options_html;
+}
 ?>
 
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
@@ -253,6 +262,24 @@ global $post;
 	</div>
 
 	<div style="padding-bottom:1rem;">
+		<?php
+		$product_options = [
+			'before_add_to_cart_form'              => 'Before add to cart',
+			'after_add_to_cart_form'               => 'After add to cart',
+			'product_tabs'                         => 'Before product tabs',
+			'product_after_tabs'                   => 'After product tabs',
+			'product_meta_start'                   => 'Before category text',
+			'product_meta_end'                     => 'After category text',
+			'single-product/product-image.php'     => 'Replace product images',
+			'single-product/meta.php'              => 'Replace product meta',
+			'single-product/rating.php'            => 'Replace product rating',
+			'single-product/price.php'             => 'Replace product price',
+			'single-product/sale-flash.php'        => 'Replace product sale flash',
+			'single-product/share.php'             => 'Replace product share',
+			'single-product/short-description.php' => 'Replace product short description',
+			'single-product/title.php'             => 'Replace product title',
+		];
+		?>
 		<label class="pmab-section-title" for="_pmab_meta_tag_n_fix"><?php _e( 'Position', 'pmab' ); ?></label>
 		<select name="_pmab_meta_tag_n_fix" id="_pmab_meta_tag_n_fix" class="postbox col-12">
 			<option value="" disabled style="font-weight: bolder;">Position</option>
@@ -261,30 +288,7 @@ global $post;
 			<option value="bottom_after" <?php selected( $_pmab_meta_tag_n_fix, 'bottom_after' ); ?>>
 				Bottom
 			</option>
-			<option class="pmab-product-options"
-							value="before_add_to_cart_form" <?php selected( $_pmab_meta_tag_n_fix, 'before_add_to_cart_form' ); ?>>
-				Before add to cart
-			</option>
-			<option class="pmab-product-options"
-							value="after_add_to_cart_form" <?php selected( $_pmab_meta_tag_n_fix, 'after_add_to_cart_form' ); ?>>
-				After add to cart
-			</option>
-			<option class="pmab-product-options"
-							value="product_tabs" <?php selected( $_pmab_meta_tag_n_fix, 'product_tabs' ); ?>>
-				Before product tabs
-			</option>
-			<option class="pmab-product-options"
-							value="product_after_tabs" <?php selected( $_pmab_meta_tag_n_fix, 'product_after_tabs' ); ?>>
-				After product tabs
-			</option>
-			<option class="pmab-product-options"
-							value="product_meta_start" <?php selected( $_pmab_meta_tag_n_fix, 'product_meta_start' ); ?>>
-				Before category text
-			</option>
-			<option class="pmab-product-options"
-							value="product_meta_end" <?php selected( $_pmab_meta_tag_n_fix, 'product_meta_end' ); ?>>
-				After category text
-			</option>
+			<?php echo render_options( $product_options, $_pmab_meta_tag_n_fix, 'pmab-product-options' ) ?>
 			<option class="pmab-no-woo" value="h2_after" <?php selected( $_pmab_meta_tag_n_fix, 'h2_after' ); ?>>After
 				Heading
 			</option>

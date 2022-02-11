@@ -336,7 +336,17 @@ if ( ! class_exists( 'class-content' ) ) {
 				'product_meta_end'        => [ 'woocommerce_product_meta_end', 999 ],
 			];
 
-			if ( ! empty( $hooks[ $tag ] ) ) {
+			if ( 0 === strpos( $tag, 'single-product/' ) ) {
+
+				add_filter( 'wc_get_template', static function ( $path, $template_name ) use ( $p, $tag ) {
+					if ( $template_name === $tag ) {
+						echo PMAB_Content::output_injection( $p );
+						return __DIR__ . '/tpl-wc-template-placeholder.php';
+					}
+					return $path;
+				}, 10, 2 );
+
+			} else if ( ! empty( $hooks[ $tag ] ) ) {
 				$hook = $hooks[ $tag ];
 				add_filter(
 					$hook[0],
