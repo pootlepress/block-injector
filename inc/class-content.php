@@ -9,7 +9,15 @@
 if ( ! class_exists( 'class-content' ) ) {
 	class PMAB_Content extends PMAB_Content_Filter {
 
-		private $pmab_metas = array();
+		private static $pmab_metas = [];
+
+		public static function get_meta( $id ) {
+			if ( isset( self::$pmab_metas[ $id ] ) ) {
+				return self::$pmab_metas[ $id ];
+			}
+
+			return false;
+		}
 
 		/**
 		 * Update props under after any changes to location taxonomy terms
@@ -38,11 +46,23 @@ if ( ! class_exists( 'class-content' ) ) {
 
 		public function footer_scripts() {
 			?>
-			<style>.woocommerce-account .woocommerce:after {content: '';display: block;clear: both;}</style>
+			<style>
+				.woocommerce-account .woocommerce:after {content: '';display: block;clear: both;}
+				@media only screen AND (min-width:768px){.block-injector-content.block-injector-resp-mobile{display:none;}}
+				@media only screen AND (max-width:768px){.block-injector-content.block-injector-resp-desktop{display:none;}}
+			</style>
 			<script>
 				!function () {
-					var jsBlocks = document.querySelectorAll( '.block_inject_div_js' );
+					function moveElement( el, target ) {
 
+					}
+
+
+
+					var topHeaderBlocks = document.querySelectorAll( '.block-injector-type-above_header' );
+					topHeaderBlocks.forEach( el => document.body.insertBefore( el, document.body.childNodes[0] ) );
+
+					var jsBlocks = document.querySelectorAll( '.block_inject_div_js' );
 					jsBlocks.forEach( el => el.parentNode.removeChild( el ) );
 
 					window.addEventListener( 'load', ( event ) => {
@@ -52,7 +72,7 @@ if ( ! class_exists( 'class-content' ) ) {
 							console.log( target );
 
 							var tag_selector = target.dataset.tag_selector;
-							if ( ! tag_selector ) {
+							if ( !tag_selector ) {
 								tag_selector = target.dataset.tag === "h2" ?
 									".page-description h1,.page-description  h2,.page-description h3,.page-description h4,.page-description h5,.page-description h6" :
 									".page-description p,.site-main p";
@@ -109,7 +129,7 @@ if ( ! class_exists( 'class-content' ) ) {
 					$location_terms = [ 'shop' ];
 				} else if ( 'WP_Term' === $queried_object_type && in_array( $queried_object->taxonomy, $this->known_query_objects ) ) {
 					$location_terms = [ $queried_object->taxonomy ];
-					$this->is_tax = $queried_object->term_id;
+					$this->is_tax   = $queried_object->term_id;
 				}
 			}
 
@@ -134,20 +154,22 @@ if ( ! class_exists( 'class-content' ) ) {
 				$pmab_meta = wp_parse_args(
 					PMAB_Content_Filter::extract_meta_for_filter_hook( $p ),
 					[
-						'p'             => $p,
-						'num_of_blocks' => get_post_meta( $p->ID, '_pmab_meta_number_of_blocks', true ),
-						'startdate'     => get_post_meta( $p->ID, '_pmab_meta_startdate', true ),
-						'expiredate'    => get_post_meta( $p->ID, '_pmab_meta_expiredate', true ),
+						'p'                     => $p,
+						'num_of_blocks'         => get_post_meta( $p->ID, '_pmab_meta_number_of_blocks', true ),
+						'startdate'             => get_post_meta( $p->ID, '_pmab_meta_startdate', true ),
+						'expiredate'            => get_post_meta( $p->ID, '_pmab_meta_expiredate', true ),
+						'responsive_visibility' => get_post_meta( $p->ID, '_pmab_responsive_visibility', true ),
 					]
 				);
 
-				$pmab_meta['dateandtime']   = pmab_expire_checker( $pmab_meta['startdate'], $pmab_meta['expiredate'] );
+				$pmab_meta['dateandtime'] = pmab_expire_checker( $pmab_meta['startdate'], $pmab_meta['expiredate'] );
 
 				$num_of_blocks = get_post_meta( $p->ID, '_pmab_meta_number_of_blocks', true );
 
 				$tag = $pmab_meta['tag_type'];
 
 				$tag_map = [
+					'above_header'   => 'header',
 					'top_before'   => 'top',
 					'bottom_after' => 'bottom',
 					'h2_after'     => 'h2',
@@ -172,7 +194,7 @@ if ( ! class_exists( 'class-content' ) ) {
 
 				$pmab_meta['num_of_blocks'] = $num_of_blocks;
 
-				array_push( $this->pmab_metas, $pmab_meta );
+				self::$pmab_metas[ $p->ID ] = $pmab_meta;
 			}
 		}
 
@@ -276,13 +298,34 @@ if ( ! class_exists( 'class-content' ) ) {
 		 * @param WP_Post $injection
 		 */
 		public static function output_injection( $injection ) {
-			return "<div class='block-injector-content' style='clear:both;'>$injection->post_content</div>";
+
+			$meta = self::get_meta( $injection->ID );
+
+			if ( ! $meta ) {
+				$meta                    = [];
+				$meta['responsive_meta'] = get_post_meta( $p->ID, '_pmab_responsive_visibility', true );
+			}
+
+			$classes = 'block-injector-content';
+
+			$classes .= ! empty( $meta['responsive_visibility'] ) ?
+				' block-injector-resp-' . $meta['responsive_visibility'] :
+				'';
+
+			$classes .= ! empty( $meta['tag_type'] ) ?
+				' block-injector-type-' . $meta['tag_type'] :
+				'';
+
+			$injection = pmab_process_injection( $injection->post_content );
+
+			return "<div class='$classes' style='clear:both;'>$injection</div>";
 		}
 
 		private function _push_content_product( $pmab_meta ) {
 			extract( $pmab_meta );
 
 			$hooks = [
+				'header'                  => [ 'woocommerce_before_single_product', 0 ],
 				'top'                     => [ 'woocommerce_before_single_product', 0 ],
 				'bottom'                  => [ 'woocommerce_after_single_product', 999 ],
 				'before_add_to_cart_form' => [ 'woocommerce_before_add_to_cart_form', 0 ],
@@ -293,16 +336,60 @@ if ( ! class_exists( 'class-content' ) ) {
 				'product_meta_end'        => [ 'woocommerce_product_meta_end', 999 ],
 			];
 
-			if ( ! empty( $hooks[ $tag ] ) ) {
+			if ( 0 === strpos( $tag, 'single-product/' ) ) {
+
+				add_filter( 'wc_get_template', static function ( $path, $template_name ) use ( $p, $tag ) {
+					if ( $template_name === $tag ) {
+						echo PMAB_Content::output_injection( $p );
+						return __DIR__ . '/tpl-wc-template-placeholder.php';
+					}
+					return $path;
+				}, 10, 2 );
+
+			} else if ( ! empty( $hooks[ $tag ] ) ) {
 				$hook = $hooks[ $tag ];
 				add_filter(
 					$hook[0],
 					static function ( $param ) use ( $p ) {
 						echo PMAB_Content::output_injection( $p );
+
 						return $param;
 					},
 					$hook[1]
 				);
+			}
+		}
+
+		private function push_content_woo_all_products_in_stock( $pmab_meta ) {
+			/** @var WC_Product $product */
+			$product = wc_get_product();
+			if ( $product && 'instock' === $product->get_stock_status() ) {
+				$this->push_content_woo_all_products( $pmab_meta );
+			}
+		}
+
+		private function push_content_woo_all_products_out_of_stock( $pmab_meta ) {
+			/** @var WC_Product $product */
+			$product = wc_get_product();
+			if ( $product && 'outofstock' === $product->get_stock_status() ) {
+				$this->push_content_woo_all_products( $pmab_meta );
+			}
+		}
+
+		private function push_content_woo_all_products_on_backorder( $pmab_meta ) {
+			/** @var WC_Product $product */
+			$product = wc_get_product();
+			if ( $product && 'onbackorder' === $product->get_stock_status() ) {
+				$this->push_content_woo_all_products( $pmab_meta );
+			}
+		}
+
+		private function push_content_woo_all_products_on_sale( $pmab_meta ) {
+			/** @var WC_Product $product */
+			$product = wc_get_product();
+
+			if ( $product && $product->is_on_sale() ) {
+				$this->push_content_woo_all_products( $pmab_meta );
 			}
 		}
 
@@ -343,7 +430,8 @@ if ( ! class_exists( 'class-content' ) ) {
 		 * @return void
 		 */
 		public function push_to_specific_content() {
-			foreach ( $this->pmab_metas as $pmab_meta ) {
+
+			foreach ( self::$pmab_metas as $pmab_meta ) {
 				extract( $pmab_meta );
 
 				if ( empty( $tag_type ) || ! isset( $tag_type[0] ) || ! $dateandtime ) {

@@ -1,3 +1,16 @@
+<?php
+global $post;
+function render_options( $options, $field_value, $class ) {
+	$options_html = '';
+	foreach ( $options as $option_val => $label ) {
+		$selected = selected( $field_value, $option_val, false );
+		$options_html .= "<option class='{$class}' value='{$option_val}' {$selected}>$label</option>";
+
+	}
+	return $options_html;
+}
+?>
+
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
 <script type="text/JavaScript" src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <style>
@@ -63,10 +76,74 @@
 		flex: 50px 0;
 		text-align: center;
 	}
+
+	.pmab-section-title {
+		font-size: 16px;
+		font-weight: bold;
+		display: block;
+		margin: 0.5em 0;
+	}
+
+	.pmab-shortcode-dl {
+		line-height: 1.6
+	}
+
+	.pmab-shortcode-dl dt {
+		font-family: monospace;
+	}
+
+	.pmab-shortcode-dl dd {
+		margin: 0 .1em .5em;
+	}
+
+	#pmab_metabox label.pmab-inline,
+	.pmab-days-picker {
+		display: flex;
+		justify-content: space-between;
+		margin: .5em auto 1em;
+		align-items: center;
+	}
+
+	#pmab_metabox .pmab-days-picker label {
+		text-align: center;
+	}
+
+	#pmab_metabox .pmab-days-picker input {
+		width: auto;
+		display: block;
+		margin: auto;
+	}
+
+	#pmab_metabox label.pmab-inline input {
+		width: calc(100% - 70px);
+		display: block;
+		margin: auto 0;
+	}
+
+	#_pmab_meta_startdate:not([type]),
+	#_pmab_meta_expiredate:not([type]) {
+		line-height: 30px;
+		padding: 0 .5em;
+		border-radius: 3px;
+		background: calc( 100% - 10px ) center no-repeat url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNSIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJXaW5kb3dUZXh0IiBkPSJNMjAgM2gtMVYxaC0ydjJIN1YxSDV2Mkg0Yy0xLjEgMC0yIC45LTIgMnYxNmMwIDEuMS45IDIgMiAyaDE2YzEuMSAwIDItLjkgMi0yVjVjMC0xLjEtLjktMi0yLTJ6bTAgMThINFY4aDE2djEzeiIvPjxwYXRoIGZpbGw9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiLz48L3N2Zz4=');
+	}
 </style>
 <div id="pmab_metabox">
 	<div class="" style="padding-bottom:1rem;">
-		<label for="_pmab_meta_type"><b style="font-size:16px"><?php _e( 'Location', 'pmab' ); ?></b></label>
+
+
+		<label class="pmab-section-title">
+			<span class="components-form-toggle <?php echo $post->post_status === 'publish' ? 'is-checked' : ''; ?>">
+				<input class="components-form-toggle__input pmab-toggle-checkbox" value="1"
+							 name="_pmab_post_published" <?php checked( $post->post_status === 'publish' ); ?>
+							 type="checkbox" aria-describedby="inspector-toggle-control-0__help">
+				<span class="components-form-toggle__track"></span>
+				<span class="components-form-toggle__thumb"></span>
+			</span>
+			<?php _e( 'Is active?', 'pmab' ); ?></label>
+
+		<label class="pmab-section-title" for="_pmab_meta_type"><?php _e( 'Location', 'pmab' ); ?></label>
+
 		<select name="_pmab_meta_type" id="_pmab_meta_type">
 			<option value="post_page" selected>Entire Website</option>
 			<option disabled style="font-weight: bolder;">Post</option>
@@ -86,6 +163,20 @@
 				<option value="woo_all_pages" <?php selected( $_pmab_meta_type, 'woo_all_pages' ); ?>>All WooCommerce Pages
 				</option>
 				<option value="woo_all_products" <?php selected( $_pmab_meta_type, 'woo_all_products' ); ?>>All Products
+				</option>
+				<option value="woo_all_products_in_stock" <?php selected( $_pmab_meta_type, 'woo_all_products_in_stock' ); ?>>
+					Products in stock
+				</option>
+				<option
+					value="woo_all_products_out_of_stock" <?php selected( $_pmab_meta_type, 'woo_all_products_out_of_stock' ); ?>>
+					Products out of stock
+				</option>
+				<option
+					value="woo_all_products_on_backorder" <?php selected( $_pmab_meta_type, 'woo_all_products_on_backorder' ); ?>>
+					Products on backorder
+				</option>
+				<option value="woo_all_products_on_sale" <?php selected( $_pmab_meta_type, 'woo_all_products_on_sale' ); ?>>
+					Products on sale
 				</option>
 				<option value="woo_product" <?php selected( $_pmab_meta_type, 'woo_product' ); ?>>Specific Product</option>
 				<option value="woo_pro_category" <?php selected( $_pmab_meta_type, 'woo_pro_category' ); ?>>Products by Category
@@ -149,13 +240,15 @@
 	<div class="specificwoocategory">
 		<label for="_pmab_meta_specific_woocategory"><?php _e( 'Product categories', 'pmab' ); ?></label>
 		<?php $_pmab_meta_specific_woocategory = explode( ',', str_replace( ' ', '', $_pmab_meta_specific_woocategory ) ); ?>
-		<select class="pmab-multi-select" name="_pmab_meta_specific_woocategory[]" multiple id="_pmab_meta_specific_woocategory">
+		<select class="pmab-multi-select" name="_pmab_meta_specific_woocategory[]" multiple
+						id="_pmab_meta_specific_woocategory">
 			<?php
 			foreach ( $_pmab_woo_categories as $category ):
 				$cat_ID = $category->cat_ID;
 				?>
-				<option <?php selected( in_array( $cat_ID, $_pmab_meta_specific_woocategory ) ) ?> value="<?php echo $cat_ID ?>">
-				<?php echo $category->name ?></option>
+				<option <?php selected( in_array( $cat_ID, $_pmab_meta_specific_woocategory ) ) ?>
+					value="<?php echo $cat_ID ?>">
+					<?php echo $category->name ?></option>
 			<?php
 			endforeach; ?>
 		</select>
@@ -169,32 +262,33 @@
 	</div>
 
 	<div style="padding-bottom:1rem;">
-		<label for="_pmab_meta_tag_n_fix"><b style="font-size:16px"><?php _e( 'Position', 'pmab' ); ?></b></label>
+		<?php
+		$product_options = [
+			'before_add_to_cart_form'              => 'Before add to cart',
+			'after_add_to_cart_form'               => 'After add to cart',
+			'product_tabs'                         => 'Before product tabs',
+			'product_after_tabs'                   => 'After product tabs',
+			'product_meta_start'                   => 'Before category text',
+			'product_meta_end'                     => 'After category text',
+			'single-product/product-image.php'     => 'Replace product images',
+			'single-product/meta.php'              => 'Replace product meta',
+			'single-product/rating.php'            => 'Replace product rating',
+			'single-product/price.php'             => 'Replace product price',
+			'single-product/sale-flash.php'        => 'Replace product sale flash',
+			'single-product/share.php'             => 'Replace product share',
+			'single-product/short-description.php' => 'Replace product short description',
+			'single-product/title.php'             => 'Replace product title',
+		];
+		?>
+		<label class="pmab-section-title" for="_pmab_meta_tag_n_fix"><?php _e( 'Position', 'pmab' ); ?></label>
 		<select name="_pmab_meta_tag_n_fix" id="_pmab_meta_tag_n_fix" class="postbox col-12">
 			<option value="" disabled style="font-weight: bolder;">Position</option>
-			<option value="top_before" <?php selected( $_pmab_meta_tag_n_fix, 'top_before' ); ?>>Top
-			</option>
+			<option value="above_header" <?php selected( $_pmab_meta_tag_n_fix, 'above_header' ); ?>>Above Header</option>
+			<option value="top_before" <?php selected( $_pmab_meta_tag_n_fix, 'top_before' ); ?>>Top</option>
 			<option value="bottom_after" <?php selected( $_pmab_meta_tag_n_fix, 'bottom_after' ); ?>>
 				Bottom
 			</option>
-			<option class="pmab-product-options" value="before_add_to_cart_form" <?php selected( $_pmab_meta_tag_n_fix, 'before_add_to_cart_form' ); ?>>
-				Before add to cart
-			</option>
-			<option class="pmab-product-options" value="after_add_to_cart_form" <?php selected( $_pmab_meta_tag_n_fix, 'after_add_to_cart_form' ); ?>>
-				After add to cart
-			</option>
-			<option class="pmab-product-options" value="product_tabs" <?php selected( $_pmab_meta_tag_n_fix, 'product_tabs' ); ?>>
-				Before product tabs
-			</option>
-			<option class="pmab-product-options" value="product_after_tabs" <?php selected( $_pmab_meta_tag_n_fix, 'product_after_tabs' ); ?>>
-				After product tabs
-			</option>
-			<option class="pmab-product-options" value="product_meta_start" <?php selected( $_pmab_meta_tag_n_fix, 'product_meta_start' ); ?>>
-				Before category text
-			</option>
-			<option class="pmab-product-options" value="product_meta_end" <?php selected( $_pmab_meta_tag_n_fix, 'product_meta_end' ); ?>>
-				After category text
-			</option>
+			<?php echo render_options( $product_options, $_pmab_meta_tag_n_fix, 'pmab-product-options' ) ?>
 			<option class="pmab-no-woo" value="h2_after" <?php selected( $_pmab_meta_tag_n_fix, 'h2_after' ); ?>>After
 				Heading
 			</option>
@@ -244,16 +338,93 @@
 		<input type="text" id="_pmab_meta_specific_post_exclude" name="_pmab_meta_specific_post_exclude"
 					 value="<?php echo esc_attr( $_pmab_meta_specific_post_exclude ); ?>" size="25"/>
 	</div>
+
+
+	<label class="pmab-section-title" for="_pmab_meta_type"><?php _e( 'Scheduling', 'pmab' ); ?></label>
+
 	<div style="padding-bottom:1rem;">
 		<label for="_pmab_meta_startdate"><?php _e( 'Select Start Date', 'pmab' ); ?></label>
-		<input type="datetime-local" id="_pmab_meta_startdate" name="_pmab_meta_startdate"
-					 value="<?php echo esc_attr( $_pmab_meta_startdate ); ?>" size="25"/>
+		<input id="_pmab_meta_startdate" name="_pmab_meta_startdate"
+						<?php if ( $_pmab_meta_from_time ): ?>
+					value="<?php echo esc_attr( $_pmab_meta_startdate ); ?>" type="datetime-local"
+				<?php else: ?>
+					onfocus="(document.getElementById('_pmab_meta_expiredate').type=this.type='datetime-local')" placeholder="Now"
+				<?php endif; ?>/>
 	</div>
 
 
 	<div style="padding-bottom:1rem;">
 		<label for="_pmab_meta_expiredate"><?php _e( 'Select Expiry Date', 'pmab' ); ?></label>
-		<input type="datetime-local" id="_pmab_meta_expiredate" name="_pmab_meta_expiredate"
-					 value="<?php echo esc_attr( $_pmab_meta_expiredate ); ?>" size="25"/>
+		<input id="_pmab_meta_expiredate" name="_pmab_meta_expiredate"
+						<?php if ( $_pmab_meta_to_time ): ?>
+					value="<?php echo esc_attr( $_pmab_meta_expiredate ); ?>" type="datetime-local"
+				<?php else: ?>
+					onfocus="(document.getElementById('_pmab_meta_startdate').type=this.type='datetime-local')" placeholder="Never"
+				<?php endif; ?>/>
 	</div>
+
+	<div>
+		<label for="_pmab_meta_on_days"><?php _e( 'On days', 'pmab' ); ?></label>
+
+		<?php
+		$days          = [ 'S', 'M', 'T', 'W', 'T', 'F', 'S', ];
+		$selected_days = $_pmab_meta_on_days ? explode( ',', str_replace( ' ', '', $_pmab_meta_on_days ) ) : [];
+		?>
+		<div class="pmab-days-picker">
+			<?php
+			foreach ( $days as $i => $day ) {
+				$checked = checked( in_array( $i, $selected_days ), true, false );
+				echo "<label><input type='checkbox' name='_pmab_meta_on_days[]' value='$i' $checked>$day</label>";
+			}
+			?>
+		</div>
+
+	</div>
+
+	<div>
+
+		<label for="_pmab_meta_from_time" class="pmab-inline">
+			<span>From: </span>
+			<input id="_pmab_meta_from_time" name="_pmab_meta_from_time"
+					value="<?php echo $_pmab_meta_from_time; ?>" type="time">
+		</label>
+
+		<label for="_pmab_meta_to_time" class="pmab-inline">
+			<span>To: </span>
+			<input id="_pmab_meta_to_time" name="_pmab_meta_to_time"
+					value="<?php echo $_pmab_meta_to_time; ?>" type="time">
+		</label>
+	</div>
+
+	<div style="padding-bottom:1rem;">
+		<label class="pmab-section-title"
+					 for="_pmab_responsive_visibility"><?php _e( 'Show on devices', 'pmab' ); ?></label>
+		<select name="_pmab_responsive_visibility" id="_pmab_responsive_visibility" class="postbox col-12">
+			<option value="" <?php selected( $_pmab_responsive_visibility, '' ); ?>>
+				All devices
+			</option>
+			<option value="desktop" <?php selected( $_pmab_responsive_visibility, 'desktop' ); ?>>
+				Desktop only
+			</option>
+			<option value="mobile" <?php selected( $_pmab_responsive_visibility, 'mobile' ); ?>>
+				Mobile only
+			</option>
+		</select>
+	</div>
+
+	<div>
+		<div class="pmab-section-title"><?php _e( 'Dynamic content', 'pmab' ); ?></div>
+		<p>Use these shortcodes to add dynamic post content in your injected blocks.</p>
+		<dl class="pmab-shortcode-dl">
+			<dt>[bi_title]</dt>
+			<dd>Shows current post title</dd>
+			<dt>[bi_price]</dt>
+			<dd>Shows product price</dd>
+			<dt>[bi_product_categories]</dt>
+			<dd>Shows product categories</dd>
+			<dt>[bi_stock]</dt>
+			<dd>Shows product stock</dd>
+		</dl>
+	</div>
+
 </div>

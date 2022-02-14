@@ -6,7 +6,7 @@
  * @package BlockInjector
  */
 
-function pmab_do_blocks( $content ) {
+function pmab_process_injection( $content ) {
 	$blocks = parse_blocks( $content );
 	$output = '';
 
@@ -14,7 +14,7 @@ function pmab_do_blocks( $content ) {
 		$output .= render_block( $block );
 	}
 
-	return $output;
+	return do_shortcode( $output );
 }
 
 if ( ! function_exists( 'pmab_update_content' ) ) {
@@ -27,7 +27,7 @@ if ( ! function_exists( 'pmab_update_content' ) ) {
 	 * @return string
 	 */
 	function pmab_update_content( $content, $tag, $num_of_blocks, $p ) {
-		$injection = pmab_do_blocks( $p->post_content );
+		$injection = PMAB_Content::output_injection( $p );
 
 		if ( $num_of_blocks == 0 ) {
 			return "$injection $content";

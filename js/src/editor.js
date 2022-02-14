@@ -34,6 +34,14 @@ jQuery( document ).ready( function ( $ ) {
 
 	}
 
+	$( '.pmab-toggle-checkbox' ).click( function() {
+		if ( this.checked ) {
+			this.parentNode.classList.add( 'is-checked' )
+		} else {
+			this.parentNode.classList.remove( 'is-checked' )
+		}
+	} );
+
 	$injType = $( '#_pmab_meta_type' );
 
 	$injType.on( 'change', function () {
@@ -43,7 +51,7 @@ jQuery( document ).ready( function ( $ ) {
 			$( '.pmab-no-woo' ).show();
 		}
 
-		if ( this.value === 'woo_all_products' || this.value === 'woo_product' ) {
+		if ( this.value.indexOf( 'woo_all_products' ) === 0 || this.value === 'woo_product' ) {
 			$( '.pmab-product-options' ).show();
 		} else {
 			$( '.pmab-product-options' ).hide();
