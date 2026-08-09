@@ -136,7 +136,11 @@ class PMAB_Admin_Post {
 		}
 
 		foreach ( $this->post_metas as $post_meta ) {
-			update_post_meta( $post_id, $post_meta, sanitize_text_field( $_POST[ $post_meta ] ) );
+			// Not every meta has a field in the box, and an empty multi-select isn't
+			// posted at all, so read defensively instead of warning on every save.
+			$value = isset( $_POST[ $post_meta ] ) ? $_POST[ $post_meta ] : '';
+
+			update_post_meta( $post_id, $post_meta, sanitize_text_field( $value ) );
 		}
 	}
 
@@ -150,7 +154,8 @@ class PMAB_Admin_Post {
 	public function save_post( $post_id ) {
 		if (
 			isset( $_POST['_pmab_meta_number_of_blocks'], $_POST['_pmab_meta_type'], $_POST['pmab_plugin_field'] ) &&
-			wp_verify_nonce( $_POST['pmab_plugin_field'], 'pmab_plugin_nonce' )
+			wp_verify_nonce( $_POST['pmab_plugin_field'], 'pmab_plugin_nonce' ) &&
+			current_user_can( 'edit_pages' )
 		) {
 //			$this->save_status( $post );
 			$this->save_metas( $post_id );

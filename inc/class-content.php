@@ -69,8 +69,6 @@ if ( ! class_exists( 'class-content' ) ) {
 						for ( let i = jsBlocks.length - 1; i >= 0; i -- ) {
 							const target = jsBlocks[i];
 
-							console.log( target );
-
 							var tag_selector = target.dataset.tag_selector;
 							if ( !tag_selector ) {
 								tag_selector = target.dataset.tag === "h2" ?
@@ -79,6 +77,12 @@ if ( ! class_exists( 'class-content' ) ) {
 							}
 							var inserted = false;
 							var matchedBlocks = document.querySelectorAll( tag_selector );
+							// Nothing on the page matches the selector, so there is nowhere
+							// to inject. Skip rather than throwing and killing the rest of
+							// the page's scripts.
+							if ( !matchedBlocks.length ) {
+								continue;
+							}
 							matchedBlocks[0].parentNode.insertBefore( target, matchedBlocks[0] );
 							var position = target.dataset.number_of_blocks;
 							matchedBlocks.forEach( ( v, k ) => {

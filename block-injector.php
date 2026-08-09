@@ -2,11 +2,14 @@
 /**
  * Plugin Name: Block Injector
  * Description: A WordPress plugin that lets you inject content into Post and Page content.
- * Version: 1.1.2
+ * Version: 1.2.0
+ * Update URI: https://api.freemius.com
  * Plugin URI: https://pootlepress.com/block-injector/
  * Author: PootlePress
  * Author URI: https://pootlepress.com/
  * Text Domain: block-injector
+ * Requires at least: 6.0
+ * Requires PHP: 7.4
  *
  * @package Block Injector
  */

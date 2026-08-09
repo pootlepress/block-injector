@@ -53,16 +53,29 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 		}
 
 		public function block_injector_screen() {
-			global $wpdb;
 			$screen = get_current_screen();
 			if ( 'edit-block_injector' === $screen->id ) {
 				if ( ! empty( $_GET['pmab_toggle_status'] ) ) {
-					if ( ! empty( $_GET['pmab_toggle_status'] ) || wp_verify_nonce( $_GET['pmab_toggle_status'], 'pmab_status_switch' ) ) {
+					$toggle_id = absint( $_GET['pmab_toggle_status'] );
+					$nonce     = isset( $_GET['pmab_nonce'] ) ? $_GET['pmab_nonce'] : '';
+
+					// The Enable/Disable link carries pmab_nonce. Check that, and the
+					// capability, before changing anything.
+					if (
+						$toggle_id &&
+						wp_verify_nonce( $nonce, 'pmab_status_switch' ) &&
+						current_user_can( 'edit_pages' ) &&
+						'block_injector' === get_post_type( $toggle_id )
+					) {
 						$new_status = 'publish';
 						if ( ! empty( $_GET['pmab_from_status'] ) && 'publish' === $_GET['pmab_from_status'] ) {
 							$new_status = 'draft';
 						}
-						$wpdb->update( $wpdb->posts, array( 'post_status' => $new_status ), array( 'ID' => $_GET['pmab_toggle_status'] ) );
+						// wp_update_post rather than a raw query, so caches are cleared.
+						wp_update_post( array(
+							'ID'          => $toggle_id,
+							'post_status' => $new_status,
+						) );
 					}
 				}
 				?>
@@ -92,6 +105,14 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 		}
 
 		public function admin_ajax_pmab_posts() {
+			// This lists every post, page and product on the site, including drafts and
+			// private ones, so it must be limited to users who can edit block injectors.
+			check_ajax_referer( 'pmab_posts', '_wpnonce' );
+
+			if ( ! current_user_can( 'edit_pages' ) ) {
+				wp_send_json_error( array( 'message' => 'Permission denied.' ), 403 );
+			}
+
 			$resp = [
 				'post'    => [],
 				'page'    => [],
@@ -101,8 +122,9 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 			global $wpdb;
 
 			$posts = $wpdb->get_results(
-				"SELECT ID, post_title as title, post_type as type FROM {$wpdb->prefix}posts " .
-				"WHERE post_type IN ( 'post', 'page', 'product' ) ORDER BY title ASC LIMIT 999" );
+				"SELECT ID, post_title as title, post_type as type FROM {$wpdb->posts} " .
+				"WHERE post_type IN ( 'post', 'page', 'product' ) " .
+				"AND post_status NOT IN ( 'auto-draft', 'trash' ) ORDER BY title ASC LIMIT 999" );
 
 			foreach ( $posts as $p ) {
 				$resp[ $p->type ][] = [ $p->ID, $p->title ];
@@ -130,6 +152,7 @@ if ( ! class_exists( 'PMAB_Admin' ) ) {
 				'pmabProps',
 				[
 					'adminAjax' => admin_url( '/admin-ajax.php' ),
+					'nonce'     => wp_create_nonce( 'pmab_posts' ),
 				]
 			);
 

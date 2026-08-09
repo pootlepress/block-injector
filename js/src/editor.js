@@ -107,7 +107,7 @@ jQuery( document ).ready( function ( $ ) {
 
 	} );
 
-	fetch( pmabProps.adminAjax + '?action=pmab_posts' )
+	fetch( pmabProps.adminAjax + '?action=pmab_posts&_wpnonce=' + encodeURIComponent( pmabProps.nonce ), { credentials: 'same-origin' } )
 		.then( resp => resp.json() )
 		.then( posts => pmabProps.allPosts = posts )
 		.then( () => {
