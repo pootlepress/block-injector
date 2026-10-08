@@ -5,13 +5,16 @@ Requires at least: 6.0
 Tested up to: 7.0
 WC Tested up to: 10.9
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Inject blocks and content anywhere in your posts, pages and WooCommerce templates.
 
 == Changelog ==
+
+= 1.2.1 =
+* Updated Freemius SDK to the latest version.
 
 = 1.2.0 =
 * Security: the endpoint that lists your posts, pages and products for the targeting dropdown now requires a nonce and the capability to edit pages. Previously any logged-in user, including subscribers and customers, could list the titles of every post, page and product on the site — including drafts and private content.
